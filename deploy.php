@@ -32,24 +32,15 @@ if ($action === 'inspect') {
     // Check directories in home
     $homeDirs = glob("{$homeDir}/*", GLOB_ONLYDIR);
 
-    // Also find all directories that contain a server.js or .next
-    $allApps = [];
-    foreach ($homeDirs as $d) {
-        if (file_exists("{$d}/server.js") || is_dir("{$d}/.next")) {
-            $bId = file_exists("{$d}/.next/BUILD_ID") ? trim(file_get_contents("{$d}/.next/BUILD_ID")) : 'no build_id';
-            $allApps[$d] = $bId;
-        }
-    }
+    // Search where the old build id Z6KHAfUK3knLueda_PW-B is stored
+    $findOld = function_exists('shell_exec') ? @shell_exec("grep -rln 'Z6KHAfUK3knLueda_PW-B' {$homeDir} 2>/dev/null | head -n 20") : 'shell_exec disabled';
 
     echo json_encode([
         'status' => 'success',
         'current_user' => $currentUser,
         'app_dir' => $appDir,
         'build_id' => $buildId,
-        'home_dirs' => $homeDirs,
-        'all_apps' => $allApps,
-        'ps' => $psOut,
-        'restart_txt_mtime' => file_exists("{$appDir}/tmp/restart.txt") ? date('Y-m-d H:i:s', filemtime("{$appDir}/tmp/restart.txt")) : 'none',
+        'find_old_build' => $findOld,
         'timestamp' => date('Y-m-d H:i:s')
     ]);
     exit;
