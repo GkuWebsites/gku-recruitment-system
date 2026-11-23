@@ -1,0 +1,80 @@
+name: Build & Auto-Deploy to GoDaddy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build Next.js
+        run: npm run build
+        env:
+          NODE_ENV: production
+          NEXT_PUBLIC_BASE_PATH: /recruitment
+
+      - name: Prepare Standalone Deployment Bundle
+        run: |
+          mkdir -p deploy_out
+          cp -r .next/standalone/* deploy_out/
+          mkdir -p deploy_out/.next/static
+          cp -r .next/static/* deploy_out/.next/static/
+          cp -r public deploy_out/
+          
+          # Inject Production Environment
+          echo "NODE_ENV=production" > deploy_out/.env
+          echo "PORT=3000" >> deploy_out/.env
+          echo "MONGODB_URI=${{ secrets.MONGODB_URI || 'mongodb://websitegku_db_user:jHn2jiAGlPImDQXk@ac-jjzkgax-shard-00-00.a05gk60.mongodb.net:27017/gku_recruitment?ssl=true&authSource=admin&retryWrites=true&w=majority' }}" >> deploy_out/.env
+          
+          # Inject Universal Path Normalizer into server.js
+          node -e "
+            const fs = require('fs');
+            const file = 'deploy_out/server.js';
+            let code = fs.readFileSync(file, 'utf8');
+            const wrapper = \`const http = require('http')
+          const originalCreateServer = http.createServer
+
+          http.createServer = function(...args) {
+            if (typeof args[0] === 'function') {
+              const origHandler = args[0]
+              args[0] = function(req, res) {
+                if (req.url) {
+                  if (!req.url.startsWith('/recruitment')) {
+                    req.url = '/recruitment' + (req.url === '/' ? '' : req.url)
+                  }
+                }
+                return origHandler(req, res)
+              }
+            }
+            return originalCreateServer.apply(this, args)
+          }\n\`;
+            fs.writeFileSync(file, wrapper + code);
+          "
+
+          # Phusion Passenger auto-restart signal
+          mkdir -p deploy_out/tmp
+          touch deploy_out/tmp/restart.txt
+
+      - name: FTP Auto-Deploy to GoDaddy
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: /gku-recruitment-system.git/
+          local-dir: ./deploy_out/
