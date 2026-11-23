@@ -49,12 +49,21 @@ const DEFAULT_ACCOUNTS: {
     status: 'Active'
   },
   {
-    name: 'Vice Chancellor & Registrar Secretariat',
+    name: 'Office of the Vice Chancellor',
     email: 'vc@gku.ac.in',
     password: 'admin123',
-    designation: 'VC / Registrar',
+    designation: 'Vice Chancellor',
     department: 'Vice Chancellor Secretariat',
     phone: '+91 98721 00005',
+    status: 'Active'
+  },
+  {
+    name: 'Office of the Registrar',
+    email: 'registrar@gku.ac.in',
+    password: 'admin123',
+    designation: 'Registrar',
+    department: 'Registrar Secretariat & Statutory Office',
+    phone: '+91 98721 00007',
     status: 'Active'
   },
   {
@@ -64,6 +73,15 @@ const DEFAULT_ACCOUNTS: {
     designation: 'Director',
     department: 'Directorate of Academic Institutions',
     phone: '+91 98721 00006',
+    status: 'Active'
+  },
+  {
+    name: 'Head of Department (CSE)',
+    email: 'hod@gku.ac.in',
+    password: 'admin123',
+    designation: 'HOD',
+    department: 'Computer Science & Engineering',
+    phone: '+91 98721 00008',
     status: 'Active'
   }
 ];

@@ -52,11 +52,20 @@ export default function HomePage() {
     if (!currentUser) return;
     try {
       // Map designation to query role
-      const roleQuery = currentUser.designation === 'Dean' || currentUser.designation === 'Director'
+      const isDeanOrHod =
+        currentUser.designation === 'Dean' ||
+        currentUser.designation === 'Director' ||
+        currentUser.designation === 'HOD';
+      const isVCRegistrar =
+        currentUser.designation === 'VC / Registrar' ||
+        currentUser.designation === 'Vice Chancellor' ||
+        currentUser.designation === 'Registrar';
+
+      const roleQuery = isDeanOrHod
         ? 'Department / Dean'
         : currentUser.designation === 'Dean Academic'
         ? 'Dean Academic'
-        : currentUser.designation === 'VC / Registrar'
+        : isVCRegistrar
         ? 'VC / Registrar'
         : currentUser.designation === 'HR'
         ? 'HR Department'
@@ -218,8 +227,12 @@ export default function HomePage() {
     );
   }
 
-  // 3. IF LOGGED IN AS DEAN / DIRECTOR: Dedicated Dean Workspace
-  if (currentUser.designation === 'Dean' || currentUser.designation === 'Director') {
+  // 3. IF LOGGED IN AS DEAN / HOD / DIRECTOR: Dedicated Faculty/Department Workspace
+  if (
+    currentUser.designation === 'Dean' ||
+    currentUser.designation === 'Director' ||
+    currentUser.designation === 'HOD'
+  ) {
     return (
       <div className="min-h-screen bg-[#f8fafc] text-slate-800 flex flex-col">
         {/* Clean Header for Dean without dropdowns */}
@@ -301,8 +314,21 @@ export default function HomePage() {
     );
   }
 
-  // 4. IF LOGGED IN AS VC / REGISTRAR
-  if (currentUser.designation === 'VC / Registrar') {
+  // 4. IF LOGGED IN AS VC OR REGISTRAR
+  if (
+    currentUser.designation === 'VC / Registrar' ||
+    currentUser.designation === 'Vice Chancellor' ||
+    currentUser.designation === 'Registrar'
+  ) {
+    const isRegistrar = currentUser.designation === 'Registrar';
+    const isVC = currentUser.designation === 'Vice Chancellor';
+    const roleBadge = isVC ? 'VC' : isRegistrar ? 'REG' : 'VC';
+    const deskSubtitle = isVC
+      ? "Vice Chancellor's Secretariat"
+      : isRegistrar
+      ? "Registrar's Statutory Office"
+      : 'Executive Sanction Desk';
+
     return (
       <div className="min-h-screen bg-[#f8fafc] text-slate-800 flex flex-col">
         <header className="w-full bg-white border-b border-slate-200 shadow-xs sticky top-0 z-40">
@@ -311,11 +337,11 @@ export default function HomePage() {
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2.5 bg-purple-50 border border-purple-200 px-3.5 py-1.5 rounded-xl">
                 <div className="w-7 h-7 rounded-lg bg-purple-700 text-white flex items-center justify-center font-bold text-xs">
-                  VC
+                  {roleBadge}
                 </div>
                 <div className="text-left text-xs">
                   <div className="font-bold text-slate-900 leading-tight">{currentUser.name}</div>
-                  <div className="text-[10px] font-semibold text-purple-700">Executive Sanction Desk</div>
+                  <div className="text-[10px] font-semibold text-purple-700">{deskSubtitle}</div>
                 </div>
               </div>
               <button

@@ -131,8 +131,10 @@ export function VCRegistrarModule({
   const openSanctionModal = (req: IHiringRequest) => {
     setSelectedReqForSanction(req);
     setSelectedDecision('approve');
+    const officialTitle = currentUser?.designation || 'Vice Chancellor';
+    const officialName = currentUser?.name || 'Executive Secretariat';
     setApprovalRemark(
-      `Sanction accorded for ${req.numberOfPositions} position(s) of ${req.postTitle} as per university budget head & Syndicate norms.`
+      `Sanction accorded for ${req.numberOfPositions} position(s) of ${req.postTitle} as sanctioned by ${officialTitle} (${officialName}). Released to HR Recruitment Desk.`
     );
     setQueryMessage('');
     setRecipientChoice('Dean Academic');
@@ -170,15 +172,18 @@ export function VCRegistrarModule({
 
     setIsProcessing(true);
     try {
+      const officialTitle = currentUser?.designation || 'Vice Chancellor';
+      const officialName = currentUser?.name || 'Executive Secretariat';
+
       if (selectedDecision === 'query') {
         const res = await fetch(`/api/requests/${selectedReqForSanction.requestId}/clarifications`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             action: 'create_thread',
-            subject: 'Executive & Administrative Sanction Clarification',
-            creatorName: currentUser?.name || 'Prof. (Dr.) Gurinder Singh (VC Office)',
-            creatorRole: 'VC / Registrar',
+            subject: `${officialTitle} Official Query / Clarification`,
+            creatorName: `${officialName} (${officialTitle})`,
+            creatorRole: officialTitle === 'Registrar' ? 'Registrar' : 'VC / Registrar',
             creatorEmail: currentUser?.email || 'vc@gku.ac.in',
             primaryRecipientRole: recipientChoice,
             primaryRecipientEmail:
@@ -205,7 +210,8 @@ export function VCRegistrarModule({
           body: JSON.stringify({
             requestId: selectedReqForSanction.requestId,
             action: actionType,
-            actorName: currentUser?.name || 'Prof. (Dr.) Gurinder Singh (VC Office)',
+            actorName: `${officialName} (${officialTitle})`,
+            actorRole: officialTitle,
             remarks: remarksToSend
           })
         });
@@ -250,10 +256,18 @@ export function VCRegistrarModule({
           </div>
           <div>
             <h2 className="text-lg font-bold text-slate-900">
-              VC & Registrar Administrative Sanction Desk
+              {currentUser?.designation === 'Vice Chancellor'
+                ? "Vice Chancellor's Executive Secretariat"
+                : currentUser?.designation === 'Registrar'
+                ? "Registrar's Office & Statutory Sanctions Desk"
+                : 'VC & Registrar Administrative Sanction Desk'}
             </h2>
             <p className="text-xs text-slate-500 mt-0.5">
-              Statutory institutional approval, financial authorization, and executive clearance.
+              {currentUser?.designation === 'Vice Chancellor'
+                ? 'Executive authority, budget sanction, and statutory appointment approvals.'
+                : currentUser?.designation === 'Registrar'
+                ? 'University statutory administration, compliance verification, and appointment sanction.'
+                : 'Statutory institutional approval, financial authorization, and executive clearance.'}
             </p>
           </div>
         </div>
@@ -533,11 +547,21 @@ export function VCRegistrarModule({
                   {selectedReqForSanction.requestId}
                 </span>
                 <h3 className="text-base font-bold text-slate-900 mt-1">
-                  Administrative Sanction: {selectedReqForSanction.postTitle}
+                  {currentUser?.designation === 'Registrar'
+                    ? "Registrar's Statutory Sanction: "
+                    : currentUser?.designation === 'Vice Chancellor'
+                    ? "Vice Chancellor's Executive Sanction: "
+                    : "Administrative Sanction: "}
+                  {selectedReqForSanction.postTitle}
                 </h3>
-                <p className="text-xs text-slate-500">
-                  {selectedReqForSanction.department} • {selectedReqForSanction.numberOfPositions} Position(s) • Budget: {selectedReqForSanction.tentativeBudget}
-                </p>
+                <div className="flex flex-wrap items-center gap-2 mt-1">
+                  <span className="text-xs text-purple-800 font-semibold bg-purple-50 border border-purple-200 px-2.5 py-0.5 rounded-lg">
+                    Deciding Official: {currentUser?.name || 'Executive Officer'} ({currentUser?.designation || 'VC'})
+                  </span>
+                  <span className="text-xs text-slate-500">
+                    • {selectedReqForSanction.department} • {selectedReqForSanction.numberOfPositions} Position(s)
+                  </span>
+                </div>
               </div>
               <button
                 type="button"

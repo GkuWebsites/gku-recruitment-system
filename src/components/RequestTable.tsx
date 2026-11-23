@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { IHiringRequest, UserRole } from '@/lib/types';
 import { UNIVERSITY_DEPARTMENTS } from '@/lib/constants';
 import { Search, ChevronRight, SlidersHorizontal, ArrowUpRight } from 'lucide-react';
@@ -29,6 +29,18 @@ export function RequestTable({
   setSelectedType
 }: RequestTableProps) {
   const [selectedUrgency, setSelectedUrgency] = useState<string>('All');
+  const [departments, setDepartments] = useState<string[]>(UNIVERSITY_DEPARTMENTS);
+
+  useEffect(() => {
+    fetch('/api/departments')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.data)) {
+          setDepartments(data.data);
+        }
+      })
+      .catch((e) => console.error(e));
+  }, []);
 
   const filtered = requests.filter((req) => {
     // Statutory Workflow Rule:
@@ -138,8 +150,8 @@ export function RequestTable({
             onChange={(e) => setSelectedDept(e.target.value)}
             className="text-xs font-semibold bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer shadow-2xs"
           >
-            <option value="All">All 12 Academic Faculties</option>
-            {UNIVERSITY_DEPARTMENTS.map((dept) => (
+            <option value="All">All Academic Faculties</option>
+            {departments.map((dept) => (
               <option key={dept} value={dept}>
                 {dept}
               </option>

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { UNIVERSITY_DEPARTMENTS, POST_LEVELS } from '@/lib/constants';
 import {
   X,
@@ -40,7 +40,14 @@ export function NewRequestModal({
   const defaultCreatorName = creatorName || (isHR ? 'Director of HR & Recruitment' : 'Dr. Harpreet Singh');
   const defaultCreatorEmail = creatorEmail || (isHR ? 'hr@gku.ac.in' : 'dean.engg@gku.ac.in');
 
+  const [departments, setDepartments] = useState<string[]>(UNIVERSITY_DEPARTMENTS);
   const [department, setDepartment] = useState(defaultDepartment || UNIVERSITY_DEPARTMENTS[0]);
+  const [isAddingDept, setIsAddingDept] = useState(false);
+  const [newDeptInput, setNewDeptInput] = useState('');
+  const [newDeptCode, setNewDeptCode] = useState('');
+  const [isDeptSaving, setIsDeptSaving] = useState(false);
+  const [deptSaveError, setDeptSaveError] = useState('');
+
   const [cadreType, setCadreType] = useState<'Teaching' | 'Non-Teaching'>('Teaching');
   const [postTitle, setPostTitle] = useState('');
   const [designationLevel, setDesignationLevel] = useState(POST_LEVELS[2] || 'Assistant Professor');
@@ -57,6 +64,49 @@ export function NewRequestModal({
   const [jobDescriptionFileSize, setJobDescriptionFileSize] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+
+  useEffect(() => {
+    fetch('/api/departments')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.data)) {
+          setDepartments(data.data);
+        }
+      })
+      .catch((err) => console.error(err));
+  }, []);
+
+  const handleQuickAddDept = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newDeptInput.trim()) return;
+    setIsDeptSaving(true);
+    setDeptSaveError('');
+    try {
+      const res = await fetch('/api/departments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: newDeptInput.trim(),
+          code: newDeptCode.trim(),
+          createdBy: defaultCreatorName
+        })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Failed to add department');
+      }
+      const added = newDeptInput.trim();
+      setDepartments((prev) => (prev.includes(added) ? prev : [...prev, added]));
+      setDepartment(added);
+      setNewDeptInput('');
+      setNewDeptCode('');
+      setIsAddingDept(false);
+    } catch (err: unknown) {
+      setDeptSaveError((err as Error).message);
+    } finally {
+      setIsDeptSaving(false);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -346,15 +396,58 @@ export function NewRequestModal({
 
             {/* Department */}
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">
-                Faculty / Department:
-              </label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="font-semibold text-slate-700">
+                  Faculty / Department:
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setIsAddingDept(!isAddingDept)}
+                  className="text-[11px] font-bold text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                >
+                  {isAddingDept ? '✕ Close' : '+ Add New Department'}
+                </button>
+              </div>
+
+              {isAddingDept && (
+                <div className="mb-2 p-3 bg-blue-50/70 border border-blue-200 rounded-xl space-y-2">
+                  <div className="text-[11px] font-bold text-blue-900">Add New Department to Database</div>
+                  {deptSaveError && (
+                    <div className="text-[11px] text-rose-600 font-semibold">{deptSaveError}</div>
+                  )}
+                  <div className="flex flex-wrap sm:flex-nowrap gap-2">
+                    <input
+                      type="text"
+                      placeholder="e.g. Faculty of Artificial Intelligence"
+                      value={newDeptInput}
+                      onChange={(e) => setNewDeptInput(e.target.value)}
+                      className="flex-1 p-2 bg-white border border-slate-200 rounded-lg text-xs"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Code (e.g. FAI)"
+                      value={newDeptCode}
+                      onChange={(e) => setNewDeptCode(e.target.value)}
+                      className="w-24 p-2 bg-white border border-slate-200 rounded-lg text-xs"
+                    />
+                    <button
+                      type="button"
+                      disabled={isDeptSaving || !newDeptInput.trim()}
+                      onClick={handleQuickAddDept}
+                      className="px-3 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-lg text-xs font-bold transition disabled:opacity-50 cursor-pointer"
+                    >
+                      {isDeptSaving ? 'Saving...' : 'Add'}
+                    </button>
+                  </div>
+                </div>
+              )}
+
               <select
                 value={department}
                 onChange={(e) => setDepartment(e.target.value as any)}
                 className="w-full bg-white border border-slate-200 rounded-xl p-2.5 font-medium text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none"
               >
-                {UNIVERSITY_DEPARTMENTS.map((dept) => (
+                {departments.map((dept) => (
                   <option key={dept} value={dept}>{dept}</option>
                 ))}
               </select>

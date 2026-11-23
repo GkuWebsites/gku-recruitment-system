@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
   try {
     await connectToDatabase();
     const body = await req.json();
-    const { requestId, action, remarks, actorName } = body;
+    const { requestId, action, remarks, actorName, actorRole } = body;
 
     if (!requestId || !action) {
       return NextResponse.json(
@@ -99,7 +99,7 @@ export async function POST(req: NextRequest) {
 
       request.auditTrail.unshift({
         id: `audit-${Date.now()}`,
-        action: 'Administrative Sanction Granted — Released to HR Recruitment Cell',
+        action: `${actorRole || 'Administrative'} Sanction Granted — Released to HR Recruitment Cell`,
         performedBy: sanctioner,
         role: 'VC / Registrar',
         details: remarks || 'Sanction accorded. Requisition handed over to HR Recruitment Cell for advertising and candidate intake.',

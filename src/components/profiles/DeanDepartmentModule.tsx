@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { IHiringRequest } from '@/lib/types';
 import { UNIVERSITY_DEPARTMENTS } from '@/lib/constants';
 import { Plus, Search, Building2, MessageSquare, CheckCircle2, Clock, AlertCircle, FileText, Check, ShieldCheck } from 'lucide-react';
@@ -28,11 +28,26 @@ export function DeanDepartmentModule({
   onRefresh,
   currentUser
 }: DeanDepartmentModuleProps) {
-  const [selectedDept, setSelectedDept] = useState<string>(UNIVERSITY_DEPARTMENTS[0]);
+  const [departments, setDepartments] = useState<string[]>(UNIVERSITY_DEPARTMENTS);
+  const [selectedDept, setSelectedDept] = useState<string>(currentUser?.department || UNIVERSITY_DEPARTMENTS[0]);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<'myRequests' | 'clarifications' | 'cleared'>('myRequests');
   const [replyText, setReplyText] = useState<{ [id: string]: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (currentUser?.department) {
+      setSelectedDept(currentUser.department);
+    }
+    fetch('/api/departments')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.data)) {
+          setDepartments(data.data);
+        }
+      })
+      .catch((e) => console.error(e));
+  }, [currentUser]);
 
   // Filter requests belonging to this department
   const deptRequests = requests.filter((r) => r.department === selectedDept);
@@ -179,7 +194,7 @@ export function DeanDepartmentModule({
               onChange={(e) => setSelectedDept(e.target.value)}
               className="text-xs font-bold bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
             >
-              {UNIVERSITY_DEPARTMENTS.map((dept) => (
+              {departments.map((dept) => (
                 <option key={dept} value={dept}>
                   {dept}
                 </option>

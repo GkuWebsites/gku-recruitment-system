@@ -145,6 +145,45 @@ export function HRDepartmentModule({
   const [timelineReq, setTimelineReq] = useState<IHiringRequest | null>(null);
   const [jobDetailsReq, setJobDetailsReq] = useState<IHiringRequest | null>(null);
 
+  // Dynamic Department Addition
+  const [isDeptModalOpen, setIsDeptModalOpen] = useState(false);
+  const [newDeptName, setNewDeptName] = useState('');
+  const [newDeptCode, setNewDeptCode] = useState('');
+  const [deptSaving, setDeptSaving] = useState(false);
+  const [deptError, setDeptError] = useState('');
+  const [deptSuccess, setDeptSuccess] = useState('');
+
+  const handleCreateDepartment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newDeptName.trim()) return;
+    setDeptSaving(true);
+    setDeptError('');
+    try {
+      const res = await fetch('/api/departments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: newDeptName.trim(),
+          code: newDeptCode.trim(),
+          createdBy: 'HR Recruitment Directorate'
+        })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Failed to add department');
+      }
+      setDeptSuccess(`✓ Department "${newDeptName.trim()}" registered successfully!`);
+      setNewDeptName('');
+      setNewDeptCode('');
+      setIsDeptModalOpen(false);
+      if (onRefresh) onRefresh();
+    } catch (err: unknown) {
+      setDeptError((err as Error).message);
+    } finally {
+      setDeptSaving(false);
+    }
+  };
+
   // Available media platforms for job advertisement
   const AVAILABLE_PLATFORMS = [
     { id: 'LinkedIn Jobs', label: 'LinkedIn Jobs', icon: '💼', tag: 'Global Portal' },
@@ -1067,6 +1106,19 @@ export function HRDepartmentModule({
           >
             <FolderCheck className="w-3.5 h-3.5 text-purple-700" />
             <span>Archive Cabinet: <strong>{archivedReqs.length}</strong></span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setIsDeptModalOpen(true);
+              setDeptError('');
+            }}
+            className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-3 py-1.5 rounded-xl font-bold transition flex items-center space-x-1.5 cursor-pointer shadow-xs"
+            title="Register a new academic department or faculty"
+          >
+            <Building2 className="w-3.5 h-3.5 text-blue-600" />
+            <span>+ Add Department</span>
           </button>
 
           {onOpenNewModal && (
@@ -3877,6 +3929,80 @@ export function HRDepartmentModule({
           request={jobDetailsReq}
           onClose={() => setJobDetailsReq(null)}
         />
+      )}
+
+      {/* CREATE DEPARTMENT MODAL (HR DESK) */}
+      {isDeptModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl border border-slate-200 max-w-md w-full p-6 space-y-4">
+            <div className="flex items-start justify-between border-b border-slate-100 pb-3">
+              <div>
+                <h3 className="text-base font-bold text-slate-900">Add Academic Faculty / Department</h3>
+                <p className="text-xs text-slate-500">
+                  Register a new university department for vacancy intake and talent recruitment.
+                </p>
+              </div>
+              <button
+                onClick={() => setIsDeptModalOpen(false)}
+                className="text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {deptError && (
+              <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl text-xs font-semibold">
+                {deptError}
+              </div>
+            )}
+
+            <form onSubmit={handleCreateDepartment} className="space-y-4 text-xs">
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">
+                  Department / Faculty Name: <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={newDeptName}
+                  onChange={(e) => setNewDeptName(e.target.value)}
+                  placeholder="e.g. Faculty of Artificial Intelligence & Data Science"
+                  className="w-full p-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 font-medium"
+                />
+              </div>
+
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">
+                  Department Code (optional):
+                </label>
+                <input
+                  type="text"
+                  value={newDeptCode}
+                  onChange={(e) => setNewDeptCode(e.target.value)}
+                  placeholder="e.g. FAIDS"
+                  className="w-full p-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 font-mono"
+                />
+              </div>
+
+              <div className="pt-3 border-t border-slate-100 flex items-center justify-end space-x-3">
+                <button
+                  type="button"
+                  onClick={() => setIsDeptModalOpen(false)}
+                  className="px-4 py-2 border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50 font-bold transition cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={deptSaving || !newDeptName.trim()}
+                  className="px-5 py-2 bg-[#0f2d59] hover:bg-[#163f7a] text-white rounded-xl font-bold transition disabled:opacity-50 cursor-pointer"
+                >
+                  {deptSaving ? 'Adding...' : 'Add Department'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
     </div>
   );

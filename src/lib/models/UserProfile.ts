@@ -2,8 +2,11 @@ import mongoose, { Schema, Document } from 'mongoose';
 
 export type UserDesignation =
   | 'Dean'
+  | 'HOD'
   | 'Dean Academic'
   | 'Director'
+  | 'Vice Chancellor'
+  | 'Registrar'
   | 'VC / Registrar'
   | 'HR'
   | 'Admin';
@@ -32,7 +35,7 @@ const UserProfileSchema = new Schema<UserProfileDocument>(
     designation: {
       type: String,
       required: true,
-      enum: ['Dean', 'Dean Academic', 'Director', 'VC / Registrar', 'HR', 'Admin']
+      enum: ['Dean', 'HOD', 'Dean Academic', 'Director', 'Vice Chancellor', 'Registrar', 'VC / Registrar', 'HR', 'Admin']
     },
     role: { type: String, required: false },
     department: { type: String, default: '' },

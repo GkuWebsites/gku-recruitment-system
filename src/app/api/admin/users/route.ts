@@ -43,9 +43,27 @@ const SEED_PROFILES: IUserProfile[] = [
     name: 'Prof. (Dr.) Gurinder Singh',
     email: 'vc@gku.ac.in',
     password: 'admin123',
-    designation: 'VC / Registrar',
+    designation: 'Vice Chancellor',
     department: "Vice Chancellor's Secretariat",
     phone: '+91 98721 00301',
+    status: 'Active'
+  },
+  {
+    name: 'Dr. Jagdish Singh',
+    email: 'registrar@gku.ac.in',
+    password: 'admin123',
+    designation: 'Registrar',
+    department: 'Office of the Registrar',
+    phone: '+91 98721 00302',
+    status: 'Active'
+  },
+  {
+    name: 'Dr. Jaspreet Kaur (HOD CSE)',
+    email: 'hod@gku.ac.in',
+    password: 'admin123',
+    designation: 'HOD',
+    department: 'Computer Science & Engineering',
+    phone: '+91 98721 00103',
     status: 'Active'
   },
   {
