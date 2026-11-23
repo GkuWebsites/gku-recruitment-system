@@ -106,6 +106,11 @@ export interface Candidate {
     scores: InterviewScores;
     panelRemarks: string;
     recommendation: 'Strongly Recommend' | 'Recommend' | 'Waitlist' | 'Not Recommended';
+    evaluatorRatings?: {
+      evaluatorName: string;
+      rating: number;
+    }[];
+    scorecardFile?: string;
   };
   joiningDetails?: {
     offerLetterRef?: string;

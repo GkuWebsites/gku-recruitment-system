@@ -259,7 +259,7 @@ export async function POST(req: NextRequest) {
 
     // HR ACTION 3.2: Record Interview Completion & Score (Out of 10)
     if (action === 'evaluate_interview') {
-      const { candidateId, scores, panelRemarks, recommendation, actorName } = body;
+      const { candidateId, scores, evaluatorRatings, ratingScorecardFile, panelRemarks, recommendation, actorName } = body;
 
       const candidateIndex = request.candidates.findIndex((c) => c.id === candidateId);
       if (candidateIndex === -1) {
@@ -269,36 +269,51 @@ export async function POST(req: NextRequest) {
       const candidate = request.candidates[candidateIndex];
       candidate.status = recommendation === 'Not Recommended' ? 'Rejected' : 'Interviewed';
 
-      const sKnowledge = Number(scores?.subjectKnowledge) || 0;
-      const rPubs = Number(scores?.researchPublications) || 0;
-      const tAptitude = Number(scores?.teachingAptitude) || 0;
-      const comms = Number(scores?.communication) || 0;
-      const avgOutOf10 = Number(((sKnowledge + rPubs + tAptitude + comms) / 4).toFixed(1));
+      let avgOutOf10 = 0;
+      if (Array.isArray(evaluatorRatings) && evaluatorRatings.length > 0) {
+        const total = evaluatorRatings.reduce((sum: number, ev: any) => sum + (Number(ev.rating) || 0), 0);
+        avgOutOf10 = Number((total / evaluatorRatings.length).toFixed(1));
+      } else {
+        const sKnowledge = Number(scores?.subjectKnowledge) || 0;
+        const rPubs = Number(scores?.researchPublications) || 0;
+        const tAptitude = Number(scores?.teachingAptitude) || 0;
+        const comms = Number(scores?.communication) || 0;
+        avgOutOf10 = Number(((sKnowledge + rPubs + tAptitude + comms) / 4).toFixed(1));
+      }
+
+      const updatedPanelMembers = Array.isArray(evaluatorRatings) && evaluatorRatings.length > 0
+        ? evaluatorRatings.map((ev: any) => ev.evaluatorName.trim()).filter(Boolean)
+        : candidate.interviewDetails?.panelMembers || ['Selection Committee'];
 
       if (!candidate.interviewDetails) {
         candidate.interviewDetails = {
           date: new Date().toISOString().split('T')[0],
-          panelMembers: ['Selection Committee'],
+          panelMembers: updatedPanelMembers,
           panelRemarks: panelRemarks || 'Interview completed.',
           scores: {
-            subjectKnowledge: sKnowledge,
-            researchPublications: rPubs,
-            teachingAptitude: tAptitude,
-            communication: comms,
+            subjectKnowledge: avgOutOf10,
+            researchPublications: avgOutOf10,
+            teachingAptitude: avgOutOf10,
+            communication: avgOutOf10,
             totalScore: avgOutOf10
           },
-          recommendation: recommendation || 'Recommend'
+          recommendation: recommendation || 'Recommend',
+          evaluatorRatings: Array.isArray(evaluatorRatings) ? evaluatorRatings : [],
+          scorecardFile: ratingScorecardFile || ''
         };
       } else {
         candidate.interviewDetails.scores = {
-          subjectKnowledge: sKnowledge,
-          researchPublications: rPubs,
-          teachingAptitude: tAptitude,
-          communication: comms,
+          subjectKnowledge: avgOutOf10,
+          researchPublications: avgOutOf10,
+          teachingAptitude: avgOutOf10,
+          communication: avgOutOf10,
           totalScore: avgOutOf10
         };
+        candidate.interviewDetails.panelMembers = updatedPanelMembers;
         if (panelRemarks) candidate.interviewDetails.panelRemarks = panelRemarks;
         candidate.interviewDetails.recommendation = recommendation || 'Recommend';
+        if (Array.isArray(evaluatorRatings)) candidate.interviewDetails.evaluatorRatings = evaluatorRatings;
+        if (ratingScorecardFile) candidate.interviewDetails.scorecardFile = ratingScorecardFile;
       }
 
       request.candidates[candidateIndex] = candidate;

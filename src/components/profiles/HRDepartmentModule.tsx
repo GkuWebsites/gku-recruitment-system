@@ -44,7 +44,9 @@ import {
   Archive,
   RotateCcw,
   Ban,
-  UploadCloud
+  UploadCloud,
+  Trash2,
+  Upload
 } from 'lucide-react';
 
 interface HRDepartmentModuleProps {
@@ -71,16 +73,54 @@ export function HRDepartmentModule({
   const [schedulingReq, setSchedulingReq] = useState<IHiringRequest | null>(null);
   const [schedulingCand, setSchedulingCand] = useState<Candidate | null>(null);
 
-  // Interview Scoring & Evaluation Modal
+  // Interview Scoring & Evaluation Modal (Evaluator Ratings & Scorecard Upload)
+  interface EvaluatorScoreItem {
+    id: string;
+    name: string;
+    rating: number | string;
+  }
   const [evaluatingReq, setEvaluatingReq] = useState<IHiringRequest | null>(null);
   const [evaluatingCand, setEvaluatingCand] = useState<Candidate | null>(null);
-  const [scoreSubject, setScoreSubject] = useState<number>(8);
-  const [scoreResearch, setScoreResearch] = useState<number>(8);
-  const [scoreTeaching, setScoreTeaching] = useState<number>(8);
-  const [scoreCommunication, setScoreCommunication] = useState<number>(8);
+  const [evaluatorEntries, setEvaluatorEntries] = useState<EvaluatorScoreItem[]>([
+    { id: 'ev-1', name: 'Dr. Harpreet Singh (Dean)', rating: 8.0 },
+    { id: 'ev-2', name: 'Subject Expert Nominee', rating: 8.0 }
+  ]);
+  const [scorecardFileName, setScorecardFileName] = useState<string>('');
+  const [scorecardFileSize, setScorecardFileSize] = useState<string>('');
   const [evalRecommendation, setEvalRecommendation] = useState<'Strongly Recommend' | 'Recommend' | 'Waitlist' | 'Not Recommended'>('Recommend');
   const [evalRemarks, setEvalRemarks] = useState('');
   const [evalDecision, setEvalDecision] = useState<'interviewed' | 'shortlist' | 'reject'>('interviewed');
+
+  const handleAddEvaluator = () => {
+    setEvaluatorEntries((prev) => [
+      ...prev,
+      { id: `ev-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`, name: '', rating: 8.0 }
+    ]);
+  };
+
+  const handleRemoveEvaluator = (id: string) => {
+    setEvaluatorEntries((prev) => prev.filter((e) => e.id !== id));
+  };
+
+  const handleEvaluatorNameChange = (id: string, name: string) => {
+    setEvaluatorEntries((prev) =>
+      prev.map((e) => (e.id === id ? { ...e, name } : e))
+    );
+  };
+
+  const handleEvaluatorRatingChange = (id: string, rating: string) => {
+    setEvaluatorEntries((prev) =>
+      prev.map((e) => (e.id === id ? { ...e, rating } : e))
+    );
+  };
+
+  const handleScorecardUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setScorecardFileName(file.name);
+      setScorecardFileSize(`${(file.size / 1024).toFixed(1)} KB`);
+    }
+  };
 
   // Collapse / Expand state for Accordions in Tab 2, Tab 3, Tab 4
   const [expandedPostedReqs, setExpandedPostedReqs] = useState<Record<string, boolean>>({});
@@ -628,7 +668,12 @@ export function HRDepartmentModule({
     setErrorMsg('');
     setStatusMsg('');
 
-    const avgScore = Number(((scoreSubject + scoreResearch + scoreTeaching + scoreCommunication) / 4).toFixed(1));
+    const validRatings = evaluatorEntries
+      .map((e) => Number(e.rating))
+      .filter((r) => !isNaN(r) && r >= 0);
+    const avgScore = validRatings.length > 0
+      ? Number((validRatings.reduce((sum, r) => sum + r, 0) / validRatings.length).toFixed(1))
+      : 0;
 
     try {
       const res = await fetch(`/api/hr`, {
@@ -639,12 +684,18 @@ export function HRDepartmentModule({
           requestId: evaluatingReq.requestId,
           candidateId: evaluatingCand.id,
           scores: {
-            subjectKnowledge: scoreSubject,
-            researchPublications: scoreResearch,
-            teachingAptitude: scoreTeaching,
-            communication: scoreCommunication
+            subjectKnowledge: avgScore,
+            researchPublications: avgScore,
+            teachingAptitude: avgScore,
+            communication: avgScore,
+            totalScore: avgScore
           },
-          panelRemarks: evalRemarks.trim() || `Interview evaluated with an overall score of ${avgScore}/10.`,
+          evaluatorRatings: evaluatorEntries.map((ev) => ({
+            evaluatorName: ev.name.trim() || 'Panel Member',
+            rating: Number(ev.rating) || 0
+          })),
+          ratingScorecardFile: scorecardFileName.trim() || undefined,
+          panelRemarks: evalRemarks.trim() || `Interview evaluated with an overall score of ${avgScore}/10 across ${evaluatorEntries.length} panel member(s).`,
           recommendation: evalRecommendation,
           actorName: 'HR Selection Committee'
         })
@@ -692,6 +743,8 @@ export function HRDepartmentModule({
       setEvaluatingReq(null);
       setEvaluatingCand(null);
       setEvalRemarks('');
+      setScorecardFileName('');
+      setScorecardFileSize('');
       setEvalDecision('interviewed');
       onRefresh();
     } catch (err: unknown) {
@@ -1489,10 +1542,18 @@ export function HRDepartmentModule({
                               {/* Status & Action */}
                               <div className="flex items-center space-x-2 shrink-0">
                                 {isEvaluated ? (
-                                  <span className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-900 border border-amber-200">
-                                    <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
-                                    <span>Score: {scoreFormatted}/10</span>
-                                  </span>
+                                  <>
+                                    <span className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-900 border border-amber-200">
+                                      <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
+                                      <span>Score: {scoreFormatted}/10</span>
+                                    </span>
+                                    {cand.interviewDetails?.scorecardFile && (
+                                      <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200" title={`Uploaded Scorecard: ${cand.interviewDetails.scorecardFile}`}>
+                                        <FileText className="w-3 h-3 text-emerald-600" />
+                                        <span className="truncate max-w-[100px]">{cand.interviewDetails.scorecardFile}</span>
+                                      </span>
+                                    )}
+                                  </>
                                 ) : cand.status === 'Interview Scheduled' ? (
                                   <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-900 border border-amber-200">
                                     Scheduled
@@ -1542,12 +1603,20 @@ export function HRDepartmentModule({
                                     onClick={() => {
                                       setEvaluatingReq(req);
                                       setEvaluatingCand(cand);
-                                      setScoreSubject(8);
-                                      setScoreResearch(8);
-                                      setScoreTeaching(8);
-                                      setScoreCommunication(8);
-                                      setEvalRecommendation('Recommend');
-                                      setEvalRemarks('');
+                                      const existingPanel = cand.interviewDetails?.evaluatorRatings && cand.interviewDetails.evaluatorRatings.length > 0
+                                        ? cand.interviewDetails.evaluatorRatings.map((ev, idx) => ({ id: `ev-${idx}`, name: ev.evaluatorName, rating: ev.rating }))
+                                        : cand.interviewDetails?.panelMembers && cand.interviewDetails.panelMembers.length > 0
+                                        ? cand.interviewDetails.panelMembers.map((name, idx) => ({ id: `ev-${idx}`, name, rating: 8.0 }))
+                                        : [
+                                            { id: 'ev-1', name: 'Dr. Harpreet Singh (Dean)', rating: 8.0 },
+                                            { id: 'ev-2', name: 'Prof. Balwant Singh (Dean Academic)', rating: 8.0 },
+                                            { id: 'ev-3', name: 'Subject Expert Nominee', rating: 8.0 }
+                                          ];
+                                      setEvaluatorEntries(existingPanel);
+                                      setScorecardFileName(cand.interviewDetails?.scorecardFile || '');
+                                      setScorecardFileSize('');
+                                      setEvalRecommendation(cand.interviewDetails?.recommendation || 'Recommend');
+                                      setEvalRemarks(cand.interviewDetails?.panelRemarks || '');
                                       setEvalDecision('interviewed');
                                     }}
                                     className="px-3 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-semibold transition cursor-pointer"
@@ -1735,10 +1804,18 @@ export function HRDepartmentModule({
                             {/* Score & Selection Actions */}
                             <div className="flex items-center space-x-2 shrink-0">
                               {isEvaluated ? (
-                                <span className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-900 border border-amber-200">
-                                  <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
-                                  <span>Score: {scoreFormatted}/10</span>
-                                </span>
+                                <>
+                                  <span className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-900 border border-amber-200">
+                                    <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
+                                    <span>Score: {scoreFormatted}/10</span>
+                                  </span>
+                                  {candidate.interviewDetails?.scorecardFile && (
+                                    <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200" title={`Uploaded Scorecard: ${candidate.interviewDetails.scorecardFile}`}>
+                                      <FileText className="w-3 h-3 text-emerald-600" />
+                                      <span className="truncate max-w-[100px]">{candidate.interviewDetails.scorecardFile}</span>
+                                    </span>
+                                  )}
+                                </>
                               ) : (
                                 <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-900 border border-amber-200">
                                   Awaiting Score
@@ -1751,12 +1828,20 @@ export function HRDepartmentModule({
                                   onClick={() => {
                                     setEvaluatingReq(req);
                                     setEvaluatingCand(candidate);
-                                    setScoreSubject(8);
-                                    setScoreResearch(8);
-                                    setScoreTeaching(8);
-                                    setScoreCommunication(8);
-                                    setEvalRecommendation('Recommend');
-                                    setEvalRemarks('');
+                                    const existingPanel = candidate.interviewDetails?.evaluatorRatings && candidate.interviewDetails.evaluatorRatings.length > 0
+                                      ? candidate.interviewDetails.evaluatorRatings.map((ev, idx) => ({ id: `ev-${idx}`, name: ev.evaluatorName, rating: ev.rating }))
+                                      : candidate.interviewDetails?.panelMembers && candidate.interviewDetails.panelMembers.length > 0
+                                      ? candidate.interviewDetails.panelMembers.map((name, idx) => ({ id: `ev-${idx}`, name, rating: 8.0 }))
+                                      : [
+                                          { id: 'ev-1', name: 'Dr. Harpreet Singh (Dean)', rating: 8.0 },
+                                          { id: 'ev-2', name: 'Prof. Balwant Singh (Dean Academic)', rating: 8.0 },
+                                          { id: 'ev-3', name: 'Subject Expert Nominee', rating: 8.0 }
+                                        ];
+                                    setEvaluatorEntries(existingPanel);
+                                    setScorecardFileName(candidate.interviewDetails?.scorecardFile || '');
+                                    setScorecardFileSize('');
+                                    setEvalRecommendation(candidate.interviewDetails?.recommendation || 'Recommend');
+                                    setEvalRemarks(candidate.interviewDetails?.panelRemarks || '');
                                     setEvalDecision('interviewed');
                                   }}
                                   className="px-3 py-1.5 bg-blue-700 hover:bg-blue-800 text-white rounded-lg text-xs font-semibold transition cursor-pointer"
@@ -3061,100 +3146,159 @@ export function HRDepartmentModule({
 
             <form onSubmit={handleSaveEvaluation} className="space-y-4 text-xs">
               {/* Live Aggregate Score Card */}
-              <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl flex items-center justify-between">
-                <div>
-                  <span className="text-[11px] font-bold text-blue-900 uppercase tracking-wider block">
-                    Calculated Overall Interview Score
-                  </span>
-                  <p className="text-xs text-slate-600">
-                    Average of the 4 statutory academic parameters
-                  </p>
-                </div>
-                <div className="text-right">
-                  <div className="text-2xl font-black text-blue-950 flex items-center space-x-1">
-                    <Star className="w-5 h-5 fill-amber-500 text-amber-500" />
-                    <span>{((scoreSubject + scoreResearch + scoreTeaching + scoreCommunication) / 4).toFixed(1)}</span>
-                    <span className="text-sm font-normal text-slate-500">/ 10</span>
+              {(() => {
+                const validRatings = evaluatorEntries
+                  .map((e) => Number(e.rating))
+                  .filter((r) => !isNaN(r) && r >= 0);
+                const overallScore = validRatings.length > 0
+                  ? (validRatings.reduce((sum, r) => sum + r, 0) / validRatings.length).toFixed(1)
+                  : '0.0';
+
+                return (
+                  <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl flex items-center justify-between">
+                    <div>
+                      <span className="text-[11px] font-bold text-blue-900 uppercase tracking-wider block">
+                        Calculated Overall Interview Score
+                      </span>
+                      <p className="text-xs text-slate-600">
+                        Average rating across {evaluatorEntries.length} evaluator / panel member(s)
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-2xl font-black text-blue-950 flex items-center space-x-1">
+                        <Star className="w-5 h-5 fill-amber-500 text-amber-500" />
+                        <span>{overallScore}</span>
+                        <span className="text-sm font-normal text-slate-500">/ 10</span>
+                      </div>
+                      <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                        {evalRecommendation}
+                      </span>
+                    </div>
                   </div>
-                  <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                    {evalRecommendation}
-                  </span>
+                );
+              })()}
+
+              {/* Panel Member Evaluator Ratings (Per-Person Rating & Name) */}
+              <div className="space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                  <div>
+                    <span className="font-bold text-slate-900 text-xs block">
+                      Evaluator Ratings (Rate each panelist out of 10):
+                    </span>
+                    <span className="text-[11px] text-slate-500">
+                      Pre-filled with scheduled panel members. You can edit names or add additional evaluators.
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleAddEvaluator}
+                    className="px-2.5 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-lg text-xs font-bold transition flex items-center space-x-1 cursor-pointer shrink-0"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Add Evaluator</span>
+                  </button>
+                </div>
+
+                <div className="space-y-2.5 pt-1">
+                  {evaluatorEntries.map((ev, index) => (
+                    <div
+                      key={ev.id}
+                      className="flex items-center space-x-2.5 bg-white p-3 rounded-xl border border-slate-200 shadow-2xs"
+                    >
+                      <div className="text-[11px] font-bold text-slate-400 w-5 text-center">
+                        #{index + 1}
+                      </div>
+                      <div className="flex-1">
+                        <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-0.5">
+                          Evaluator / Panelist Name
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={ev.name}
+                          onChange={(e) => handleEvaluatorNameChange(ev.id, e.target.value)}
+                          placeholder="e.g. Dr. Harpreet Singh / External Expert Nominee"
+                          className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        />
+                      </div>
+                      <div className="w-28">
+                        <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-0.5">
+                          Rating (0 - 10)
+                        </label>
+                        <div className="relative flex items-center">
+                          <input
+                            type="number"
+                            min="0"
+                            max="10"
+                            step="0.1"
+                            required
+                            value={ev.rating}
+                            onChange={(e) => handleEvaluatorRatingChange(ev.id, e.target.value)}
+                            className="w-full pl-2.5 pr-8 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-blue-900 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                          />
+                          <span className="absolute right-2 text-[11px] font-bold text-slate-400">/ 10</span>
+                        </div>
+                      </div>
+                      {evaluatorEntries.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveEvaluator(ev.id)}
+                          title="Remove Evaluator"
+                          className="p-2 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition cursor-pointer"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
+                  ))}
                 </div>
               </div>
 
-              {/* 4 Academic Scoring Parameters (Out of 10) */}
-              <div className="space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
-                <span className="font-bold text-slate-900 text-xs block border-b border-slate-200 pb-2">
-                  Academic Parameter Scoring (Rate each parameter out of 10):
-                </span>
-
-                {/* Parameter 1 */}
-                <div className="space-y-1">
-                  <div className="flex justify-between font-semibold text-slate-800">
-                    <span>1. Subject Knowledge & Domain Expertise:</span>
-                    <strong className="text-blue-900 font-mono text-sm">{scoreSubject} / 10</strong>
-                  </div>
-                  <input
-                    type="range"
-                    min="0"
-                    max="10"
-                    step="0.5"
-                    value={scoreSubject}
-                    onChange={(e) => setScoreSubject(Number(e.target.value))}
-                    className="w-full accent-blue-600"
-                  />
+              {/* Upload Scorecard / Evaluation Document */}
+              <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-slate-900 text-xs block">
+                    Upload Rating Scorecard / Evaluation Sheet (Optional)
+                  </span>
+                  <span className="text-[10px] font-semibold text-slate-500">PDF, JPG, PNG up to 10MB</span>
                 </div>
 
-                {/* Parameter 2 */}
-                <div className="space-y-1">
-                  <div className="flex justify-between font-semibold text-slate-800">
-                    <span>2. Research, Publications & Citation Index:</span>
-                    <strong className="text-blue-900 font-mono text-sm">{scoreResearch} / 10</strong>
+                {!scorecardFileName ? (
+                  <label className="border-2 border-dashed border-slate-300 hover:border-blue-400 rounded-xl p-3.5 flex items-center justify-center space-x-2 cursor-pointer bg-white transition hover:bg-blue-50/40">
+                    <Upload className="w-4 h-4 text-blue-600" />
+                    <span className="text-xs font-semibold text-slate-700">
+                      Click to browse or upload signed interview evaluation scorecard
+                    </span>
+                    <input
+                      type="file"
+                      accept=".pdf,.png,.jpg,.jpeg,.doc,.docx"
+                      onChange={handleScorecardUpload}
+                      className="hidden"
+                    />
+                  </label>
+                ) : (
+                  <div className="flex items-center justify-between p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl">
+                    <div className="flex items-center space-x-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                      <div>
+                        <span className="font-bold text-emerald-950 text-xs">{scorecardFileName}</span>
+                        {scorecardFileSize && (
+                          <span className="text-[10px] text-emerald-700 block">{scorecardFileSize}</span>
+                        )}
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setScorecardFileName('');
+                        setScorecardFileSize('');
+                      }}
+                      className="text-[11px] font-bold text-rose-600 hover:text-rose-800 hover:underline cursor-pointer"
+                    >
+                      Remove / Change
+                    </button>
                   </div>
-                  <input
-                    type="range"
-                    min="0"
-                    max="10"
-                    step="0.5"
-                    value={scoreResearch}
-                    onChange={(e) => setScoreResearch(Number(e.target.value))}
-                    className="w-full accent-blue-600"
-                  />
-                </div>
-
-                {/* Parameter 3 */}
-                <div className="space-y-1">
-                  <div className="flex justify-between font-semibold text-slate-800">
-                    <span>3. Teaching Aptitude & Pedagogical Methodology:</span>
-                    <strong className="text-blue-900 font-mono text-sm">{scoreTeaching} / 10</strong>
-                  </div>
-                  <input
-                    type="range"
-                    min="0"
-                    max="10"
-                    step="0.5"
-                    value={scoreTeaching}
-                    onChange={(e) => setScoreTeaching(Number(e.target.value))}
-                    className="w-full accent-blue-600"
-                  />
-                </div>
-
-                {/* Parameter 4 */}
-                <div className="space-y-1">
-                  <div className="flex justify-between font-semibold text-slate-800">
-                    <span>4. Communication, Presentation & Scholarly Delivery:</span>
-                    <strong className="text-blue-900 font-mono text-sm">{scoreCommunication} / 10</strong>
-                  </div>
-                  <input
-                    type="range"
-                    min="0"
-                    max="10"
-                    step="0.5"
-                    value={scoreCommunication}
-                    onChange={(e) => setScoreCommunication(Number(e.target.value))}
-                    className="w-full accent-blue-600"
-                  />
-                </div>
+                )}
               </div>
 
               {/* Recommendation & Immediate Decision Select */}

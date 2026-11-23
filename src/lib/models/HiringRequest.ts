@@ -48,7 +48,12 @@ const CandidateSchema = new Schema({
     recommendation: {
       type: String,
       enum: ['Strongly Recommend', 'Recommend', 'Waitlist', 'Not Recommended']
-    }
+    },
+    evaluatorRatings: [{
+      evaluatorName: { type: String },
+      rating: { type: Number, default: 0 }
+    }],
+    scorecardFile: { type: String }
   },
   joiningDetails: {
     offerLetterRef: { type: String },

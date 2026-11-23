@@ -78,16 +78,8 @@ export async function POST(req: NextRequest) {
       }
     });
   } catch (error: unknown) {
-    console.error('Authentication Error:', error);
-    const msg = (error as Error).message || '';
-    let clientError = 'Authentication service temporarily unavailable. Please try again.';
-    
-    if (msg.includes('MongoDB Atlas cluster') || msg.includes('whitelist') || msg.includes('ECONNREFUSED')) {
-      clientError = 'Database connection error: The server IP is not whitelisted in MongoDB Atlas. Please add 0.0.0.0/0 in MongoDB Atlas Network Access.';
-    }
-
     return NextResponse.json(
-      { success: false, error: clientError },
+      { success: false, error: (error as Error).message || 'Authentication failed' },
       { status: 500 }
     );
   }
