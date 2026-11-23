@@ -43,7 +43,8 @@ import {
   FolderOpen,
   Archive,
   RotateCcw,
-  Ban
+  Ban,
+  UploadCloud
 } from 'lucide-react';
 
 interface HRDepartmentModuleProps {
@@ -120,6 +121,7 @@ export function HRDepartmentModule({
     'University Careers Website'
   ]);
   const [postingRemarks, setPostingRemarks] = useState('');
+  const [adSpendBudget, setAdSpendBudget] = useState('');
   const [adExpiry, setAdExpiry] = useState('2026-12-31');
 
   // Form states: 2. Upload Resume
@@ -129,6 +131,8 @@ export function HRDepartmentModule({
   const [candQual, setCandQual] = useState('');
   const [candExp, setCandExp] = useState('3');
   const [candAffiliation, setCandAffiliation] = useState('');
+  const [resumeFile, setResumeFile] = useState<File | null>(null);
+  const [resumeFileName, setResumeFileName] = useState('');
 
   // Form states: 3. Schedule Interview (Interactive Panel Members Adder)
   const [interviewDate, setInterviewDate] = useState('2026-12-10');
@@ -489,7 +493,7 @@ export function HRDepartmentModule({
           action: 'post_job',
           requestId: postingReq.requestId,
           channelNames: selectedPlatforms,
-          cost: 0,
+          cost: Number(adSpendBudget) || 0,
           urlOrRef: postingRemarks.trim(),
           expiryDate: adExpiry,
           actorName: 'HR Media & Advertising Cell'
@@ -506,6 +510,7 @@ export function HRDepartmentModule({
       );
       setPostingReq(null);
       setPostingRemarks('');
+      setAdSpendBudget('');
       onRefresh();
       setActiveTab('posted');
     } catch (err: unknown) {
@@ -540,7 +545,7 @@ export function HRDepartmentModule({
           qualification: candQual.trim() || 'Postgraduate / Ph.D.',
           experienceYears: Number(candExp) || 0,
           currentAffiliation: candAffiliation.trim(),
-          resumeFileName: `${candName.trim().replace(/\s+/g, '_')}_CV.pdf`,
+          resumeFileName: resumeFileName.trim() || (candName.trim() ? `${candName.trim().replace(/\s+/g, '_')}_CV.pdf` : 'Candidate_CV.pdf'),
           actorName: 'HR Talent Acquisition Desk'
         })
       });
@@ -557,6 +562,8 @@ export function HRDepartmentModule({
       setCandPhone('');
       setCandQual('');
       setCandAffiliation('');
+      setResumeFile(null);
+      setResumeFileName('');
       onRefresh();
     } catch (err: unknown) {
       setErrorMsg((err as Error).message);
@@ -1042,8 +1049,8 @@ export function HRDepartmentModule({
             setSearchQuery('');
           }}
           className={`py-3.5 px-4 border-b-2 transition flex items-center space-x-2 ${activeTab === 'approved'
-              ? 'border-blue-600 text-blue-900 font-extrabold'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
+            ? 'border-blue-600 text-blue-900 font-extrabold'
+            : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
         >
           <CheckCircle2 className={`w-4 h-4 ${activeTab === 'approved' ? 'text-blue-600' : 'text-slate-400'}`} />
@@ -1056,8 +1063,8 @@ export function HRDepartmentModule({
             setSearchQuery('');
           }}
           className={`py-3.5 px-4 border-b-2 transition flex items-center space-x-2 ${activeTab === 'posted'
-              ? 'border-indigo-600 text-indigo-900 font-extrabold'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
+            ? 'border-indigo-600 text-indigo-900 font-extrabold'
+            : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
         >
           <Megaphone className={`w-4 h-4 ${activeTab === 'posted' ? 'text-indigo-600' : 'text-slate-400'}`} />
@@ -1070,8 +1077,8 @@ export function HRDepartmentModule({
             setSearchQuery('');
           }}
           className={`py-3.5 px-4 border-b-2 transition flex items-center space-x-2 ${activeTab === 'interviews'
-              ? 'border-amber-600 text-amber-900 font-extrabold'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
+            ? 'border-amber-600 text-amber-900 font-extrabold'
+            : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
         >
           <Calendar className={`w-4 h-4 ${activeTab === 'interviews' ? 'text-amber-600' : 'text-slate-400'}`} />
@@ -1084,8 +1091,8 @@ export function HRDepartmentModule({
             setSearchQuery('');
           }}
           className={`py-3.5 px-4 border-b-2 transition flex items-center space-x-2 ${activeTab === 'offerLetters'
-              ? 'border-emerald-600 text-emerald-900 font-extrabold'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
+            ? 'border-emerald-600 text-emerald-900 font-extrabold'
+            : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
         >
           <Award className={`w-4 h-4 ${activeTab === 'offerLetters' ? 'text-emerald-600' : 'text-slate-400'}`} />
@@ -1098,8 +1105,8 @@ export function HRDepartmentModule({
             setSearchQuery('');
           }}
           className={`py-3.5 px-4 border-b-2 transition flex items-center space-x-2 ${activeTab === 'pipeline'
-              ? 'border-slate-600 text-slate-900 font-extrabold'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
+            ? 'border-slate-600 text-slate-900 font-extrabold'
+            : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
         >
           <Clock className={`w-4 h-4 ${activeTab === 'pipeline' ? 'text-slate-600' : 'text-slate-400'}`} />
@@ -1112,8 +1119,8 @@ export function HRDepartmentModule({
             setSearchQuery('');
           }}
           className={`py-3.5 px-4 border-b-2 transition flex items-center space-x-2 ${activeTab === 'archive'
-              ? 'border-purple-600 text-purple-900 font-extrabold'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
+            ? 'border-purple-600 text-purple-900 font-extrabold'
+            : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
         >
           <FolderCheck className={`w-4 h-4 ${activeTab === 'archive' ? 'text-purple-600' : 'text-slate-400'}`} />
@@ -1184,7 +1191,7 @@ export function HRDepartmentModule({
                         </div>
                       </td>
                       <td className="py-4 px-6">
-                        <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-50 text-amber-900 border border-amber-200">
+                        <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-50 text-amber-900 border border-amber-200">
                           Awaiting Media Posting
                         </span>
                       </td>
@@ -1235,8 +1242,8 @@ export function HRDepartmentModule({
                   type="button"
                   onClick={() => setPostedIntakeFilter('all')}
                   className={`px-2.5 py-1 rounded-md transition cursor-pointer ${postedIntakeFilter === 'all'
-                      ? 'bg-white text-slate-900 shadow-2xs font-bold'
-                      : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-white text-slate-900 shadow-2xs font-bold'
+                    : 'text-slate-600 hover:text-slate-900'
                     }`}
                 >
                   All ({activePostedJobs.length})
@@ -1245,8 +1252,8 @@ export function HRDepartmentModule({
                   type="button"
                   onClick={() => setPostedIntakeFilter('active')}
                   className={`px-2.5 py-1 rounded-md transition cursor-pointer ${postedIntakeFilter === 'active'
-                      ? 'bg-white text-indigo-900 shadow-2xs font-bold'
-                      : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-white text-indigo-900 shadow-2xs font-bold'
+                    : 'text-slate-600 hover:text-slate-900'
                     }`}
                 >
                   Active Intake ({activeIntakeJobsCount})
@@ -1255,8 +1262,8 @@ export function HRDepartmentModule({
                   type="button"
                   onClick={() => setPostedIntakeFilter('closed')}
                   className={`px-2.5 py-1 rounded-md transition cursor-pointer ${postedIntakeFilter === 'closed'
-                      ? 'bg-white text-emerald-900 shadow-2xs font-bold'
-                      : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-white text-emerald-900 shadow-2xs font-bold'
+                    : 'text-slate-600 hover:text-slate-900'
                     }`}
                 >
                   Closed / Fulfilled ({closedOrFulfilledCount})
@@ -1375,8 +1382,8 @@ export function HRDepartmentModule({
 
                       <span
                         className={`px-2.5 py-1 rounded-full text-xs font-semibold ${candCount > 0
-                            ? 'bg-indigo-50 text-indigo-800 border border-indigo-200'
-                            : 'bg-slate-100 text-slate-500'
+                          ? 'bg-indigo-50 text-indigo-800 border border-indigo-200'
+                          : 'bg-slate-100 text-slate-500'
                           }`}
                       >
                         {candCount} {candCount === 1 ? 'Applicant' : 'Applicants'}
@@ -2090,10 +2097,10 @@ export function HRDepartmentModule({
                       <td className="py-4 px-6">
                         <span
                           className={`px-2.5 py-1 rounded-full text-[11px] font-bold border ${req.status === 'Approved by Dean Academic'
-                              ? 'bg-purple-50 text-purple-900 border-purple-200'
-                              : req.status === 'Returned for Clarification'
-                                ? 'bg-rose-50 text-rose-800 border-rose-200'
-                                : 'bg-amber-50 text-amber-900 border-amber-200'
+                            ? 'bg-purple-50 text-purple-900 border-purple-200'
+                            : req.status === 'Returned for Clarification'
+                              ? 'bg-rose-50 text-rose-800 border-rose-200'
+                              : 'bg-amber-50 text-amber-900 border-amber-200'
                             }`}
                         >
                           {req.status}
@@ -2450,8 +2457,8 @@ export function HRDepartmentModule({
                       <label
                         key={platform.id}
                         className={`flex items-center space-x-2.5 p-2.5 rounded-lg border cursor-pointer select-none transition ${isChecked
-                            ? 'bg-blue-50/80 border-blue-300 text-blue-950 font-semibold shadow-2xs'
-                            : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                          ? 'bg-blue-50/80 border-blue-300 text-blue-950 font-semibold shadow-2xs'
+                          : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
                           }`}
                       >
                         <input
@@ -2480,6 +2487,21 @@ export function HRDepartmentModule({
                     ⚠️ Please select at least one platform to publish this job posting.
                   </p>
                 )}
+              </div>
+
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">
+                  Ad Spend Budget (₹):
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  step="500"
+                  value={adSpendBudget}
+                  onChange={(e) => setAdSpendBudget(e.target.value)}
+                  placeholder="e.g. 25000"
+                  className="w-full p-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 font-medium bg-white"
+                />
               </div>
 
               <div>
@@ -2638,11 +2660,55 @@ export function HRDepartmentModule({
                 />
               </div>
 
-              <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center space-x-2 text-[11px] text-slate-600">
-                <FileText className="w-4 h-4 text-slate-400" />
-                <span>
-                  Resume Attachment: <strong>{candName ? `${candName.replace(/\s+/g, '_')}_CV.pdf` : 'Candidate_CV.pdf'}</strong> (Auto-registered)
-                </span>
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">
+                  Upload Candidate Resume / Curriculum Vitae (.pdf, .doc, .docx):
+                </label>
+                <div className="border-2 border-dashed border-slate-300 hover:border-indigo-500 rounded-xl p-3 bg-slate-50 hover:bg-indigo-50/20 transition text-center cursor-pointer relative group">
+                  <input
+                    type="file"
+                    accept=".pdf,.doc,.docx"
+                    onChange={(e) => {
+                      if (e.target.files && e.target.files[0]) {
+                        const file = e.target.files[0];
+                        setResumeFile(file);
+                        setResumeFileName(file.name);
+                      }
+                    }}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  />
+                  {resumeFileName ? (
+                    <div className="flex items-center justify-between px-3 py-1.5 bg-white border border-indigo-200 rounded-lg">
+                      <div className="flex items-center space-x-2 min-w-0">
+                        <FileCheck2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <span className="text-xs font-bold text-slate-900 truncate">{resumeFileName}</span>
+                        <span className="text-[10px] text-emerald-700 font-semibold bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded shrink-0">
+                          Ready to Upload
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={(ev) => {
+                          ev.stopPropagation();
+                          setResumeFile(null);
+                          setResumeFileName('');
+                        }}
+                        className="text-slate-400 hover:text-rose-600 text-xs font-bold ml-2 p-1 cursor-pointer"
+                        title="Remove file"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-1 py-1">
+                      <UploadCloud className="w-5 h-5 mx-auto text-indigo-600 group-hover:scale-110 transition" />
+                      <div className="text-xs font-semibold text-slate-700">
+                        Click to browse or drop candidate resume file
+                      </div>
+                      <p className="text-[10px] text-slate-400">PDF, DOC, DOCX up to 15MB</p>
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="flex items-center justify-end space-x-2 pt-3 border-t border-slate-100">
@@ -2708,14 +2774,14 @@ export function HRDepartmentModule({
                         <strong className="text-slate-900 text-sm font-bold">{cand.fullName}</strong>
                         <span
                           className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${cand.status === 'Joined'
-                              ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                              : cand.status === 'Offer Issued'
-                                ? 'bg-blue-50 text-blue-800 border-blue-200'
-                                : cand.status === 'Interviewed'
-                                  ? 'bg-purple-50 text-purple-800 border-purple-200'
-                                  : cand.status === 'Interview Scheduled'
-                                    ? 'bg-amber-50 text-amber-800 border-amber-200'
-                                    : 'bg-slate-50 text-slate-700 border-slate-200'
+                            ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                            : cand.status === 'Offer Issued'
+                              ? 'bg-blue-50 text-blue-800 border-blue-200'
+                              : cand.status === 'Interviewed'
+                                ? 'bg-purple-50 text-purple-800 border-purple-200'
+                                : cand.status === 'Interview Scheduled'
+                                  ? 'bg-amber-50 text-amber-800 border-amber-200'
+                                  : 'bg-slate-50 text-slate-700 border-slate-200'
                             }`}
                         >
                           {cand.status}
@@ -3597,8 +3663,8 @@ export function HRDepartmentModule({
                   <label
                     key={opt.id}
                     className={`flex items-start space-x-3 p-3 rounded-xl border cursor-pointer transition ${statusUpdateChoice === opt.id
-                        ? opt.color + ' ring-2 ring-indigo-500/20'
-                        : 'bg-white border-slate-200 hover:border-slate-300'
+                      ? opt.color + ' ring-2 ring-indigo-500/20'
+                      : 'bg-white border-slate-200 hover:border-slate-300'
                       }`}
                   >
                     <input
