@@ -24,19 +24,26 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
-                if (typeof window !== 'undefined' && window.fetch) {
-                  var origFetch = window.fetch;
-                  window.fetch = function(input, init) {
-                    if (typeof input === 'string') {
-                      if (input.startsWith('/api/')) {
-                        input = '/recruitment' + input;
-                      }
-                    } else if (input && typeof input.url === 'string' && input.url.startsWith('/api/')) {
-                      input = new Request('/recruitment' + input.url, input);
-                    }
-                    return origFetch.call(this, input, init);
-                  };
-                }
+                try {
+                  if (typeof window !== 'undefined' && window.fetch) {
+                    var origFetch = window.fetch;
+                    window.fetch = function(input, init) {
+                      try {
+                        if (typeof input === 'string') {
+                          if (input.startsWith('/api/')) {
+                            input = '/recruitment' + input;
+                          }
+                        } else if (input && typeof input.url === 'string') {
+                          var u = new URL(input.url, window.location.origin);
+                          if (u.pathname.startsWith('/api/')) {
+                            input = new Request('/recruitment' + u.pathname + u.search, input);
+                          }
+                        }
+                      } catch (e) {}
+                      return origFetch.call(this, input, init);
+                    };
+                  }
+                } catch (e) {}
               })();
             `,
           }}

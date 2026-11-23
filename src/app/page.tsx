@@ -18,7 +18,6 @@ import { Lock, Mail, ArrowRight, ShieldCheck, CheckCircle2, AlertCircle, LogOut 
 
 export default function HomePage() {
   const [currentUser, setCurrentUser] = useState<IUserProfile | null>(null);
-  const [isInitializing, setIsInitializing] = useState(true);
 
   // Login form state
   const [email, setEmail] = useState('');
@@ -45,8 +44,6 @@ export default function HomePage() {
       }
     } catch (e) {
       console.error(e);
-    } finally {
-      setIsInitializing(false);
     }
   }, []);
 
@@ -119,16 +116,6 @@ export default function HomePage() {
     setEmail('');
     setPassword('');
   };
-
-  if (isInitializing) {
-    return (
-      <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center">
-        <div className="text-slate-400 text-xs font-semibold animate-pulse">
-          Loading Guru Kashi University Recruitment Portal...
-        </div>
-      </div>
-    );
-  }
 
   // 1. IF NOT LOGGED IN: Render Clean Institutional Authentication Page
   if (!currentUser) {
