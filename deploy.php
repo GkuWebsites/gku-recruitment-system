@@ -32,15 +32,12 @@ if ($action === 'inspect') {
     // Check directories in home
     $homeDirs = glob("{$homeDir}/*", GLOB_ONLYDIR);
 
-    // Search where the old build id Z6KHAfUK3knLueda_PW-B is stored
-    $findOld = function_exists('shell_exec') ? @shell_exec("grep -rln 'Z6KHAfUK3knLueda_PW-B' {$homeDir} 2>/dev/null | head -n 20") : 'shell_exec disabled';
-
     echo json_encode([
         'status' => 'success',
         'current_user' => $currentUser,
         'app_dir' => $appDir,
         'build_id' => $buildId,
-        'find_old_build' => $findOld,
+        'restart_txt_mtime' => file_exists("{$appDir}/tmp/restart.txt") ? date('Y-m-d H:i:s', filemtime("{$appDir}/tmp/restart.txt")) : 'none',
         'timestamp' => date('Y-m-d H:i:s')
     ]);
     exit;
