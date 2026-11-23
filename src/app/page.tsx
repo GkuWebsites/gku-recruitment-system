@@ -82,13 +82,13 @@ export default function HomePage() {
   }, [currentUser]);
 
   // Handle Login submission
-  const handleLogin = async (e?: React.FormEvent, presetEmail?: string, presetPass?: string) => {
+  const handleLogin = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     setLoginError('');
     setIsLoggingIn(true);
 
-    const loginEmail = presetEmail || email;
-    const loginPassword = presetPass || password;
+    const loginEmail = email;
+    const loginPassword = password;
 
     try {
       const res = await fetch('/api/auth/login', {
@@ -208,29 +208,6 @@ export default function HomePage() {
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </form>
-
-            {/* Quick 1-Click Admin Access Helper */}
-            <div className="pt-4 border-t border-slate-100">
-              <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">
-                Default Super Admin Credentials
-              </div>
-              <button
-                type="button"
-                onClick={() => handleLogin(undefined, 'admin@gurukashiuniv.edu.in', 'admin123')}
-                disabled={isLoggingIn}
-                className="w-full p-3 bg-slate-50 hover:bg-blue-50/60 border border-slate-200 hover:border-blue-200 rounded-xl text-left transition flex items-center justify-between"
-              >
-                <div className="text-xs">
-                  <div className="font-bold text-slate-900">One-Click Super Admin Login</div>
-                  <div className="text-[11px] text-slate-500 font-mono mt-0.5">
-                    admin@gurukashiuniv.edu.in / admin123
-                  </div>
-                </div>
-                <span className="text-xs font-bold text-blue-700 bg-white border border-blue-200 px-2 py-1 rounded-lg">
-                  Sign In
-                </span>
-              </button>
-            </div>
           </div>
         </main>
 
