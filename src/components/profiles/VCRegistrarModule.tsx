@@ -179,7 +179,7 @@ export function VCRegistrarModule({
             subject: 'Executive & Administrative Sanction Clarification',
             creatorName: currentUser?.name || 'Prof. (Dr.) Gurinder Singh (VC Office)',
             creatorRole: 'VC / Registrar',
-            creatorEmail: currentUser?.email || 'vc@gurukashiuniv.edu.in',
+            creatorEmail: currentUser?.email || 'vc@gku.ac.in',
             primaryRecipientRole: recipientChoice,
             primaryRecipientEmail:
               recipientChoice === 'Department / Dean' || recipientChoice === 'Both'

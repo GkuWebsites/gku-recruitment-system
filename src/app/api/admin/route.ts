@@ -6,7 +6,7 @@ import { UserProfileModel, IUserProfile } from '@/lib/models/UserProfile';
 const INITIAL_PROFILES: IUserProfile[] = [
   {
     name: 'System Administrator',
-    email: 'admin@gurukashiuniv.edu.in',
+    email: 'admin@gku.ac.in',
     designation: 'Admin',
     department: 'Administration & IT Cell',
     phone: '+91 98721 00001',
@@ -14,7 +14,7 @@ const INITIAL_PROFILES: IUserProfile[] = [
   },
   {
     name: 'Dr. Harpreet Singh',
-    email: 'dean@gurukashiuniv.edu.in',
+    email: 'dean@gku.ac.in',
     designation: 'Dean',
     department: 'Computer Science & Engineering',
     phone: '+91 98721 00101',
@@ -22,7 +22,7 @@ const INITIAL_PROFILES: IUserProfile[] = [
   },
   {
     name: 'Prof. (Dr.) Balwant Singh',
-    email: 'deanacademic@gurukashiuniv.edu.in',
+    email: 'deanacademic@gku.ac.in',
     designation: 'Dean Academic',
     department: 'Academic Council & Scrutiny',
     phone: '+91 98721 00201',
@@ -30,7 +30,7 @@ const INITIAL_PROFILES: IUserProfile[] = [
   },
   {
     name: 'Dr. Maninder Kaur',
-    email: 'director@gurukashiuniv.edu.in',
+    email: 'director@gku.ac.in',
     designation: 'Director',
     department: 'Management Studies',
     phone: '+91 98721 00102',
@@ -38,7 +38,7 @@ const INITIAL_PROFILES: IUserProfile[] = [
   },
   {
     name: 'Prof. (Dr.) Gurinder Singh',
-    email: 'vc@gurukashiuniv.edu.in',
+    email: 'vc@gku.ac.in',
     designation: 'VC / Registrar',
     department: "Vice Chancellor's Secretariat",
     phone: '+91 98721 00301',
@@ -46,7 +46,7 @@ const INITIAL_PROFILES: IUserProfile[] = [
   },
   {
     name: 'Mr. Vikram Sharma',
-    email: 'hr@gurukashiuniv.edu.in',
+    email: 'hr@gku.ac.in',
     designation: 'HR',
     department: 'HR Recruitment Cell',
     phone: '+91 98721 00401',

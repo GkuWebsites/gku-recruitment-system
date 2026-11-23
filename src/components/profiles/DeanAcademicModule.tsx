@@ -232,7 +232,7 @@ export function DeanAcademicModule({
             subject: 'Academic Workload & Teaching Norms Scrutiny',
             creatorName: currentUser?.name || 'Prof. Balwant Singh (Dean Academic)',
             creatorRole: 'Dean Academic',
-            creatorEmail: currentUser?.email || 'deanacademic@gurukashiuniv.edu.in',
+            creatorEmail: currentUser?.email || 'deanacademic@gku.ac.in',
             primaryRecipientRole: 'Department / Dean',
             primaryRecipientEmail: selectedReqForAction.creator.email,
             primaryRecipientName: selectedReqForAction.creator.name,

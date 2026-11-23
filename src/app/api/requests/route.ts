@@ -96,7 +96,7 @@ export async function POST(req: NextRequest) {
       creator: {
         name: body.creatorName || 'Dr. HOD',
         role: 'Department / Dean',
-        email: body.creatorEmail || 'hod@gurukashiuniv.edu.in'
+        email: body.creatorEmail || 'hod@gku.ac.in'
       },
       status: 'Request Submitted (Department)',
       currentStage: 1,

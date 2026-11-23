@@ -13,7 +13,7 @@ const DEFAULT_ADMIN: {
   status: 'Active';
 } = {
   name: 'System Administrator',
-  email: 'admin@gurukashiuniv.edu.in',
+  email: 'admin@gku.ac.in',
   password: 'admin123',
   designation: 'Admin',
   department: 'Administration & IT Cell',

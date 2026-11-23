@@ -80,7 +80,7 @@ export function ClarificationThreadChat({
           threadId,
           senderName: currentUser?.name || 'Authorized Officer',
           senderRole: currentUser?.designation || 'Officer',
-          senderEmail: currentUser?.email || 'officer@gurukashiuniv.edu.in',
+          senderEmail: currentUser?.email || 'officer@gku.ac.in',
           messageText: text
         })
       });
@@ -118,7 +118,7 @@ export function ClarificationThreadChat({
           subject: newSubject.trim(),
           creatorName: currentUser?.name || 'University Authority',
           creatorRole: currentUser?.designation || 'Officer',
-          creatorEmail: currentUser?.email || 'officer@gurukashiuniv.edu.in',
+          creatorEmail: currentUser?.email || 'officer@gku.ac.in',
           primaryRecipientRole: newPrimaryRole,
           primaryRecipientEmail:
             newPrimaryRole === 'Department / Dean' || newPrimaryRole === 'Both'

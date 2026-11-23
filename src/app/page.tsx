@@ -163,7 +163,7 @@ export default function HomePage() {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="e.g. admin@gurukashiuniv.edu.in"
+                    placeholder="e.g. admin@gku.ac.in"
                     className="w-full pl-9 pr-3 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-800 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   />
                 </div>

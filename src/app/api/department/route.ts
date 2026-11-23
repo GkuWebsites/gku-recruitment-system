@@ -92,7 +92,7 @@ export async function POST(req: NextRequest) {
       creator: {
         name: body.creatorName || 'Dean / Director / HOD',
         role: 'Department / Dean',
-        email: body.creatorEmail || 'department@gurukashiuniv.edu.in'
+        email: body.creatorEmail || 'department@gku.ac.in'
       },
       status: 'Request Submitted (Department)',
       currentStage: 1,

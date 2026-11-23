@@ -23,9 +23,9 @@ const DEPARTMENTS: {
   {
     name: 'Computer Science & Engineering',
     deanName: 'Dr. Gurwinder Singh',
-    deanEmail: 'dean.engg@gurukashiuniv.edu.in',
+    deanEmail: 'dean.engg@gku.ac.in',
     hodName: 'Dr. Arvinder Singh',
-    hodEmail: 'hod.cse@gurukashiuniv.edu.in',
+    hodEmail: 'hod.cse@gku.ac.in',
     specializations: [
       {
         postTitle: 'Professor & Head (Cybersecurity & Cryptography)',
@@ -72,9 +72,9 @@ const DEPARTMENTS: {
   {
     name: 'Mechanical Engineering',
     deanName: 'Dr. Harinder Pal Singh',
-    deanEmail: 'dean.mech@gurukashiuniv.edu.in',
+    deanEmail: 'dean.mech@gku.ac.in',
     hodName: 'Dr. Bikramjit Singh',
-    hodEmail: 'hod.mech@gurukashiuniv.edu.in',
+    hodEmail: 'hod.mech@gku.ac.in',
     specializations: [
       {
         postTitle: 'Professor (Robotics & Autonomous Mechatronics)',
@@ -111,9 +111,9 @@ const DEPARTMENTS: {
   {
     name: 'Management Studies',
     deanName: 'Dr. Amardeep Kaur',
-    deanEmail: 'dean.mgmt@gurukashiuniv.edu.in',
+    deanEmail: 'dean.mgmt@gku.ac.in',
     hodName: 'Dr. Puneet Walia',
-    hodEmail: 'hod.mgmt@gurukashiuniv.edu.in',
+    hodEmail: 'hod.mgmt@gku.ac.in',
     specializations: [
       {
         postTitle: 'Professor (Fintech & Strategic Financial Management)',
@@ -150,9 +150,9 @@ const DEPARTMENTS: {
   {
     name: 'Agriculture & Forestry',
     deanName: 'Dr. Manjit Singh',
-    deanEmail: 'dean.agri@gurukashiuniv.edu.in',
+    deanEmail: 'dean.agri@gku.ac.in',
     hodName: 'Dr. Ravinder Pal Singh',
-    hodEmail: 'hod.agri@gurukashiuniv.edu.in',
+    hodEmail: 'hod.agri@gku.ac.in',
     specializations: [
       {
         postTitle: 'Professor & Head (Agronomy & Soil Conservation)',
@@ -189,9 +189,9 @@ const DEPARTMENTS: {
   {
     name: 'Pharmaceutical Sciences',
     deanName: 'Dr. Rameshwar Sharma',
-    deanEmail: 'dean.pharma@gurukashiuniv.edu.in',
+    deanEmail: 'dean.pharma@gku.ac.in',
     hodName: 'Dr. Baljinder Singh',
-    hodEmail: 'hod.pharma@gurukashiuniv.edu.in',
+    hodEmail: 'hod.pharma@gku.ac.in',
     specializations: [
       {
         postTitle: 'Professor (Pharmaceutics & Novel Drug Delivery Systems)',
@@ -228,9 +228,9 @@ const DEPARTMENTS: {
   {
     name: 'Faculty of Law',
     deanName: 'Prof. (Dr.) Ravinderjit Kaur',
-    deanEmail: 'dean.law@gurukashiuniv.edu.in',
+    deanEmail: 'dean.law@gku.ac.in',
     hodName: 'Dr. Sukhwinder Singh',
-    hodEmail: 'hod.law@gurukashiuniv.edu.in',
+    hodEmail: 'hod.law@gku.ac.in',
     specializations: [
       {
         postTitle: 'Professor & Head (Constitutional Law & Comparative Jurisprudence)',
@@ -267,9 +267,9 @@ const DEPARTMENTS: {
   {
     name: 'Basic & Applied Sciences',
     deanName: 'Dr. Sukhdev Singh',
-    deanEmail: 'dean.sciences@gurukashiuniv.edu.in',
+    deanEmail: 'dean.sciences@gku.ac.in',
     hodName: 'Dr. Mandeep Sharma',
-    hodEmail: 'hod.sciences@gurukashiuniv.edu.in',
+    hodEmail: 'hod.sciences@gku.ac.in',
     specializations: [
       {
         postTitle: 'Professor (Solid State & Condensed Matter Physics)',
@@ -306,9 +306,9 @@ const DEPARTMENTS: {
   {
     name: 'Nursing & Allied Health Sciences',
     deanName: 'Dr. Jasleen Kaur',
-    deanEmail: 'dean.nursing@gurukashiuniv.edu.in',
+    deanEmail: 'dean.nursing@gku.ac.in',
     hodName: 'Dr. Harpreet Kaur',
-    hodEmail: 'hod.nursing@gurukashiuniv.edu.in',
+    hodEmail: 'hod.nursing@gku.ac.in',
     specializations: [
       {
         postTitle: 'Professor (Medical Surgical Nursing & Critical Care)',
@@ -345,9 +345,9 @@ const DEPARTMENTS: {
   {
     name: 'Education',
     deanName: 'Dr. Balwinder Singh',
-    deanEmail: 'dean.edu@gurukashiuniv.edu.in',
+    deanEmail: 'dean.edu@gku.ac.in',
     hodName: 'Dr. Kuldeep Singh',
-    hodEmail: 'hod.edu@gurukashiuniv.edu.in',
+    hodEmail: 'hod.edu@gku.ac.in',
     specializations: [
       {
         postTitle: 'Professor (Educational Technology & Curriculum Pedagogy)',
@@ -384,9 +384,9 @@ const DEPARTMENTS: {
   {
     name: 'Humanities & Languages',
     deanName: 'Dr. Paramjit Kaur',
-    deanEmail: 'dean.humanities@gurukashiuniv.edu.in',
+    deanEmail: 'dean.humanities@gku.ac.in',
     hodName: 'Dr. Gurpreet Kaur',
-    hodEmail: 'hod.humanities@gurukashiuniv.edu.in',
+    hodEmail: 'hod.humanities@gku.ac.in',
     specializations: [
       {
         postTitle: 'Professor (English Literature & Comparative Cultural Studies)',
@@ -423,9 +423,9 @@ const DEPARTMENTS: {
   {
     name: 'Commerce & Finance',
     deanName: 'Dr. Gurpreet Singh',
-    deanEmail: 'dean.comm@gurukashiuniv.edu.in',
+    deanEmail: 'dean.comm@gku.ac.in',
     hodName: 'Dr. Rajesh Sharma',
-    hodEmail: 'hod.comm@gurukashiuniv.edu.in',
+    hodEmail: 'hod.comm@gku.ac.in',
     specializations: [
       {
         postTitle: 'Professor (Banking, Corporate Governance & International Finance)',
@@ -462,9 +462,9 @@ const DEPARTMENTS: {
   {
     name: 'Physical Education & Sports',
     deanName: 'Dr. Harpreet Singh Dhillon',
-    deanEmail: 'dean.sports@gurukashiuniv.edu.in',
+    deanEmail: 'dean.sports@gku.ac.in',
     hodName: 'Dr. Jaspal Singh',
-    hodEmail: 'hod.sports@gurukashiuniv.edu.in',
+    hodEmail: 'hod.sports@gku.ac.in',
     specializations: [
       {
         postTitle: 'Professor (Exercise Physiology & Sports Biomechanics)',
@@ -625,12 +625,12 @@ function generateSeedRequests(): IHiringRequest[] {
           subject: `Credit Hour & Laboratory Workload Verification - ${spec.postTitle}`,
           creatorName: 'Prof. (Dr.) Baljit Singh Khaira (Dean Academic)',
           creatorRole: 'Dean Academic',
-          creatorEmail: 'dean.academic@gurukashiuniv.edu.in',
+          creatorEmail: 'dean.academic@gku.ac.in',
           primaryRecipientRole: 'Department / Dean',
           primaryRecipientEmail: deptObj.deanEmail,
           primaryRecipientName: deptObj.deanName,
           ccRecipients: [
-            { name: 'Dr. Jagjeet Singh', email: 'registrar@gurukashiuniv.edu.in', role: 'VC / Registrar' }
+            { name: 'Dr. Jagjeet Singh', email: 'registrar@gku.ac.in', role: 'VC / Registrar' }
           ],
           status: isAnswered ? 'Resolved' : 'Open',
           createdAt: '2026-11-12T14:30:00.000Z',
@@ -640,7 +640,7 @@ function generateSeedRequests(): IHiringRequest[] {
               id: `msg-${reqId}-1`,
               senderName: 'Prof. (Dr.) Baljit Singh Khaira (Dean Academic)',
               senderRole: 'Dean Academic',
-              senderEmail: 'dean.academic@gurukashiuniv.edu.in',
+              senderEmail: 'dean.academic@gku.ac.in',
               text: `Kindly substantiate the credit hours distribution and state if visiting or adjunct faculty can absorb the current semester lecture load before sanctioning a permanent post.`,
               timestamp: '2026-11-12T14:30:00.000Z'
             },
@@ -751,9 +751,9 @@ function generateSeedRequests(): IHiringRequest[] {
           subject: `Syndicate Financial Sanction & Reservation Roster - ${spec.postTitle}`,
           creatorName: 'Dr. Jagjeet Singh (Registrar)',
           creatorRole: 'VC / Registrar',
-          creatorEmail: 'registrar@gurukashiuniv.edu.in',
+          creatorEmail: 'registrar@gku.ac.in',
           primaryRecipientRole: 'Dean Academic',
-          primaryRecipientEmail: 'dean.academic@gurukashiuniv.edu.in',
+          primaryRecipientEmail: 'dean.academic@gku.ac.in',
           primaryRecipientName: 'Prof. (Dr.) Baljit Singh Khaira (Dean Academic)',
           ccRecipients: [
             { name: deptObj.deanName, email: deptObj.deanEmail, role: 'Department / Dean' }
@@ -766,7 +766,7 @@ function generateSeedRequests(): IHiringRequest[] {
               id: `msg-${reqId}-vc-1`,
               senderName: 'Dr. Jagjeet Singh (Registrar)',
               senderRole: 'VC / Registrar',
-              senderEmail: 'registrar@gurukashiuniv.edu.in',
+              senderEmail: 'registrar@gku.ac.in',
               text: `Please confirm 200-point reservation roster slot and whether budget is provided under University recurring grants or self-financed scheme.`,
               timestamp: '2026-11-06T15:00:00.000Z'
             },
@@ -774,7 +774,7 @@ function generateSeedRequests(): IHiringRequest[] {
               id: `msg-${reqId}-vc-2`,
               senderName: 'Prof. (Dr.) Baljit Singh Khaira (Dean Academic)',
               senderRole: 'Dean Academic',
-              senderEmail: 'dean.academic@gurukashiuniv.edu.in',
+              senderEmail: 'dean.academic@gku.ac.in',
               text: `Slot corresponds to Roster Point #14 (Unreserved / Open). Budget is covered under Department tuition fee revenue allocations.`,
               timestamp: '2026-11-08T10:00:00.000Z'
             }] : [])
@@ -1299,7 +1299,7 @@ function generateSeedRequests(): IHiringRequest[] {
         },
         joiningDate: '2026-11-01',
         employeeId: `GKU-FAC-2026-${String(40 + i)}`,
-        officialEmail: `dr.${candData.first.toLowerCase().replace(/[^a-z]/g, '')}@gurukashiuniv.edu.in`,
+        officialEmail: `dr.${candData.first.toLowerCase().replace(/[^a-z]/g, '')}@gku.ac.in`,
         reportingHead: deptObj.deanName,
         joiningRemarks: 'Candidate assumed charge on 1st November 2026. Official departmental orientation and classroom assignment finalized.'
       };
@@ -1470,7 +1470,7 @@ function generateSeedRequests(): IHiringRequest[] {
             inductionCompleted: archiveStatus === 'Position Fulfilled (Recruitment Completed)',
             joiningDate: '2026-09-10',
             employeeId: `GKU-FAC-2026-ARC${String(d * 3 + s + 1).padStart(2, '0')}`,
-            officialEmail: `dr.${candData.first.toLowerCase().replace(/[^a-z]/g, '')}@gurukashiuniv.edu.in`,
+            officialEmail: `dr.${candData.first.toLowerCase().replace(/[^a-z]/g, '')}@gku.ac.in`,
             reportingHead: deptObj.deanName,
             joiningRemarks: 'Inducted and active faculty member. Archived to department records cabinet.'
           }

@@ -19,7 +19,7 @@ export function NewRequestModal({
   onSuccess,
   defaultDepartment,
   creatorName = 'Dr. Harpreet Singh',
-  creatorEmail = 'dean.engg@gurukashiuniv.edu.in'
+  creatorEmail = 'dean.engg@gku.ac.in'
 }: NewRequestModalProps) {
   const [department, setDepartment] = useState(defaultDepartment || UNIVERSITY_DEPARTMENTS[0]);
   const [cadreType, setCadreType] = useState<'Teaching' | 'Non-Teaching'>('Teaching');

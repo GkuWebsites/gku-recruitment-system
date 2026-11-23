@@ -98,7 +98,7 @@ export async function POST(
         id: `msg-${Date.now()}-1`,
         senderName: creatorName || 'University Officer',
         senderRole: creatorRole || 'Officer',
-        senderEmail: creatorEmail || 'officer@gurukashiuniv.edu.in',
+        senderEmail: creatorEmail || 'officer@gku.ac.in',
         text: messageText,
         timestamp
       };
@@ -116,7 +116,7 @@ export async function POST(
         subject: subject.trim(),
         creatorName: creatorName || 'University Authority',
         creatorRole: creatorRole || 'Officer',
-        creatorEmail: creatorEmail || 'officer@gurukashiuniv.edu.in',
+        creatorEmail: creatorEmail || 'officer@gku.ac.in',
         primaryRecipientRole,
         primaryRecipientEmail: resolvedRecipientEmail,
         primaryRecipientName: resolvedRecipientName,

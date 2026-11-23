@@ -498,7 +498,7 @@ export function AdminUserDashboard() {
                     type="email"
                     value={createEmail}
                     onChange={(e) => setCreateEmail(e.target.value)}
-                    placeholder="e.g. dean.engg@gurukashiuniv.edu.in"
+                    placeholder="e.g. dean.engg@gku.ac.in"
                     className="w-full p-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500"
                     required
                   />
