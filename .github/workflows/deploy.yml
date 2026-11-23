@@ -30,9 +30,12 @@ jobs:
       - name: Prepare Standalone Deployment Bundle
         run: |
           mkdir -p deploy_out
-          cp -r .next/standalone/* deploy_out/
+          # Copy standalone including hidden .next directory
+          cp -r .next/standalone/. deploy_out/
+          # Copy static files into .next/static
           mkdir -p deploy_out/.next/static
           cp -r .next/static/* deploy_out/.next/static/
+          # Copy public assets
           cp -r public deploy_out/
           
           # Inject Production Environment
