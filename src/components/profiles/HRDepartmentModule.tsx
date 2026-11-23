@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { IHiringRequest, Candidate, PromotionChannel, HiringStatus } from '@/lib/types';
 import { TimelineModal } from '@/components/TimelineModal';
 import { JobDetailsModal } from '@/components/JobDetailsModal';
@@ -128,6 +128,10 @@ export function HRDepartmentModule({
   const [expandedPostedReqs, setExpandedPostedReqs] = useState<Record<string, boolean>>({});
   const [expandedInterviewReqs, setExpandedInterviewReqs] = useState<Record<string, boolean>>({});
   const [expandedOfferReqs, setExpandedOfferReqs] = useState<Record<string, boolean>>({});
+
+  // Tab 4 (Shortlisted & Offers) View & Filter State
+  const [offerLetterViewMode, setOfferLetterViewMode] = useState<'grouped' | 'table'>('grouped');
+  const [offerStatusFilter, setOfferStatusFilter] = useState<'all' | 'Selected' | 'Offer Issued' | 'Joined'>('all');
 
   // Manage Recruitment & Intake Closure Modal
   const [manageStatusReq, setManageStatusReq] = useState<IHiringRequest | null>(null);
@@ -551,6 +555,52 @@ export function HRDepartmentModule({
   });
 
   const displayedPending = filterBySearch(pendingPipeline);
+
+  // Flat list of all shortlisted candidates for Tab 4 Master List View
+  const allShortlistedCandidatesList = useMemo(() => {
+    const list: Array<{ req: IHiringRequest; candidate: Candidate }> = [];
+    displayedShortlistedJobs.forEach((req) => {
+      (req.candidates || []).forEach((c) => {
+        if (c.status === 'Selected' || c.status === 'Offer Issued' || c.status === 'Joined') {
+          if (offerStatusFilter === 'all' || c.status === offerStatusFilter) {
+            list.push({ req, candidate: c });
+          }
+        }
+      });
+    });
+    return list;
+  }, [displayedShortlistedJobs, offerStatusFilter]);
+
+  // Status-specific counts across all shortlisted requirements
+  const countAwaitingOffer = useMemo(() => {
+    let count = 0;
+    shortlistedJobs.forEach((r) => {
+      (r.candidates || []).forEach((c) => {
+        if (c.status === 'Selected') count++;
+      });
+    });
+    return count;
+  }, [shortlistedJobs]);
+
+  const countOfferIssued = useMemo(() => {
+    let count = 0;
+    shortlistedJobs.forEach((r) => {
+      (r.candidates || []).forEach((c) => {
+        if (c.status === 'Offer Issued') count++;
+      });
+    });
+    return count;
+  }, [shortlistedJobs]);
+
+  const countJoined = useMemo(() => {
+    let count = 0;
+    shortlistedJobs.forEach((r) => {
+      (r.candidates || []).forEach((c) => {
+        if (c.status === 'Joined') count++;
+      });
+    });
+    return count;
+  }, [shortlistedJobs]);
 
   // --- ACTIONS ---
 
@@ -1972,93 +2022,151 @@ export function HRDepartmentModule({
       {/* TAB 4: SHORTLISTED CANDIDATES & FORMAL OFFER LETTERS DESK */}
       {/* ============================================================== */}
       {activeTab === 'offerLetters' && (
-        <div className="space-y-3">
-          {/* Controls Bar */}
-          <div className="bg-white border border-slate-200 rounded-xl p-3 shadow-2xs flex flex-wrap items-center justify-between gap-3">
-            <div className="relative max-w-sm w-full">
-              <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Search shortlisted candidates, offer refs, employee codes..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-3 py-1.5 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium"
-              />
+        <div className="space-y-3.5">
+          {/* Controls Bar & Filter Strip */}
+          <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-xs space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex flex-wrap items-center gap-3 flex-1 min-w-[280px]">
+                {/* Search Bar */}
+                <div className="relative max-w-sm w-full">
+                  <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
+                  <input
+                    type="text"
+                    placeholder="Search candidate name, post, department, ref..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-9 pr-3 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium placeholder:text-slate-400"
+                  />
+                </div>
+
+                {/* View Switcher: Grouped Accordions vs Master Table */}
+                <div className="inline-flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200/80 text-xs font-semibold">
+                  <button
+                    type="button"
+                    onClick={() => setOfferLetterViewMode('grouped')}
+                    className={`px-3 py-1.5 rounded-lg transition cursor-pointer flex items-center space-x-1.5 ${
+                      offerLetterViewMode === 'grouped'
+                        ? 'bg-white text-emerald-950 shadow-xs font-bold'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    <Folder className="w-3.5 h-3.5 text-emerald-700" />
+                    <span>By Requisition ({displayedShortlistedJobs.length})</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setOfferLetterViewMode('table')}
+                    className={`px-3 py-1.5 rounded-lg transition cursor-pointer flex items-center space-x-1.5 ${
+                      offerLetterViewMode === 'table'
+                        ? 'bg-white text-emerald-950 shadow-xs font-bold'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    <Users className="w-3.5 h-3.5 text-emerald-700" />
+                    <span>Master Candidates List ({allShortlistedCandidatesList.length})</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Expand / Collapse buttons in Grouped mode */}
+              {offerLetterViewMode === 'grouped' && (
+                <div className="flex items-center space-x-2">
+                  <button
+                    type="button"
+                    onClick={() => toggleAllOffer(true)}
+                    className="text-xs font-semibold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-xl transition cursor-pointer"
+                  >
+                    Expand All
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => toggleAllOffer(false)}
+                    className="text-xs font-semibold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-xl transition cursor-pointer"
+                  >
+                    Collapse All
+                  </button>
+                </div>
+              )}
             </div>
-            <div className="flex items-center space-x-2">
+
+            {/* Quick Status Filter Pills */}
+            <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100 text-xs">
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mr-1">
+                Filter Stage:
+              </span>
               <button
                 type="button"
-                onClick={() => toggleAllOffer(true)}
-                className="text-xs font-semibold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg transition cursor-pointer"
+                onClick={() => setOfferStatusFilter('all')}
+                className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition cursor-pointer ${
+                  offerStatusFilter === 'all'
+                    ? 'bg-slate-900 text-white shadow-2xs'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`}
               >
-                Expand All
+                All Statuses ({totalShortlistedCandidates})
               </button>
               <button
                 type="button"
-                onClick={() => toggleAllOffer(false)}
-                className="text-xs font-semibold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg transition cursor-pointer"
+                onClick={() => setOfferStatusFilter('Selected')}
+                className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition cursor-pointer ${
+                  offerStatusFilter === 'Selected'
+                    ? 'bg-amber-600 text-white shadow-2xs'
+                    : 'bg-amber-50 text-amber-900 hover:bg-amber-100 border border-amber-200'
+                }`}
               >
-                Collapse All
+                ⏳ Awaiting Offer ({countAwaitingOffer})
+              </button>
+              <button
+                type="button"
+                onClick={() => setOfferStatusFilter('Offer Issued')}
+                className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition cursor-pointer ${
+                  offerStatusFilter === 'Offer Issued'
+                    ? 'bg-emerald-600 text-white shadow-2xs'
+                    : 'bg-emerald-50 text-emerald-900 hover:bg-emerald-100 border border-emerald-200'
+                }`}
+              >
+                ✉️ Offer Issued ({countOfferIssued})
+              </button>
+              <button
+                type="button"
+                onClick={() => setOfferStatusFilter('Joined')}
+                className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition cursor-pointer ${
+                  offerStatusFilter === 'Joined'
+                    ? 'bg-teal-700 text-white shadow-2xs'
+                    : 'bg-teal-50 text-teal-900 hover:bg-teal-100 border border-teal-200'
+                }`}
+              >
+                🎓 Joined &amp; Inducted ({countJoined})
               </button>
             </div>
           </div>
 
-          {displayedShortlistedJobs.length === 0 ? (
-            <div className="bg-white border border-slate-200 rounded-xl p-10 text-center text-slate-400 shadow-2xs">
-              <GraduationCap className="w-8 h-8 mx-auto mb-2 text-slate-300" />
-              <div className="font-semibold text-slate-700 text-sm">No Shortlisted Candidates Found</div>
-              <p className="text-slate-400 text-xs mt-0.5">
-                Score candidate interviews in Tab 3 and click &ldquo;Shortlist Candidate&rdquo; to release detailed offer letters here.
-              </p>
-            </div>
-          ) : (
-            displayedShortlistedJobs.map((req) => {
-              const shortlistedCands = (req.candidates || []).filter(
-                (c) => c.status === 'Selected' || c.status === 'Offer Issued' || c.status === 'Joined'
-              );
-              const isExpanded = isOfferExpanded(req.requestId);
-
-              return (
-                <div
-                  key={req.requestId}
-                  className="bg-white border border-slate-200 hover:border-slate-300 rounded-xl shadow-2xs overflow-hidden transition"
-                >
-                  {/* Clean Clickable Header */}
-                  <div
-                    onClick={() => toggleOfferExpand(req.requestId)}
-                    className="p-3.5 flex items-center justify-between gap-4 cursor-pointer hover:bg-slate-50/70 transition select-none"
-                  >
-                    <div className="flex items-center space-x-3 min-w-0">
-                      <div className="text-slate-400 hover:text-slate-600">
-                        {isExpanded ? <ChevronDown className="w-4 h-4 text-emerald-600" /> : <ChevronRight className="w-4 h-4" />}
-                      </div>
-                      <div className="min-w-0">
-                        <div className="flex items-center space-x-2">
-                          <span className="font-mono text-[11px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded">
-                            {req.requestId}
-                          </span>
-                          <h3 className="font-bold text-slate-900 text-sm truncate">{req.postTitle}</h3>
-                          <span className="text-xs text-slate-500 font-medium hidden sm:inline">
-                            • {req.department}
-                          </span>
-                        </div>
-                        <div className="text-slate-500 text-[11px] mt-0.5">
-                          {req.numberOfPositions} Position(s) • Budget: {req.tentativeBudget}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center space-x-2 shrink-0">
-                      <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
-                        {shortlistedCands.length} Shortlisted
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Expanded Shortlisted Candidates Roster */}
-                  {isExpanded && (
-                    <div className="border-t border-slate-100 bg-slate-50/50 p-3 space-y-2">
-                      {shortlistedCands.map((candidate) => {
+          {/* VIEW 1: MASTER TABLE VIEW */}
+          {offerLetterViewMode === 'table' ? (
+            <div className="bg-white border border-slate-200/90 rounded-2xl shadow-xs overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-slate-50/90 text-slate-500 font-bold border-b border-slate-200">
+                    <tr>
+                      <th className="py-3.5 px-4 whitespace-nowrap">Candidate Name & Contact</th>
+                      <th className="py-3.5 px-4 whitespace-nowrap">Assigned Requisition / Faculty</th>
+                      <th className="py-3.5 px-4 whitespace-nowrap">Qualification</th>
+                      <th className="py-3.5 px-4 whitespace-nowrap text-center">Score</th>
+                      <th className="py-3.5 px-4 whitespace-nowrap">Offer / Appointment</th>
+                      <th className="py-3.5 px-4 whitespace-nowrap">Compliance Docs</th>
+                      <th className="py-3.5 px-4 whitespace-nowrap text-right">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {allShortlistedCandidatesList.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} className="py-12 text-center text-slate-400">
+                          No shortlisted candidates match your filters.
+                        </td>
+                      </tr>
+                    ) : (
+                      allShortlistedCandidatesList.map(({ req, candidate }) => {
                         const docs = candidate.joiningDetails?.documentVerification;
                         const verifiedCount = [
                           docs?.identityProof,
@@ -2071,75 +2179,98 @@ export function HRDepartmentModule({
                         const scoreFormatted = formatScore(candidate.interviewDetails?.scores?.totalScore);
 
                         return (
-                          <div
-                            key={candidate.id}
-                            className="bg-white border border-slate-200 rounded-lg p-3 flex flex-wrap items-center justify-between gap-3 hover:border-slate-300 transition"
-                          >
-                            {/* Candidate & Score */}
-                            <div className="space-y-0.5 min-w-0">
-                              <div className="flex items-center space-x-2">
-                                <h4 className="font-bold text-slate-900 text-sm">{candidate.fullName}</h4>
-                                <span className="text-[10px] font-semibold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
-                                  {candidate.qualification}
-                                </span>
-                                <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-900 border border-amber-200">
-                                  <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
-                                  <span>{scoreFormatted}/10</span>
-                                </span>
+                          <tr key={candidate.id} className="hover:bg-slate-50/70 transition">
+                            {/* Candidate Info */}
+                            <td className="py-3.5 px-4 whitespace-nowrap">
+                              <div className="font-bold text-slate-900 text-sm">{candidate.fullName}</div>
+                              <div className="text-[11px] text-slate-500 font-mono mt-0.5">
+                                {candidate.email} • {candidate.phone}
                               </div>
-                              <div className="text-[11px] text-slate-500 flex items-center space-x-2">
-                                <span>{candidate.email}</span>
-                                <span>•</span>
-                                <span>{candidate.phone}</span>
-                              </div>
+                            </td>
 
-                              {/* Appointment / Verification meta */}
-                              {candidate.status !== 'Selected' && candidate.joiningDetails && (
-                                <div className="text-[11px] text-slate-600 flex flex-wrap items-center gap-2 pt-0.5">
-                                  <span className="font-semibold text-emerald-900">
+                            {/* Requisition Info */}
+                            <td className="py-3.5 px-4 whitespace-nowrap">
+                              <div className="flex items-center space-x-1.5">
+                                <span className="font-mono text-[10px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded">
+                                  {req.requestId}
+                                </span>
+                                <span className="font-bold text-slate-800 text-xs truncate max-w-[240px]">
+                                  {req.postTitle}
+                                </span>
+                              </div>
+                              <div className="text-[11px] text-slate-500 mt-0.5">
+                                {req.department}
+                              </div>
+                            </td>
+
+                            {/* Qualification */}
+                            <td className="py-3.5 px-4 whitespace-nowrap">
+                              <span className="inline-block text-[11px] font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                                {candidate.qualification}
+                              </span>
+                            </td>
+
+                            {/* Score */}
+                            <td className="py-3.5 px-4 whitespace-nowrap text-center">
+                              <span className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-900 border border-amber-200">
+                                <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
+                                <span>{scoreFormatted}/10</span>
+                              </span>
+                            </td>
+
+                            {/* Offer Details */}
+                            <td className="py-3.5 px-4 whitespace-nowrap">
+                              {candidate.status === 'Selected' ? (
+                                <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-50 text-amber-800 border border-amber-200">
+                                  Pending Offer Letter
+                                </span>
+                              ) : candidate.joiningDetails ? (
+                                <div>
+                                  <div className="font-bold text-emerald-900 text-xs">
                                     Offered: {candidate.joiningDetails.offeredCtc}
-                                  </span>
-                                  <span>•</span>
-                                  <span className="font-mono text-slate-500 text-[10px]">
+                                  </div>
+                                  <div className="text-[10px] text-slate-500 font-mono mt-0.5">
                                     Ref: {candidate.joiningDetails.offerLetterRef}
-                                  </span>
-                                  <span>•</span>
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      setDocVerifyReq(req);
-                                      setDocVerifyCand(candidate);
-                                      setDocIdentityProof(!!candidate.joiningDetails?.documentVerification?.identityProof);
-                                      setDocDegreesVerified(!!candidate.joiningDetails?.documentVerification?.degreesVerified);
-                                      setDocExperienceCertificates(!!candidate.joiningDetails?.documentVerification?.experienceCertificates);
-                                      setDocPoliceVerification(!!candidate.joiningDetails?.documentVerification?.policeVerification);
-                                      setDocMedicalFitness(candidate.joiningDetails?.documentVerification?.medicalFitness !== false);
-                                      setDocNocRelieving(candidate.joiningDetails?.documentVerification?.nocRelieving !== false);
-                                      setDocRemarks(candidate.joiningDetails?.documentVerification?.verificationRemarks || 'Originals verified against university compliance norms.');
-                                    }}
-                                    className="text-blue-700 hover:text-blue-900 font-semibold text-[10px] underline"
-                                  >
-                                    Verify Docs ({verifiedCount}/6)
-                                  </button>
-                                  {candidate.status === 'Joined' && (
-                                    <>
-                                      <span>•</span>
-                                      <span className="text-emerald-800 font-semibold text-[10px]">
-                                        EMP ID: {candidate.joiningDetails.employeeId}
-                                      </span>
-                                    </>
-                                  )}
+                                  </div>
                                 </div>
+                              ) : (
+                                <span className="text-slate-400 text-xs">—</span>
                               )}
-                            </div>
+                            </td>
 
-                            {/* Status & Actions */}
-                            <div className="flex items-center space-x-2 shrink-0">
+                            {/* Document Verification */}
+                            <td className="py-3.5 px-4 whitespace-nowrap">
+                              {candidate.status !== 'Selected' && candidate.joiningDetails ? (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setDocVerifyReq(req);
+                                    setDocVerifyCand(candidate);
+                                    setDocIdentityProof(!!candidate.joiningDetails?.documentVerification?.identityProof);
+                                    setDocDegreesVerified(!!candidate.joiningDetails?.documentVerification?.degreesVerified);
+                                    setDocExperienceCertificates(!!candidate.joiningDetails?.documentVerification?.experienceCertificates);
+                                    setDocPoliceVerification(!!candidate.joiningDetails?.documentVerification?.policeVerification);
+                                    setDocMedicalFitness(candidate.joiningDetails?.documentVerification?.medicalFitness !== false);
+                                    setDocNocRelieving(candidate.joiningDetails?.documentVerification?.nocRelieving !== false);
+                                    setDocRemarks(candidate.joiningDetails?.documentVerification?.verificationRemarks || 'Originals verified against university compliance norms.');
+                                  }}
+                                  className="inline-flex items-center space-x-1 text-blue-700 hover:text-blue-900 font-semibold text-xs hover:underline cursor-pointer"
+                                >
+                                  <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
+                                  <span>Verify ({verifiedCount}/6)</span>
+                                </button>
+                              ) : (
+                                <span className="text-slate-400 text-[11px]">Pending offer</span>
+                              )}
+                            </td>
+
+                            {/* Action */}
+                            <td className="py-3.5 px-4 whitespace-nowrap text-right">
                               {candidate.status === 'Selected' ? (
                                 <button
                                   type="button"
                                   onClick={() => openOfferModal(req, candidate)}
-                                  className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition shadow-xs flex items-center space-x-1.5 cursor-pointer"
+                                  className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer"
                                 >
                                   <Award className="w-3.5 h-3.5" />
                                   <span>Issue Offer Letter &rarr;</span>
@@ -2160,7 +2291,7 @@ export function HRDepartmentModule({
                                     setChkBankAccount(true);
                                     setJoiningRemarks('Induction completed. Smart identity card issued and reporting initiated.');
                                   }}
-                                  className="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-xs font-semibold transition flex items-center space-x-1.5 cursor-pointer"
+                                  className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-semibold transition cursor-pointer shadow-xs"
                                 >
                                   <UserCheck className="w-3.5 h-3.5" />
                                   <span>Formal Induction & Join &rarr;</span>
@@ -2171,15 +2302,222 @@ export function HRDepartmentModule({
                                   <span>Joined & Inducted</span>
                                 </span>
                               )}
-                            </div>
-                          </div>
+                            </td>
+                          </tr>
                         );
-                      })}
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          ) : (
+            /* VIEW 2: GROUPED ACCORDION VIEW WITH CLEAN INNER TABLES */
+            displayedShortlistedJobs.length === 0 ? (
+              <div className="bg-white border border-slate-200/90 rounded-2xl p-10 text-center text-slate-400 shadow-xs">
+                <GraduationCap className="w-8 h-8 mx-auto mb-2 text-slate-300" />
+                <div className="font-semibold text-slate-700 text-sm">No Shortlisted Candidates Found</div>
+                <p className="text-slate-400 text-xs mt-0.5">
+                  Score candidate interviews in Tab 3 and click &ldquo;Shortlist Candidate&rdquo; to release detailed offer letters here.
+                </p>
+              </div>
+            ) : (
+              displayedShortlistedJobs.map((req) => {
+                const shortlistedCands = (req.candidates || []).filter(
+                  (c) =>
+                    (c.status === 'Selected' || c.status === 'Offer Issued' || c.status === 'Joined') &&
+                    (offerStatusFilter === 'all' || c.status === offerStatusFilter)
+                );
+                if (shortlistedCands.length === 0 && offerStatusFilter !== 'all') {
+                  return null;
+                }
+                const isExpanded = isOfferExpanded(req.requestId);
+
+                return (
+                  <div
+                    key={req.requestId}
+                    className="bg-white border border-slate-200 hover:border-slate-300 rounded-2xl shadow-xs overflow-hidden transition"
+                  >
+                    {/* Clean Clickable Header */}
+                    <div
+                      onClick={() => toggleOfferExpand(req.requestId)}
+                      className="p-4 flex items-center justify-between gap-4 cursor-pointer hover:bg-slate-50/70 transition select-none"
+                    >
+                      <div className="flex items-center space-x-3.5 min-w-0">
+                        <div className="w-6 h-6 rounded-lg bg-slate-100 flex items-center justify-center text-slate-500">
+                          {isExpanded ? <ChevronDown className="w-4 h-4 text-emerald-700" /> : <ChevronRight className="w-4 h-4" />}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="font-mono text-[11px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md">
+                              {req.requestId}
+                            </span>
+                            <h3 className="font-bold text-slate-900 text-sm truncate">{req.postTitle}</h3>
+                            <span className="text-xs text-slate-500 font-medium">
+                              • {req.department}
+                            </span>
+                          </div>
+                          <div className="text-slate-500 text-[11px] mt-1 font-medium">
+                            {req.numberOfPositions} Position(s) • Budget: {req.tentativeBudget}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center space-x-2 shrink-0">
+                        <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">
+                          {shortlistedCands.length} Shortlisted
+                        </span>
+                      </div>
                     </div>
-                  )}
-                </div>
-              );
-            })
+
+                    {/* Expanded Clean Table (Zero Clutter) */}
+                    {isExpanded && (
+                      <div className="border-t border-slate-200 overflow-x-auto bg-white">
+                        <table className="w-full text-left text-xs">
+                          <thead className="bg-slate-50/80 text-slate-500 font-bold border-b border-slate-200">
+                            <tr>
+                              <th className="py-3 px-5 whitespace-nowrap">Candidate Name & Contact</th>
+                              <th className="py-3 px-5 whitespace-nowrap">Qualification</th>
+                              <th className="py-3 px-5 whitespace-nowrap text-center">Score</th>
+                              <th className="py-3 px-5 whitespace-nowrap">Offer / Appointment</th>
+                              <th className="py-3 px-5 whitespace-nowrap">Compliance Docs</th>
+                              <th className="py-3 px-5 whitespace-nowrap text-right">Action</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100">
+                            {shortlistedCands.map((candidate) => {
+                              const docs = candidate.joiningDetails?.documentVerification;
+                              const verifiedCount = [
+                                docs?.identityProof,
+                                docs?.degreesVerified,
+                                docs?.experienceCertificates,
+                                docs?.policeVerification,
+                                docs?.medicalFitness,
+                                docs?.nocRelieving
+                              ].filter(Boolean).length;
+                              const scoreFormatted = formatScore(candidate.interviewDetails?.scores?.totalScore);
+
+                              return (
+                                <tr key={candidate.id} className="hover:bg-slate-50/60 transition">
+                                  {/* Candidate Name & Contact */}
+                                  <td className="py-3.5 px-5 whitespace-nowrap">
+                                    <div className="font-bold text-slate-900 text-sm">{candidate.fullName}</div>
+                                    <div className="text-[11px] text-slate-500 font-mono mt-0.5">
+                                      {candidate.email} • {candidate.phone}
+                                    </div>
+                                  </td>
+
+                                  {/* Qualification */}
+                                  <td className="py-3.5 px-5 whitespace-nowrap">
+                                    <span className="inline-block text-[11px] font-semibold text-slate-700 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">
+                                      {candidate.qualification}
+                                    </span>
+                                  </td>
+
+                                  {/* Score */}
+                                  <td className="py-3.5 px-5 whitespace-nowrap text-center">
+                                    <span className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-900 border border-amber-200">
+                                      <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
+                                      <span>{scoreFormatted}/10</span>
+                                    </span>
+                                  </td>
+
+                                  {/* Offer Details */}
+                                  <td className="py-3.5 px-5 whitespace-nowrap">
+                                    {candidate.status === 'Selected' ? (
+                                      <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-800 border border-amber-200">
+                                        ⏳ Awaiting Offer Release
+                                      </span>
+                                    ) : candidate.joiningDetails ? (
+                                      <div>
+                                        <div className="font-bold text-emerald-900 text-xs">
+                                          Offered: {candidate.joiningDetails.offeredCtc}
+                                        </div>
+                                        <div className="text-[10px] text-slate-500 font-mono mt-0.5">
+                                          Ref: {candidate.joiningDetails.offerLetterRef}
+                                        </div>
+                                      </div>
+                                    ) : (
+                                      <span className="text-slate-400 text-xs">—</span>
+                                    )}
+                                  </td>
+
+                                  {/* Document Verification */}
+                                  <td className="py-3.5 px-5 whitespace-nowrap">
+                                    {candidate.status !== 'Selected' && candidate.joiningDetails ? (
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          setDocVerifyReq(req);
+                                          setDocVerifyCand(candidate);
+                                          setDocIdentityProof(!!candidate.joiningDetails?.documentVerification?.identityProof);
+                                          setDocDegreesVerified(!!candidate.joiningDetails?.documentVerification?.degreesVerified);
+                                          setDocExperienceCertificates(!!candidate.joiningDetails?.documentVerification?.experienceCertificates);
+                                          setDocPoliceVerification(!!candidate.joiningDetails?.documentVerification?.policeVerification);
+                                          setDocMedicalFitness(candidate.joiningDetails?.documentVerification?.medicalFitness !== false);
+                                          setDocNocRelieving(candidate.joiningDetails?.documentVerification?.nocRelieving !== false);
+                                          setDocRemarks(candidate.joiningDetails?.documentVerification?.verificationRemarks || 'Originals verified against university compliance norms.');
+                                        }}
+                                        className="inline-flex items-center space-x-1 text-blue-700 hover:text-blue-900 font-semibold text-xs hover:underline cursor-pointer"
+                                      >
+                                        <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
+                                        <span>Verify ({verifiedCount}/6)</span>
+                                      </button>
+                                    ) : (
+                                      <span className="text-slate-400 text-[11px]">Pending offer</span>
+                                    )}
+                                  </td>
+
+                                  {/* Action Buttons */}
+                                  <td className="py-3.5 px-5 whitespace-nowrap text-right">
+                                    {candidate.status === 'Selected' ? (
+                                      <button
+                                        type="button"
+                                        onClick={() => openOfferModal(req, candidate)}
+                                        className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer"
+                                      >
+                                        <Award className="w-3.5 h-3.5" />
+                                        <span>Issue Offer Letter &rarr;</span>
+                                      </button>
+                                    ) : candidate.status === 'Offer Issued' ? (
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          setOnboardReq(req);
+                                          setOnboardCand(candidate);
+                                          setEmployeeId(candidate.joiningDetails?.employeeId || `GKU-FAC-${new Date().getFullYear()}-${Math.floor(100 + Math.random() * 900)}`);
+                                          setOfficialEmail(candidate.joiningDetails?.officialEmail || `${candidate.fullName.toLowerCase().replace(/[^a-z]/g, '')}@gku.ac.in`);
+                                          setReportingHead(`Dean, ${req.department}`);
+                                          setJoiningDate(new Date().toISOString().split('T')[0]);
+                                          setChkIdCard(true);
+                                          setChkItAccount(true);
+                                          setChkWorkload(true);
+                                          setChkBankAccount(true);
+                                          setJoiningRemarks('Induction completed. Smart identity card issued and reporting initiated.');
+                                        }}
+                                        className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-semibold transition cursor-pointer shadow-xs"
+                                      >
+                                        <UserCheck className="w-3.5 h-3.5" />
+                                        <span>Formal Induction & Join &rarr;</span>
+                                      </button>
+                                    ) : (
+                                      <span className="text-emerald-700 font-bold text-xs inline-flex items-center space-x-1">
+                                        <CheckCircle className="w-4 h-4 text-emerald-600" />
+                                        <span>Joined & Inducted</span>
+                                      </span>
+                                    )}
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                );
+              })
+            )
           )}
         </div>
       )}
