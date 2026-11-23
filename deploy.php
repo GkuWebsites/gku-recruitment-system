@@ -29,13 +29,26 @@ if ($action === 'inspect') {
     $psOut = function_exists('shell_exec') ? @shell_exec("ps aux | grep node") : 'shell_exec disabled';
     $disabled = ini_get('disable_functions');
 
+    // Check directories in home
+    $homeDirs = glob("{$homeDir}/*", GLOB_ONLYDIR);
+
+    // Also find all directories that contain a server.js or .next
+    $allApps = [];
+    foreach ($homeDirs as $d) {
+        if (file_exists("{$d}/server.js") || is_dir("{$d}/.next")) {
+            $bId = file_exists("{$d}/.next/BUILD_ID") ? trim(file_get_contents("{$d}/.next/BUILD_ID")) : 'no build_id';
+            $allApps[$d] = $bId;
+        }
+    }
+
     echo json_encode([
         'status' => 'success',
         'current_user' => $currentUser,
         'app_dir' => $appDir,
         'build_id' => $buildId,
+        'home_dirs' => $homeDirs,
+        'all_apps' => $allApps,
         'ps' => $psOut,
-        'disabled_functions' => $disabled,
         'restart_txt_mtime' => file_exists("{$appDir}/tmp/restart.txt") ? date('Y-m-d H:i:s', filemtime("{$appDir}/tmp/restart.txt")) : 'none',
         'timestamp' => date('Y-m-d H:i:s')
     ]);
