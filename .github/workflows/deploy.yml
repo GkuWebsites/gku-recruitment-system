@@ -27,10 +27,10 @@ jobs:
         env:
           NODE_ENV: production
 
-      - name: Prepare Standalone Deployment Bundle
+      - name: Package Standalone Deployment Bundle
         run: |
           mkdir -p deploy_out
-          # Copy standalone including hidden .next directory
+          # Copy standalone files including hidden .next
           cp -r .next/standalone/. deploy_out/
           # Copy static files into .next/static
           mkdir -p deploy_out/.next/static
@@ -43,15 +43,44 @@ jobs:
           echo "PORT=3000" >> deploy_out/.env
           echo "MONGODB_URI=${{ secrets.MONGODB_URI || 'mongodb://websitegku_db_user:jHn2jiAGlPImDQXk@ac-jjzkgax-shard-00-00.a05gk60.mongodb.net:27017/gku_recruitment?ssl=true&authSource=admin&retryWrites=true&w=majority' }}" >> deploy_out/.env
 
-          # Phusion Passenger auto-restart signal
-          mkdir -p deploy_out/tmp
-          touch deploy_out/tmp/restart.txt
+          # Prepare zip package
+          mkdir -p pkg_out
+          cd deploy_out && zip -q -r ../pkg_out/gku-deploy.zip . && cd ..
 
-      - name: FTP Auto-Deploy to GoDaddy
+          # Prepare webhook payload
+          mkdir -p webhook_out
+          cp deploy.php webhook_out/deploy.php
+          # Also copy deploy.php to pkg_out
+          cp deploy.php pkg_out/deploy.php
+
+      - name: Upload Webhook Helper to public_html
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        continue-on-error: true
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: /public_html/
+          local-dir: ./webhook_out/
+
+      - name: Upload Single Deployment Package to Node App Directory
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           server-dir: /gku-recruitment-system.git/
-          local-dir: ./deploy_out/
+          local-dir: ./pkg_out/
+
+      - name: Trigger Server Extraction & Phusion Passenger Restart
+        run: |
+          echo "Triggering deployment webhook..."
+          # Try primary temp domain endpoint
+          RES1=$(curl -k -s "http://a7n.f1f.mytemp.website/deploy.php?token=gku_deploy_2026" || echo "failed")
+          echo "Trigger Result (mytemp.website): $RES1"
+          
+          # If not yet extracted, try hrm.gku.ac.in directly
+          if [[ "$RES1" != *"success"* ]]; then
+            RES2=$(curl -k -s "https://hrm.gku.ac.in/deploy.php?token=gku_deploy_2026" || echo "failed")
+            echo "Trigger Result (hrm.gku.ac.in): $RES2"
+          fi
