@@ -56,6 +56,84 @@ if ($action === 'clean') {
     exit;
 }
 
+if ($action === 'start_local_mongo') {
+    $mongoDir = "{$homeDir}/mongodb";
+    $binDir = "{$mongoDir}/bin";
+    $dataDir = "{$mongoDir}/data";
+    $logFile = "{$mongoDir}/mongod.log";
+    $mongodBin = "{$binDir}/mongod";
+
+    if (!is_dir($binDir)) @mkdir($binDir, 0755, true);
+    if (!is_dir($dataDir)) @mkdir($dataDir, 0755, true);
+
+    $downloadMsg = 'binary already exists';
+    if (!file_exists($mongodBin)) {
+        $url = 'https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-rhel80-4.4.29.tgz';
+        $tgzPath = "{$mongoDir}/mongodb.tgz";
+        
+        // Download via curl CLI or file_get_contents
+        if (function_exists('exec')) {
+            @exec("curl -s -L " . escapeshellarg($url) . " -o " . escapeshellarg($tgzPath), $out, $ret);
+        }
+        if (!file_exists($tgzPath) || filesize($tgzPath) < 1000000) {
+            $data = @file_get_contents($url);
+            if ($data) @file_put_contents($tgzPath, $data);
+        }
+
+        if (file_exists($tgzPath) && filesize($tgzPath) > 1000000) {
+            @exec("tar -zxvf " . escapeshellarg($tgzPath) . " -C " . escapeshellarg($mongoDir), $out, $ret);
+            $extracted = glob("{$mongoDir}/mongodb-linux-x86_64-*");
+            if (!empty($extracted)) {
+                @rename("{$extracted[0]}/bin/mongod", $mongodBin);
+                @chmod($mongodBin, 0755);
+                @exec("rm -rf " . escapeshellarg($extracted[0]) . " " . escapeshellarg($tgzPath));
+            }
+            $downloadMsg = 'downloaded and extracted mongod';
+        } else {
+            $downloadMsg = 'failed to download tgz';
+        }
+    }
+
+    // Check if mongod is already running on 27017
+    $fp = @fsockopen('127.0.0.1', 27017, $errno, $errstr, 1);
+    $running = (bool)$fp;
+    if ($fp) fclose($fp);
+
+    $startOut = 'already running';
+    if (!$running && file_exists($mongodBin)) {
+        // Start mongod with minimal memory footprint (wiredTigerCacheSizeGB=0.25)
+        $cmd = "{$mongodBin} --dbpath {$dataDir} --bind_ip 127.0.0.1 --port 27017 --fork --logpath {$logFile} --wiredTigerCacheSizeGB 0.25 2>&1";
+        $startOut = function_exists('shell_exec') ? @shell_exec($cmd) : 'shell_exec disabled';
+        
+        // Check socket again
+        sleep(1);
+        $fp = @fsockopen('127.0.0.1', 27017, $errno, $errstr, 2);
+        $running = (bool)$fp;
+        if ($fp) fclose($fp);
+    }
+
+    // If running, update .env to use local mongodb
+    if ($running) {
+        $localUri = 'mongodb://127.0.0.1:27017/gku_recruitment';
+        $envContent = "NODE_ENV=production\nPORT=3000\nMONGODB_URI={$localUri}\nNEXT_PUBLIC_APP_NAME=\"Guru Kashi University - Hiring & Recruitment System\"\n";
+        file_put_contents("{$appDir}/.env", $envContent);
+        @touch("{$appDir}/tmp/restart.txt");
+        if (function_exists('exec')) {
+            @exec("pkill -9 -u {$currentUser} -f node");
+        }
+    }
+
+    echo json_encode([
+        'status' => 'success',
+        'download' => $downloadMsg,
+        'mongod_exists' => file_exists($mongodBin),
+        'start_output' => trim((string)$startOut),
+        'local_port_27017_open' => $running,
+        'env_updated' => $running
+    ]);
+    exit;
+}
+
 if ($action === 'test_ports') {
     $tests = [
         ['127.0.0.1', 27017],
