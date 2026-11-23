@@ -20,6 +20,16 @@ $appDir = "{$homeDir}/gku-recruitment-system.git";
 
 $action = $_GET['action'] ?? 'deploy';
 
+if ($action === 'autossl') {
+    $out = function_exists('shell_exec') ? @shell_exec("uapi SSL start_autossl_check 2>&1") : 'disabled';
+    echo json_encode([
+        'status' => 'success',
+        'command_output' => $out,
+        'timestamp' => date('Y-m-d H:i:s')
+    ]);
+    exit;
+}
+
 if ($action === 'clean') {
     // Completely wipe old .next folder and tmp/restart.txt
     if (is_dir("{$appDir}/.next")) {
