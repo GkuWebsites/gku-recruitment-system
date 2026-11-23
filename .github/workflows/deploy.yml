@@ -26,7 +26,6 @@ jobs:
         run: npm run build
         env:
           NODE_ENV: production
-          NEXT_PUBLIC_BASE_PATH: /recruitment
 
       - name: Prepare Standalone Deployment Bundle
         run: |
@@ -40,31 +39,6 @@ jobs:
           echo "NODE_ENV=production" > deploy_out/.env
           echo "PORT=3000" >> deploy_out/.env
           echo "MONGODB_URI=${{ secrets.MONGODB_URI || 'mongodb://websitegku_db_user:jHn2jiAGlPImDQXk@ac-jjzkgax-shard-00-00.a05gk60.mongodb.net:27017/gku_recruitment?ssl=true&authSource=admin&retryWrites=true&w=majority' }}" >> deploy_out/.env
-          
-          # Inject Universal Path Normalizer into server.js
-          node -e "
-            const fs = require('fs');
-            const file = 'deploy_out/server.js';
-            let code = fs.readFileSync(file, 'utf8');
-            const wrapper = \`const http = require('http')
-          const originalCreateServer = http.createServer
-
-          http.createServer = function(...args) {
-            if (typeof args[0] === 'function') {
-              const origHandler = args[0]
-              args[0] = function(req, res) {
-                if (req.url) {
-                  if (!req.url.startsWith('/recruitment')) {
-                    req.url = '/recruitment' + (req.url === '/' ? '' : req.url)
-                  }
-                }
-                return origHandler(req, res)
-              }
-            }
-            return originalCreateServer.apply(this, args)
-          }\n\`;
-            fs.writeFileSync(file, wrapper + code);
-          "
 
           # Phusion Passenger auto-restart signal
           mkdir -p deploy_out/tmp

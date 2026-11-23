@@ -1065,7 +1065,7 @@ export function OfferLetterWorkbench({
               <div className="flex justify-center mb-2">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src="/recruitment/gku-logo.png"
+                  src="/gku-logo.png"
                   alt="Guru Kashi University"
                   className="h-16 object-contain"
                 />
