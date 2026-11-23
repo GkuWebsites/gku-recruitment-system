@@ -56,6 +56,75 @@ if ($action === 'clean') {
     exit;
 }
 
+if ($action === 'fix_env') {
+    $fullUri = 'mongodb://websitegku_db_user:jHn2jiAGlPImDQXk@ac-jjzkgax-shard-00-00.a05gk60.mongodb.net:27017,ac-jjzkgax-shard-00-01.a05gk60.mongodb.net:27017,ac-jjzkgax-shard-00-02.a05gk60.mongodb.net:27017/gku_recruitment?ssl=true&replicaSet=atlas-d1fbdv-shard-0&authSource=admin&retryWrites=true&w=majority';
+    $envContent = "NODE_ENV=production\nPORT=3000\nMONGODB_URI={$fullUri}\nNEXT_PUBLIC_APP_NAME=\"Guru Kashi University - Hiring & Recruitment System\"\n";
+    file_put_contents("{$appDir}/.env", $envContent);
+    @touch("{$appDir}/tmp/restart.txt");
+    if (function_exists('exec')) {
+        @exec("pkill -9 -u {$currentUser} -f node");
+    }
+    echo json_encode([
+        'status' => 'success',
+        'message' => 'Updated .env with full replicaSet MONGODB_URI and restarted node',
+        'timestamp' => date('Y-m-d H:i:s')
+    ]);
+    exit;
+}
+
+if ($action === 'test_mongo') {
+    $envContent = file_exists("{$appDir}/.env") ? file_get_contents("{$appDir}/.env") : 'no .env';
+    
+    // Mask password in URI
+    $maskedEnv = preg_replace('/:[^:@]+@/', ':***@', $envContent);
+
+    // Test TCP socket to Atlas host
+    $host = 'ac-jjzkgax-shard-00-00.a05gk60.mongodb.net';
+    $port = 27017;
+    $errno = 0;
+    $errstr = '';
+    
+    $t0 = microtime(true);
+    $fp = @fsockopen($host, $port, $errno, $errstr, 5);
+    $tcpTime = round((microtime(true) - $t0) * 1000, 2);
+    $tcpSuccess = (bool)$fp;
+    if ($fp) {
+        fclose($fp);
+    }
+
+    // Test SSL socket
+    $sslSuccess = false;
+    $sslErr = '';
+    $context = stream_context_create(['ssl' => ['verify_peer' => false, 'verify_peer_name' => false]]);
+    $sslFp = @stream_socket_client("ssl://{$host}:{$port}", $errno, $errstr, 5, STREAM_CLIENT_CONNECT, $context);
+    if ($sslFp) {
+        $sslSuccess = true;
+        fclose($sslFp);
+    } else {
+        $sslErr = "{$errno}: {$errstr}";
+    }
+
+    $outIp = @file_get_contents('https://api.ipify.org') ?: 'unavailable';
+
+    echo json_encode([
+        'status' => 'success',
+        'masked_env' => $maskedEnv,
+        'server_outgoing_ip' => $outIp,
+        'dns_lookup' => gethostbyname($host),
+        'tcp_27017' => [
+            'success' => $tcpSuccess,
+            'time_ms' => $tcpTime,
+            'errno' => $errno,
+            'errstr' => $errstr
+        ],
+        'ssl_27017' => [
+            'success' => $sslSuccess,
+            'error' => $sslErr
+        ]
+    ]);
+    exit;
+}
+
 if ($action === 'inspect') {
     $buildId = file_exists("{$appDir}/.next/BUILD_ID") ? trim(file_get_contents("{$appDir}/.next/BUILD_ID")) : 'not found';
     $zipExists = file_exists("{$appDir}/gku-deploy.zip");

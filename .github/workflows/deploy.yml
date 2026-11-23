@@ -41,7 +41,8 @@ jobs:
           # Inject Production Environment
           echo "NODE_ENV=production" > deploy_out/.env
           echo "PORT=3000" >> deploy_out/.env
-          echo "MONGODB_URI=${{ secrets.MONGODB_URI || 'mongodb://websitegku_db_user:jHn2jiAGlPImDQXk@ac-jjzkgax-shard-00-00.a05gk60.mongodb.net:27017/gku_recruitment?ssl=true&authSource=admin&retryWrites=true&w=majority' }}" >> deploy_out/.env
+          echo "MONGODB_URI=mongodb://websitegku_db_user:jHn2jiAGlPImDQXk@ac-jjzkgax-shard-00-00.a05gk60.mongodb.net:27017,ac-jjzkgax-shard-00-01.a05gk60.mongodb.net:27017,ac-jjzkgax-shard-00-02.a05gk60.mongodb.net:27017/gku_recruitment?ssl=true&replicaSet=atlas-d1fbdv-shard-0&authSource=admin&retryWrites=true&w=majority" >> deploy_out/.env
+          echo "NEXT_PUBLIC_APP_NAME=Guru Kashi University - Hiring & Recruitment System" >> deploy_out/.env
 
           # Prepare zip package
           mkdir -p pkg_out
