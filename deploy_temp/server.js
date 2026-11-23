@@ -1,3 +1,21 @@
+const http = require('http')
+const originalCreateServer = http.createServer
+
+http.createServer = function(...args) {
+  if (typeof args[0] === 'function') {
+    const origHandler = args[0]
+    args[0] = function(req, res) {
+      if (req.url) {
+        if (!req.url.startsWith('/recruitment')) {
+          req.url = '/recruitment' + (req.url === '/' ? '' : req.url)
+        }
+      }
+      return origHandler(req, res)
+    }
+  }
+  return originalCreateServer.apply(this, args)
+}
+
 const path = require('path')
 
 const dir = path.join(__dirname)
