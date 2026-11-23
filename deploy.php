@@ -68,11 +68,14 @@ if ($action === 'inspect') {
     // Check directories in home
     $homeDirs = glob("{$homeDir}/*", GLOB_ONLYDIR);
 
+    $outIp = @file_get_contents('https://api.ipify.org') ?: 'unavailable';
+
     echo json_encode([
         'status' => 'success',
         'current_user' => $currentUser,
         'app_dir' => $appDir,
         'build_id' => $buildId,
+        'server_outgoing_ip' => $outIp,
         'restart_txt_mtime' => file_exists("{$appDir}/tmp/restart.txt") ? date('Y-m-d H:i:s', filemtime("{$appDir}/tmp/restart.txt")) : 'none',
         'timestamp' => date('Y-m-d H:i:s')
     ]);
