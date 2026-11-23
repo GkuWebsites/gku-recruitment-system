@@ -3118,59 +3118,63 @@ export function HRDepartmentModule({
       {/* ============================================================== */}
       {/* MODAL 3.2: EVALUATE INTERVIEW & SCORE (OUT OF 10) */}
       {/* ============================================================== */}
+      {/* 3. EVALUATION MODAL: STREAMLINED & PROFESSIONAL */}
+      {/* ============================================================== */}
       {evaluatingReq && evaluatingCand && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-xl border border-slate-200 max-w-xl w-full p-6 space-y-4 animate-in fade-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-lg w-full p-5 space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            {/* Header with Candidate details & Close */}
             <div className="flex items-start justify-between border-b border-slate-100 pb-3">
               <div>
-                <span className="font-mono text-xs font-bold text-blue-900 bg-blue-50 px-2.5 py-0.5 rounded border border-blue-200">
-                  {evaluatingReq.requestId}
-                </span>
-                <h3 className="text-base font-bold text-slate-900 mt-1">
-                  Interview Evaluation & Scoring Desk
+                <div className="flex items-center space-x-2 mb-1">
+                  <span className="font-mono text-[11px] font-bold text-blue-900 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+                    {evaluatingReq.requestId}
+                  </span>
+                  <span className="text-xs text-slate-500 font-medium">
+                    {evaluatingReq.postTitle}
+                  </span>
+                </div>
+                <h3 className="text-base font-bold text-slate-900">
+                  {evaluatingCand.fullName}
                 </h3>
-                <p className="text-xs text-slate-500">
-                  Candidate: <strong>{evaluatingCand.fullName}</strong> &bull; {evaluatingReq.postTitle}
-                </p>
               </div>
               <button
+                type="button"
                 onClick={() => {
                   setEvaluatingReq(null);
                   setEvaluatingCand(null);
                 }}
-                className="text-slate-400 hover:text-slate-600 text-sm font-bold"
+                className="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition cursor-pointer"
               >
-                ✕
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveEvaluation} className="space-y-4 text-xs">
-              {/* Live Aggregate Score Card */}
+            <form onSubmit={handleSaveEvaluation} className="space-y-3.5 text-xs">
+              {/* Compact Inline Score Bar */}
               {(() => {
                 const validRatings = evaluatorEntries
                   .map((e) => Number(e.rating))
                   .filter((r) => !isNaN(r) && r >= 0);
                 const overallScore = validRatings.length > 0
                   ? (validRatings.reduce((sum, r) => sum + r, 0) / validRatings.length).toFixed(1)
-                  : '0.0';
+                  : '—';
 
                 return (
-                  <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl flex items-center justify-between">
-                    <div>
-                      <span className="text-[11px] font-bold text-blue-900 uppercase tracking-wider block">
-                        Calculated Overall Interview Score
-                      </span>
-                      <p className="text-xs text-slate-600">
-                        Average rating across {evaluatorEntries.length} evaluator / panel member(s)
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-2xl font-black text-blue-950 flex items-center space-x-1">
-                        <Star className="w-5 h-5 fill-amber-500 text-amber-500" />
-                        <span>{overallScore}</span>
-                        <span className="text-sm font-normal text-slate-500">/ 10</span>
+                  <div className="flex items-center justify-between px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl">
+                    <div className="flex items-center space-x-2">
+                      <span className="text-slate-600 font-semibold text-xs">Overall Score:</span>
+                      <div className="flex items-center space-x-1">
+                        <Star className="w-4 h-4 fill-amber-500 text-amber-500" />
+                        <span className="text-base font-black text-slate-900">{overallScore}</span>
+                        <span className="text-slate-400 text-xs font-normal">/ 10</span>
                       </div>
-                      <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-[11px] font-medium text-slate-500">
+                        {evaluatorEntries.length} {evaluatorEntries.length === 1 ? 'Evaluator' : 'Evaluators'}
+                      </span>
+                      <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
                         {evalRecommendation}
                       </span>
                     </div>
@@ -3178,75 +3182,58 @@ export function HRDepartmentModule({
                 );
               })()}
 
-              {/* Panel Member Evaluator Ratings (Per-Person Rating & Name) */}
-              <div className="space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
-                <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-                  <div>
-                    <span className="font-bold text-slate-900 text-xs block">
-                      Evaluator Ratings (Rate each panelist out of 10):
-                    </span>
-                    <span className="text-[11px] text-slate-500">
-                      Pre-filled with scheduled panel members. You can edit names or add additional evaluators.
-                    </span>
-                  </div>
+              {/* Panel Evaluator Rows */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-slate-800 text-xs">
+                    Evaluator Ratings
+                  </span>
                   <button
                     type="button"
                     onClick={handleAddEvaluator}
-                    className="px-2.5 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-lg text-xs font-bold transition flex items-center space-x-1 cursor-pointer shrink-0"
+                    className="px-2.5 py-1 text-blue-700 hover:bg-blue-50 border border-blue-200 rounded-lg text-xs font-semibold transition flex items-center space-x-1 cursor-pointer"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     <span>Add Evaluator</span>
                   </button>
                 </div>
 
-                <div className="space-y-2.5 pt-1">
-                  {evaluatorEntries.map((ev, index) => (
+                <div className="space-y-1.5 max-h-56 overflow-y-auto pr-0.5">
+                  {evaluatorEntries.map((ev) => (
                     <div
                       key={ev.id}
-                      className="flex items-center space-x-2.5 bg-white p-3 rounded-xl border border-slate-200 shadow-2xs"
+                      className="flex items-center space-x-2 bg-slate-50/70 hover:bg-slate-50 p-2 rounded-lg border border-slate-200 transition"
                     >
-                      <div className="text-[11px] font-bold text-slate-400 w-5 text-center">
-                        #{index + 1}
-                      </div>
-                      <div className="flex-1">
-                        <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-0.5">
-                          Evaluator / Panelist Name
-                        </label>
+                      <input
+                        type="text"
+                        required
+                        value={ev.name}
+                        onChange={(e) => handleEvaluatorNameChange(ev.id, e.target.value)}
+                        placeholder="Evaluator Name"
+                        className="flex-1 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                      />
+                      <div className="flex items-center space-x-1.5 shrink-0">
                         <input
-                          type="text"
+                          type="number"
+                          min="0"
+                          max="10"
+                          step="0.1"
                           required
-                          value={ev.name}
-                          onChange={(e) => handleEvaluatorNameChange(ev.id, e.target.value)}
-                          placeholder="e.g. Dr. Harpreet Singh / External Expert Nominee"
-                          className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                          value={ev.rating}
+                          onChange={(e) => handleEvaluatorRatingChange(ev.id, e.target.value)}
+                          placeholder="Score"
+                          className="w-16 px-2 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-bold text-center text-blue-900 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                         />
-                      </div>
-                      <div className="w-28">
-                        <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-0.5">
-                          Rating (0 - 10)
-                        </label>
-                        <div className="relative flex items-center">
-                          <input
-                            type="number"
-                            min="0"
-                            max="10"
-                            step="0.1"
-                            required
-                            value={ev.rating}
-                            onChange={(e) => handleEvaluatorRatingChange(ev.id, e.target.value)}
-                            className="w-full pl-2.5 pr-8 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-blue-900 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                          />
-                          <span className="absolute right-2 text-[11px] font-bold text-slate-400">/ 10</span>
-                        </div>
+                        <span className="text-[11px] font-semibold text-slate-400">/ 10</span>
                       </div>
                       {evaluatorEntries.length > 1 && (
                         <button
                           type="button"
                           onClick={() => handleRemoveEvaluator(ev.id)}
-                          title="Remove Evaluator"
-                          className="p-2 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition cursor-pointer"
+                          title="Remove"
+                          className="p-1.5 text-slate-400 hover:text-rose-600 rounded-md hover:bg-rose-50 transition cursor-pointer"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       )}
                     </div>
@@ -3254,20 +3241,16 @@ export function HRDepartmentModule({
                 </div>
               </div>
 
-              {/* Upload Scorecard / Evaluation Document */}
-              <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-slate-900 text-xs block">
-                    Upload Rating Scorecard / Evaluation Sheet (Optional)
-                  </span>
-                  <span className="text-[10px] font-semibold text-slate-500">PDF, JPG, PNG up to 10MB</span>
-                </div>
-
+              {/* Minimal Single-Line Scorecard Upload */}
+              <div>
+                <label className="block font-bold text-slate-800 text-xs mb-1">
+                  Signed Scorecard Sheet <span className="text-slate-400 font-normal">(Optional)</span>
+                </label>
                 {!scorecardFileName ? (
-                  <label className="border-2 border-dashed border-slate-300 hover:border-blue-400 rounded-xl p-3.5 flex items-center justify-center space-x-2 cursor-pointer bg-white transition hover:bg-blue-50/40">
-                    <Upload className="w-4 h-4 text-blue-600" />
-                    <span className="text-xs font-semibold text-slate-700">
-                      Click to browse or upload signed interview evaluation scorecard
+                  <label className="border border-dashed border-slate-300 hover:border-blue-400 rounded-lg p-2.5 flex items-center justify-center space-x-2 cursor-pointer bg-slate-50/50 hover:bg-blue-50/30 transition">
+                    <Upload className="w-3.5 h-3.5 text-blue-600" />
+                    <span className="text-xs font-medium text-slate-600">
+                      Upload Signed Scorecard (PDF or Image)
                     </span>
                     <input
                       type="file"
@@ -3277,15 +3260,13 @@ export function HRDepartmentModule({
                     />
                   </label>
                 ) : (
-                  <div className="flex items-center justify-between p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl">
-                    <div className="flex items-center space-x-2">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                      <div>
-                        <span className="font-bold text-emerald-950 text-xs">{scorecardFileName}</span>
-                        {scorecardFileSize && (
-                          <span className="text-[10px] text-emerald-700 block">{scorecardFileSize}</span>
-                        )}
-                      </div>
+                  <div className="flex items-center justify-between px-3 py-2 bg-emerald-50 border border-emerald-200 rounded-lg">
+                    <div className="flex items-center space-x-2 min-w-0">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <span className="font-semibold text-emerald-950 text-xs truncate">{scorecardFileName}</span>
+                      {scorecardFileSize && (
+                        <span className="text-[10px] text-emerald-700 shrink-0">({scorecardFileSize})</span>
+                      )}
                     </div>
                     <button
                       type="button"
@@ -3293,80 +3274,80 @@ export function HRDepartmentModule({
                         setScorecardFileName('');
                         setScorecardFileSize('');
                       }}
-                      className="text-[11px] font-bold text-rose-600 hover:text-rose-800 hover:underline cursor-pointer"
+                      className="text-[11px] font-bold text-rose-600 hover:text-rose-800 hover:underline cursor-pointer shrink-0 ml-2"
                     >
-                      Remove / Change
+                      Remove
                     </button>
                   </div>
                 )}
               </div>
 
-              {/* Recommendation & Immediate Decision Select */}
-              <div className="grid grid-cols-2 gap-3">
+              {/* Recommendation & Immediate Decision */}
+              <div className="grid grid-cols-2 gap-2.5">
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">
-                    Selection Recommendation:
+                  <label className="block font-bold text-slate-800 text-xs mb-1">
+                    Recommendation
                   </label>
                   <select
                     value={evalRecommendation}
                     onChange={(e) => setEvalRecommendation(e.target.value as any)}
-                    className="w-full p-2.5 bg-white border border-slate-200 rounded-xl font-bold focus:ring-2 focus:ring-blue-500"
+                    className="w-full p-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold focus:ring-2 focus:ring-blue-500"
                   >
-                    <option value="Strongly Recommend">Strongly Recommend (Top Pick)</option>
-                    <option value="Recommend">Recommend (Qualified)</option>
-                    <option value="Waitlist">Waitlist (Reserve Pool)</option>
+                    <option value="Strongly Recommend">Strongly Recommend</option>
+                    <option value="Recommend">Recommend</option>
+                    <option value="Waitlist">Waitlist</option>
                     <option value="Not Recommended">Not Recommended</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">
-                    Selection Action After Scoring:
+                  <label className="block font-bold text-slate-800 text-xs mb-1">
+                    Next Action
                   </label>
                   <select
                     value={evalDecision}
                     onChange={(e) => setEvalDecision(e.target.value as any)}
-                    className="w-full p-2.5 bg-white border border-slate-200 rounded-xl font-bold focus:ring-2 focus:ring-blue-500"
+                    className="w-full p-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold focus:ring-2 focus:ring-blue-500"
                   >
-                    <option value="interviewed">Save Score Only (Decide on Desk)</option>
-                    <option value="shortlist">✓ Save Score & Shortlist for Offer</option>
-                    <option value="reject">✕ Save Score & Reject Candidate</option>
+                    <option value="interviewed">Save Score</option>
+                    <option value="shortlist">Save & Shortlist for Offer</option>
+                    <option value="reject">Save & Reject Candidate</option>
                   </select>
                 </div>
               </div>
 
-              {/* Panel Remarks */}
+              {/* Remarks */}
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">
-                  Selection Committee Observations & Remarks:
+                <label className="block font-bold text-slate-800 text-xs mb-1">
+                  Committee Remarks
                 </label>
                 <textarea
                   rows={2}
                   value={evalRemarks}
                   onChange={(e) => setEvalRemarks(e.target.value)}
-                  placeholder="Record interview observations, strengths, or specific appointment notes..."
-                  className="w-full p-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 font-medium"
+                  placeholder="Observations or appointment notes..."
+                  className="w-full p-2 border border-slate-200 rounded-lg text-xs font-medium focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
-              <div className="flex items-center justify-end space-x-2 pt-3 border-t border-slate-100">
+              <div className="flex items-center justify-end space-x-2 pt-2 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => {
                     setEvaluatingReq(null);
                     setEvaluatingCand(null);
                   }}
-                  className="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-900"
+                  className="px-3.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 rounded-lg hover:bg-slate-100 transition cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-xl text-xs font-bold transition disabled:opacity-50 flex items-center space-x-1.5"
+                  className="px-4 py-1.5 bg-blue-700 hover:bg-blue-800 text-white rounded-lg text-xs font-bold transition disabled:opacity-50 flex items-center space-x-1.5 cursor-pointer shadow-xs"
                 >
-                  <BookmarkCheck className="w-4 h-4" />
-                  <span>{isSubmitting ? 'Saving...' : 'Save Evaluation & Mark Interview Done'}</span>
+                  <BookmarkCheck className="w-3.5 h-3.5" />
+                  <span>{isSubmitting ? 'Saving...' : 'Save Evaluation'}</span>
                 </button>
               </div>
             </form>
