@@ -53,12 +53,14 @@ interface HRDepartmentModuleProps {
   requests: IHiringRequest[];
   onSelectRequest: (request: IHiringRequest) => void;
   onRefresh: () => void;
+  onOpenNewModal?: () => void;
 }
 
 export function HRDepartmentModule({
   requests,
   onSelectRequest,
-  onRefresh
+  onRefresh,
+  onOpenNewModal
 }: HRDepartmentModuleProps) {
   // 6 Dedicated Tabs for the HR Pipeline (including Archive Cabinet)
   type HRTab = 'approved' | 'posted' | 'interviews' | 'offerLetters' | 'pipeline' | 'archive';
@@ -1066,6 +1068,17 @@ export function HRDepartmentModule({
             <FolderCheck className="w-3.5 h-3.5 text-purple-700" />
             <span>Archive Cabinet: <strong>{archivedReqs.length}</strong></span>
           </button>
+
+          {onOpenNewModal && (
+            <button
+              type="button"
+              onClick={onOpenNewModal}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 rounded-xl font-bold transition flex items-center space-x-1.5 cursor-pointer shadow-xs"
+            >
+              <Plus className="w-4 h-4" />
+              <span>+ Create Requirement</span>
+            </button>
+          )}
         </div>
       </div>
 

@@ -163,6 +163,7 @@ const HiringRequestSchema = new Schema<IHiringRequest>(
     tentativeBudget: { type: String, required: true },
     budgetAmountNumber: { type: Number, default: 0 },
     urgency: { type: String, enum: ['Normal', 'High', 'Urgent'], default: 'Normal' },
+    jobDescriptionFile: { type: String },
     creator: {
       name: { type: String, required: true },
       role: { type: String, required: true },

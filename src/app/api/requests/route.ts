@@ -80,6 +80,48 @@ export async function POST(req: NextRequest) {
 
     const timestamp = new Date().toISOString();
 
+    const routing = body.approvalRouting || 'standard_academic';
+    let status = 'Request Submitted (Department)';
+    let currentStage = 1;
+    let deanAcademicApproval: any = undefined;
+    let vcRegistrarApproval: any = undefined;
+    let auditAction = 'Requisition Created';
+    let auditDetails = `Hiring requisition submitted for ${body.numberOfPositions} position(s) of ${body.postTitle}`;
+
+    if (routing === 'direct_hr_order') {
+      status = 'In Process (HR - Recruitment)';
+      currentStage = 4;
+      deanAcademicApproval = {
+        decision: 'Approved',
+        remarks: 'Pre-cleared under Direct Executive Institutional Hiring Protocol.',
+        decidedBy: body.creatorName || 'Director of HR & Recruitment',
+        decidedAt: timestamp
+      };
+      vcRegistrarApproval = {
+        decision: 'Approved',
+        remarks: 'Direct Institutional Requirement sanctioned under Executive Authority.',
+        decidedBy: body.creatorName || 'Director of HR & Recruitment',
+        decidedAt: timestamp
+      };
+      auditAction = 'Direct Executive Requisition Created';
+      auditDetails = `Direct requisition created & sanctioned under Executive Authority for ${body.numberOfPositions} position(s) of ${body.postTitle}. Ready for posting & candidate intake.`;
+    } else if (routing === 'route_vc') {
+      status = 'Under Review (VC / Registrar)';
+      currentStage = 3;
+      deanAcademicApproval = {
+        decision: 'Approved',
+        remarks: 'Forwarded directly by HR Directorate for VC / Registrar Executive Sanction.',
+        decidedBy: body.creatorName || 'Director of HR & Recruitment',
+        decidedAt: timestamp
+      };
+      auditAction = 'Requisition Created - Routed to VC / Registrar';
+      auditDetails = `Hiring requisition created by HR and forwarded directly to VC & Registrar for formal sanction.`;
+    }
+
+    const creatorRole = body.creatorRole || (routing === 'direct_hr_order' || routing === 'route_vc' ? 'HR Department' : 'Department / Dean');
+    const creatorEmail = body.creatorEmail || (creatorRole === 'HR Department' ? 'hr@gku.ac.in' : 'dean@gku.ac.in');
+    const creatorName = body.creatorName || (creatorRole === 'HR Department' ? 'Director of HR & Recruitment' : 'Department Dean');
+
     const newRequest = new HiringRequestModel({
       requestId,
       department: body.department,
@@ -93,13 +135,16 @@ export async function POST(req: NextRequest) {
       tentativeBudget: body.tentativeBudget || 'As per UGC / University Norms',
       budgetAmountNumber: Number(body.budgetAmountNumber) || 0,
       urgency: body.urgency || 'Normal',
+      jobDescriptionFile: body.jobDescriptionFile || undefined,
       creator: {
-        name: body.creatorName || 'Dr. HOD',
-        role: 'Department / Dean',
-        email: body.creatorEmail || 'hod@gku.ac.in'
+        name: creatorName,
+        role: creatorRole,
+        email: creatorEmail
       },
-      status: 'Request Submitted (Department)',
-      currentStage: 1,
+      status,
+      currentStage,
+      deanAcademicApproval,
+      vcRegistrarApproval,
       promotionChannels: [],
       totalPromotionCost: 0,
       candidates: [],
@@ -107,8 +152,8 @@ export async function POST(req: NextRequest) {
         ? [
             {
               id: `c-${Date.now()}`,
-              authorName: body.creatorName || 'Department HOD',
-              authorRole: 'Department / Dean',
+              authorName: creatorName,
+              authorRole: creatorRole,
               text: body.initialComment,
               timestamp,
               category: 'Remark'
@@ -118,10 +163,10 @@ export async function POST(req: NextRequest) {
       auditTrail: [
         {
           id: `audit-${Date.now()}`,
-          action: 'Requisition Created',
-          performedBy: body.creatorName || 'Department HOD',
-          role: 'Department / Dean',
-          details: `Hiring requisition submitted for ${body.numberOfPositions} position(s) of ${body.postTitle}`,
+          action: auditAction,
+          performedBy: creatorName,
+          role: creatorRole,
+          details: auditDetails,
           timestamp
         }
       ]

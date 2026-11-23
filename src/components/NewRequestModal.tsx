@@ -2,7 +2,20 @@
 
 import React, { useState } from 'react';
 import { UNIVERSITY_DEPARTMENTS, POST_LEVELS } from '@/lib/constants';
-import { X, Building2, Briefcase, GraduationCap, CheckCircle2, ChevronRight, Plus, Minus } from 'lucide-react';
+import {
+  X,
+  Building2,
+  Briefcase,
+  GraduationCap,
+  CheckCircle2,
+  ChevronRight,
+  Plus,
+  Minus,
+  UploadCloud,
+  FileText,
+  Zap,
+  ShieldCheck
+} from 'lucide-react';
 
 interface NewRequestModalProps {
   isOpen: boolean;
@@ -11,6 +24,7 @@ interface NewRequestModalProps {
   defaultDepartment?: string;
   creatorName?: string;
   creatorEmail?: string;
+  userRole?: string;
 }
 
 export function NewRequestModal({
@@ -18,9 +32,14 @@ export function NewRequestModal({
   onClose,
   onSuccess,
   defaultDepartment,
-  creatorName = 'Dr. Harpreet Singh',
-  creatorEmail = 'dean.engg@gku.ac.in'
+  creatorName,
+  creatorEmail,
+  userRole = 'Department / Dean'
 }: NewRequestModalProps) {
+  const isHR = userRole.toLowerCase().includes('hr') || userRole === 'Admin';
+  const defaultCreatorName = creatorName || (isHR ? 'Director of HR & Recruitment' : 'Dr. Harpreet Singh');
+  const defaultCreatorEmail = creatorEmail || (isHR ? 'hr@gku.ac.in' : 'dean.engg@gku.ac.in');
+
   const [department, setDepartment] = useState(defaultDepartment || UNIVERSITY_DEPARTMENTS[0]);
   const [cadreType, setCadreType] = useState<'Teaching' | 'Non-Teaching'>('Teaching');
   const [postTitle, setPostTitle] = useState('');
@@ -31,6 +50,11 @@ export function NewRequestModal({
   const [justification, setJustification] = useState('');
   const [qualifications, setQualifications] = useState('');
   const [experience, setExperience] = useState('2 - 5 Years');
+  const [approvalRouting, setApprovalRouting] = useState<'direct_hr_order' | 'route_vc' | 'standard_academic'>(
+    isHR ? 'direct_hr_order' : 'standard_academic'
+  );
+  const [jobDescriptionFileName, setJobDescriptionFileName] = useState('');
+  const [jobDescriptionFileSize, setJobDescriptionFileSize] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
@@ -57,10 +81,19 @@ export function NewRequestModal({
     }
   };
 
+  const handleJdUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setJobDescriptionFileName(file.name);
+      const sizeStr = file.size > 1024 * 1024 ? `${(file.size / (1024 * 1024)).toFixed(1)} MB` : `${Math.round(file.size / 1024)} KB`;
+      setJobDescriptionFileSize(sizeStr);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!postTitle.trim() || !justification.trim() || !qualifications.trim()) {
-      setErrorMsg('Please complete post specialization, teaching load justification, and qualifications.');
+      setErrorMsg('Please complete post specialization, justification, and qualifications.');
       return;
     }
 
@@ -86,9 +119,16 @@ export function NewRequestModal({
           justification: justification.trim(),
           requiredQualifications: qualifications.trim(),
           experienceRequired: experience.trim(),
-          creatorName,
-          creatorEmail,
-          initialComment: 'Submitted by Department Dean for Academic Workload Scrutiny.'
+          jobDescriptionFile: jobDescriptionFileName || undefined,
+          approvalRouting,
+          creatorName: defaultCreatorName,
+          creatorEmail: defaultCreatorEmail,
+          creatorRole: isHR ? 'HR Department' : 'Department / Dean',
+          initialComment: isHR
+            ? approvalRouting === 'direct_hr_order'
+              ? 'Sanctioned under Executive Direct Order by HR Directorate.'
+              : 'Direct institutional requirement raised by HR Directorate.'
+            : 'Submitted by Department Dean for Academic Workload Scrutiny.'
         })
       });
 
@@ -106,6 +146,19 @@ export function NewRequestModal({
     }
   };
 
+  let submitBtnLabel = 'Submit to Dean Academic';
+  let routingSubtext = 'Dispatched directly to Dean Academic desk.';
+  if (approvalRouting === 'direct_hr_order') {
+    submitBtnLabel = isSubmitting ? 'Creating Requisition...' : 'Create & Direct Sanction';
+    routingSubtext = 'Immediate executive sanction: skips approvals and initiates recruitment immediately.';
+  } else if (approvalRouting === 'route_vc') {
+    submitBtnLabel = isSubmitting ? 'Submitting to VC...' : 'Submit to VC / Registrar';
+    routingSubtext = 'Dispatched directly to Vice Chancellor & Registrar executive desk.';
+  } else {
+    submitBtnLabel = isSubmitting ? 'Submitting...' : 'Submit for Academic Review';
+    routingSubtext = 'Dispatched to Dean Academic for workload & compliance review.';
+  }
+
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl border border-slate-200/90 max-w-2xl w-full max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
@@ -117,17 +170,17 @@ export function NewRequestModal({
             </div>
             <div>
               <h2 className="text-base font-bold text-slate-900 leading-tight">
-                New Faculty Requisition
+                {isHR ? 'Create Hiring Requirement & Requisition' : 'New Faculty Requisition'}
               </h2>
               <p className="text-xs text-slate-500 mt-0.5">
-                Stage 1: Dispatched to Dean Academic for workload & ratio verification
+                {isHR ? 'Directorate of HR & Faculty Affairs' : 'Department Dean Requisition Desk'}
               </p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 p-1.5 rounded-xl hover:bg-slate-100 transition"
+            className="text-slate-400 hover:text-slate-600 p-1.5 rounded-xl hover:bg-slate-100 transition cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -141,20 +194,135 @@ export function NewRequestModal({
         )}
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="p-6 flex-1 overflow-y-auto space-y-5 text-xs">
+        <form onSubmit={handleSubmit} className="p-6 flex-1 overflow-y-auto space-y-4 text-xs">
+          {/* Section 0: Approval Routing & Executive Sanction (For HR or when configurable) */}
+          <div className="bg-white p-4 rounded-xl border border-slate-200 space-y-2.5">
+            <div className="border-b border-slate-100 pb-2 flex items-center justify-between">
+              <span className="font-bold text-slate-800 uppercase tracking-wider text-[11px] flex items-center space-x-1.5">
+                <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
+                <span>Approval Workflow &amp; Sanction Authority</span>
+              </span>
+              <span className="text-[10px] text-slate-400 font-semibold">Select routing option</span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+              {/* Option 1: Direct HR Order */}
+              <label
+                onClick={() => setApprovalRouting('direct_hr_order')}
+                className={`p-3 rounded-xl border cursor-pointer select-none transition flex flex-col justify-between ${
+                  approvalRouting === 'direct_hr_order'
+                    ? 'bg-blue-50/70 border-blue-400 ring-2 ring-blue-500/20'
+                    : 'bg-slate-50 border-slate-200 hover:border-slate-300'
+                }`}
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-bold text-slate-900 text-xs flex items-center space-x-1">
+                      <Zap className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+                      <span>Direct HR Order</span>
+                    </span>
+                    <input
+                      type="radio"
+                      name="approvalRouting"
+                      checked={approvalRouting === 'direct_hr_order'}
+                      onChange={() => setApprovalRouting('direct_hr_order')}
+                      className="text-blue-600 cursor-pointer"
+                    />
+                  </div>
+                  <p className="text-[10px] text-slate-500 leading-relaxed">
+                    Direct executive order. Sanctioned immediately; HR can post jobs and intake candidates right away.
+                  </p>
+                </div>
+                <div className="mt-2 pt-2 border-t border-slate-200/60">
+                  <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                    Direct Approved (Stage 4)
+                  </span>
+                </div>
+              </label>
+
+              {/* Option 2: Route to VC / Registrar */}
+              <label
+                onClick={() => setApprovalRouting('route_vc')}
+                className={`p-3 rounded-xl border cursor-pointer select-none transition flex flex-col justify-between ${
+                  approvalRouting === 'route_vc'
+                    ? 'bg-purple-50/70 border-purple-400 ring-2 ring-purple-500/20'
+                    : 'bg-slate-50 border-slate-200 hover:border-slate-300'
+                }`}
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-bold text-slate-900 text-xs flex items-center space-x-1">
+                      <Building2 className="w-3.5 h-3.5 text-purple-600" />
+                      <span>Route to VC / Reg.</span>
+                    </span>
+                    <input
+                      type="radio"
+                      name="approvalRouting"
+                      checked={approvalRouting === 'route_vc'}
+                      onChange={() => setApprovalRouting('route_vc')}
+                      className="text-purple-600 cursor-pointer"
+                    />
+                  </div>
+                  <p className="text-[10px] text-slate-500 leading-relaxed">
+                    Bypasses academic review and sends directly to VC &amp; Registrar desk for formal sanction.
+                  </p>
+                </div>
+                <div className="mt-2 pt-2 border-t border-slate-200/60">
+                  <span className="text-[10px] font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200">
+                    Pending VC Sanction (Stage 3)
+                  </span>
+                </div>
+              </label>
+
+              {/* Option 3: Standard Academic Workflow */}
+              <label
+                onClick={() => setApprovalRouting('standard_academic')}
+                className={`p-3 rounded-xl border cursor-pointer select-none transition flex flex-col justify-between ${
+                  approvalRouting === 'standard_academic'
+                    ? 'bg-slate-100 border-slate-400 ring-2 ring-slate-400/20'
+                    : 'bg-slate-50 border-slate-200 hover:border-slate-300'
+                }`}
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-bold text-slate-900 text-xs flex items-center space-x-1">
+                      <GraduationCap className="w-3.5 h-3.5 text-slate-600" />
+                      <span>Academic Review</span>
+                    </span>
+                    <input
+                      type="radio"
+                      name="approvalRouting"
+                      checked={approvalRouting === 'standard_academic'}
+                      onChange={() => setApprovalRouting('standard_academic')}
+                      className="text-slate-600 cursor-pointer"
+                    />
+                  </div>
+                  <p className="text-[10px] text-slate-500 leading-relaxed">
+                    Standard route to Dean Academic for workload &amp; ratio review before reaching VC.
+                  </p>
+                </div>
+                <div className="mt-2 pt-2 border-t border-slate-200/60">
+                  <span className="text-[10px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+                    Dean Academic (Stage 1)
+                  </span>
+                </div>
+              </label>
+            </div>
+          </div>
+
           {/* Card 1: Cadre & Position Overview */}
-          <div className="bg-slate-50/70 p-4 rounded-xl border border-slate-200/80 space-y-3.5">
+          <div className="bg-slate-50/70 p-4 rounded-xl border border-slate-200/80 space-y-3">
             <div className="flex items-center justify-between border-b border-slate-200/60 pb-2">
               <span className="font-bold text-slate-800 uppercase tracking-wider text-[11px] flex items-center space-x-1.5">
                 <Briefcase className="w-3.5 h-3.5 text-blue-600" />
-                <span>1. Cadre & Designation</span>
+                <span>1. Cadre &amp; Designation</span>
               </span>
               {/* Cadre Segmented Pill */}
               <div className="inline-flex bg-white p-0.5 rounded-lg border border-slate-200 text-[11px] font-semibold">
                 <button
                   type="button"
                   onClick={() => setCadreType('Teaching')}
-                  className={`px-3 py-1 rounded-md transition ${
+                  className={`px-3 py-1 rounded-md transition cursor-pointer ${
                     cadreType === 'Teaching'
                       ? 'bg-blue-600 text-white shadow-2xs'
                       : 'text-slate-600 hover:text-slate-900'
@@ -165,7 +333,7 @@ export function NewRequestModal({
                 <button
                   type="button"
                   onClick={() => setCadreType('Non-Teaching')}
-                  className={`px-3 py-1 rounded-md transition ${
+                  className={`px-3 py-1 rounded-md transition cursor-pointer ${
                     cadreType === 'Non-Teaching'
                       ? 'bg-blue-600 text-white shadow-2xs'
                       : 'text-slate-600 hover:text-slate-900'
@@ -224,7 +392,7 @@ export function NewRequestModal({
               </div>
             </div>
 
-            {/* Positions & Budget Head */}
+            {/* Positions, Urgency & Budget Head */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
                 <label className="block font-semibold text-slate-700 mb-1">
@@ -234,7 +402,7 @@ export function NewRequestModal({
                   <button
                     type="button"
                     onClick={() => setNumberOfPositions(Math.max(1, numberOfPositions - 1))}
-                    className="p-2.5 bg-white border border-r-0 border-slate-200 rounded-l-xl text-slate-600 hover:bg-slate-100 transition"
+                    className="p-2.5 bg-white border border-r-0 border-slate-200 rounded-l-xl text-slate-600 hover:bg-slate-100 transition cursor-pointer"
                   >
                     <Minus className="w-3.5 h-3.5" />
                   </button>
@@ -250,14 +418,29 @@ export function NewRequestModal({
                   <button
                     type="button"
                     onClick={() => setNumberOfPositions(numberOfPositions + 1)}
-                    className="p-2.5 bg-white border border-l-0 border-slate-200 rounded-r-xl text-slate-600 hover:bg-slate-100 transition"
+                    className="p-2.5 bg-white border border-l-0 border-slate-200 rounded-r-xl text-slate-600 hover:bg-slate-100 transition cursor-pointer"
                   >
                     <Plus className="w-3.5 h-3.5" />
                   </button>
                 </div>
               </div>
 
-              <div className="sm:col-span-2">
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">
+                  Hiring Urgency:
+                </label>
+                <select
+                  value={priority}
+                  onChange={(e) => setPriority(e.target.value as any)}
+                  className="w-full bg-white border border-slate-200 rounded-xl p-2.5 font-medium text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                >
+                  <option value="Normal">Normal</option>
+                  <option value="High">High</option>
+                  <option value="Urgent">Urgent / Immediate</option>
+                </select>
+              </div>
+
+              <div>
                 <label className="block font-semibold text-slate-700 mb-1">
                   Budget Head / Package:
                 </label>
@@ -272,26 +455,26 @@ export function NewRequestModal({
             </div>
           </div>
 
-          {/* Card 2: Academic Workload Justification & Qualifications */}
-          <div className="bg-white p-4 rounded-xl border border-slate-200 space-y-3.5">
+          {/* Card 2: Workload Justification & Qualifications */}
+          <div className="bg-white p-4 rounded-xl border border-slate-200 space-y-3">
             <div className="border-b border-slate-100 pb-2">
               <span className="font-bold text-slate-800 uppercase tracking-wider text-[11px] flex items-center space-x-1.5">
                 <GraduationCap className="w-3.5 h-3.5 text-blue-600" />
-                <span>2. Workload Justification & Eligibility</span>
+                <span>2. Workload Justification &amp; Specifications</span>
               </span>
             </div>
 
             {/* Teaching Load Justification */}
             <div>
               <label className="block font-semibold text-slate-700 mb-1">
-                Teaching Load & Faculty Deficit Justification:
+                Requirement Justification:
               </label>
               <textarea
                 rows={2}
                 value={justification}
                 onChange={(e) => setJustification(e.target.value)}
-                placeholder="State student enrollment increase, credit-hour teaching load deficit, or statutory UGC/AICTE compliance norms..."
-                className="w-full border border-slate-200 rounded-xl p-3 text-xs text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none placeholder:text-slate-400 leading-relaxed"
+                placeholder="State enrollment increase, credit-hour teaching load deficit, or institutional expansion requirement..."
+                className="w-full border border-slate-200 rounded-xl p-2.5 text-xs text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none placeholder:text-slate-400 leading-relaxed"
                 required
               />
             </div>
@@ -305,13 +488,13 @@ export function NewRequestModal({
                 rows={2}
                 value={qualifications}
                 onChange={(e) => setQualifications(e.target.value)}
-                placeholder="e.g., Ph.D. in relevant discipline with First Class Master's degree; minimum 2 Scopus/UGC-CARE indexed publications..."
-                className="w-full border border-slate-200 rounded-xl p-3 text-xs text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none placeholder:text-slate-400 leading-relaxed"
+                placeholder="e.g. Ph.D. in relevant discipline with First Class Master's degree; minimum 2 Scopus/UGC-CARE publications..."
+                className="w-full border border-slate-200 rounded-xl p-2.5 text-xs text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none placeholder:text-slate-400 leading-relaxed"
                 required
               />
             </div>
 
-            {/* Experience with Quick Select Pills */}
+            {/* Experience */}
             <div>
               <div className="flex items-center justify-between mb-1">
                 <label className="block font-semibold text-slate-700">
@@ -324,7 +507,7 @@ export function NewRequestModal({
                       key={preset}
                       type="button"
                       onClick={() => setExperience(preset)}
-                      className={`px-2 py-0.5 rounded-md border transition ${
+                      className={`px-2 py-0.5 rounded-md border transition cursor-pointer ${
                         experience === preset
                           ? 'bg-blue-50 text-blue-700 border-blue-200 font-bold'
                           : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
@@ -343,28 +526,69 @@ export function NewRequestModal({
                 className="w-full border border-slate-200 rounded-xl p-2.5 font-medium text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none"
               />
             </div>
+
+            {/* Upload Job Requirement Document / JD File */}
+            <div className="pt-1">
+              <label className="block font-semibold text-slate-700 mb-1">
+                Upload Job Requirement Document / JD <span className="text-slate-400 font-normal">(Optional)</span>
+              </label>
+              {!jobDescriptionFileName ? (
+                <label className="border border-dashed border-slate-300 hover:border-blue-400 rounded-xl p-2.5 flex items-center justify-center space-x-2 cursor-pointer bg-slate-50/50 hover:bg-blue-50/30 transition">
+                  <UploadCloud className="w-3.5 h-3.5 text-blue-600" />
+                  <span className="text-xs font-medium text-slate-600">
+                    Upload Job Requirement Sheet / Specification (PDF or DOC)
+                  </span>
+                  <input
+                    type="file"
+                    accept=".pdf,.doc,.docx"
+                    onChange={handleJdUpload}
+                    className="hidden"
+                  />
+                </label>
+              ) : (
+                <div className="flex items-center justify-between px-3 py-2 bg-emerald-50 border border-emerald-200 rounded-xl">
+                  <div className="flex items-center space-x-2 min-w-0">
+                    <FileText className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span className="font-semibold text-emerald-950 text-xs truncate">{jobDescriptionFileName}</span>
+                    {jobDescriptionFileSize && (
+                      <span className="text-[10px] text-emerald-700 shrink-0">({jobDescriptionFileSize})</span>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setJobDescriptionFileName('');
+                      setJobDescriptionFileSize('');
+                    }}
+                    className="text-[11px] font-bold text-rose-600 hover:text-rose-800 hover:underline cursor-pointer ml-2"
+                  >
+                    Remove
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Footer buttons */}
           <div className="pt-2 flex items-center justify-between border-t border-slate-100">
             <span className="text-[11px] text-slate-500">
-              Dispatched directly to Dean Academic desk.
+              {routingSubtext}
             </span>
             <div className="flex items-center space-x-2">
               <button
                 type="button"
                 onClick={onClose}
                 disabled={isSubmitting}
-                className="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-900 border border-slate-200 rounded-xl hover:bg-slate-50 transition"
+                className="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-900 border border-slate-200 rounded-xl hover:bg-slate-50 transition cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="px-5 py-2.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-xs transition disabled:opacity-50 flex items-center space-x-1.5"
+                className="px-5 py-2.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-xs transition disabled:opacity-50 flex items-center space-x-1.5 cursor-pointer"
               >
-                <span>{isSubmitting ? 'Submitting...' : 'Submit to Dean Academic'}</span>
+                <span>{submitBtnLabel}</span>
                 <ChevronRight className="w-4 h-4" />
               </button>
             </div>

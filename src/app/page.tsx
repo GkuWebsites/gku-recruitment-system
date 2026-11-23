@@ -272,6 +272,7 @@ export default function HomePage() {
           defaultDepartment={currentUser.department}
           creatorName={currentUser.name}
           creatorEmail={currentUser.email}
+          userRole={currentUser.role}
         />
 
         {/* Modal 2: Step-by-Step Timeline with Remarks */}

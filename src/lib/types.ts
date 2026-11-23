@@ -186,6 +186,7 @@ export interface IHiringRequest {
   tentativeBudget: string;
   budgetAmountNumber?: number;
   urgency: 'Normal' | 'High' | 'Urgent';
+  jobDescriptionFile?: string;
   creator: {
     name: string;
     role: UserRole;
