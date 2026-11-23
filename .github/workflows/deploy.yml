@@ -67,33 +67,38 @@ jobs:
           ftp.login(user, passwd)
           print('Logged in successfully.')
 
-          # 1. Upload deploy.php to public_html (for web trigger)
-          try:
-              ftp.cwd('/public_html')
+          # Helper to safely navigate
+          def enter_dir(target):
+              for attempt in [target, target.strip('/'), '/' + target.strip('/')]:
+                  try:
+                      ftp.cwd(attempt)
+                      return True
+                  except Exception:
+                      pass
+              return False
+
+          # 1. Upload deploy.php to public_html
+          if enter_dir('public_html'):
+              print('Entered public_html')
               with open('deploy.php', 'rb') as f:
                   ftp.storbinary('STOR deploy.php', f)
-              print('deploy.php uploaded to /public_html/deploy.php')
-          except Exception as e:
-              print(f'public_html notice: {e}')
+              print('deploy.php uploaded to public_html/deploy.php')
+              ftp.cwd('..')
 
-          # 2. Upload gku-deploy.zip directly to gku-recruitment-system.git
-          try:
-              ftp.cwd('/gku-recruitment-system.git')
-          except Exception as e:
-              print(f'cwd to /gku-recruitment-system.git: {e}')
+          # 2. Upload to gku-recruitment-system.git
+          if enter_dir('gku-recruitment-system.git'):
+              print('Entered gku-recruitment-system.git')
+              print('Uploading gku-deploy.zip...')
+              with open('pkg_out/gku-deploy.zip', 'rb') as f:
+                  ftp.storbinary('STOR gku-deploy.zip', f)
+              print('gku-deploy.zip uploaded successfully!')
 
-          print('Uploading gku-deploy.zip...')
-          with open('pkg_out/gku-deploy.zip', 'rb') as f:
-              ftp.storbinary('STOR gku-deploy.zip', f)
-          print('gku-deploy.zip uploaded successfully!')
-
-          # 3. Also upload deploy.php to app root
-          try:
               with open('deploy.php', 'rb') as f:
                   ftp.storbinary('STOR deploy.php', f)
-              print('deploy.php uploaded to app root.')
-          except Exception as e:
-              print(f'app root deploy.php notice: {e}')
+              print('deploy.php uploaded to gku-recruitment-system.git')
+          else:
+              print('ERROR: Could not navigate to gku-recruitment-system.git directory!')
+              sys.exit(1)
 
           ftp.quit()
           print('FTP upload completed successfully.')

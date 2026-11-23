@@ -1,10 +1,8 @@
 <?php
 /**
- * Guru Kashi University - Automated Deployment Webhook
- * Extracts gku-deploy.zip and restarts Phusion Passenger.
+ * Guru Kashi University - Automated Deployment & Management Webhook
  */
 
-// 1. Authenticate Request
 $SECRET_TOKEN = 'gku_deploy_2026';
 $receivedToken = $_GET['token'] ?? $_POST['token'] ?? '';
 
@@ -12,99 +10,140 @@ header('Content-Type: application/json');
 
 if (!hash_equals($SECRET_TOKEN, $receivedToken)) {
     http_response_code(403);
+    echo json_encode(['status' => 'error', 'message' => 'Unauthorized']);
+    exit;
+}
+
+$currentUser = get_current_user();
+$homeDir = "/home/{$currentUser}";
+$appDir = "{$homeDir}/gku-recruitment-system.git";
+
+$action = $_GET['action'] ?? 'deploy';
+
+if ($action === 'inspect') {
+    $buildId = file_exists("{$appDir}/.next/BUILD_ID") ? trim(file_get_contents("{$appDir}/.next/BUILD_ID")) : 'not found';
+    $zipExists = file_exists("{$appDir}/gku-deploy.zip");
+    $zipSize = $zipExists ? filesize("{$appDir}/gku-deploy.zip") : 0;
+    
+    // Check passenger log
+    $passengerLog = '';
+    $logPath = "{$homeDir}/logs/passenger.log";
+    if (file_exists($logPath)) {
+        $lines = file($logPath);
+        $passengerLog = implode('', array_slice($lines, -15));
+    }
+
     echo json_encode([
-        'status' => 'error',
-        'message' => 'Unauthorized: Invalid or missing token.'
+        'status' => 'success',
+        'current_user' => $currentUser,
+        'app_dir' => $appDir,
+        'app_dir_exists' => is_dir($appDir),
+        'build_id' => $buildId,
+        'zip_exists' => $zipExists,
+        'zip_size' => $zipSize,
+        'passenger_log' => $passengerLog,
+        'timestamp' => date('Y-m-d H:i:s')
     ]);
     exit;
 }
 
-// 2. Locate App Directory and Zip File
-$candidates = [
-    '/home/prvmcqeftpe4/gku-recruitment-system.git',
-    dirname(__DIR__) . '/gku-recruitment-system.git',
-    __DIR__,
-    dirname(__DIR__)
+// 1. Locate zip file
+$zipCandidates = [
+    "{$appDir}/gku-deploy.zip",
+    __DIR__ . "/gku-deploy.zip",
+    "{$homeDir}/public_html/gku-deploy.zip",
+    "{$homeDir}/gku-deploy.zip"
 ];
 
-$appDir = null;
-foreach ($candidates as $candidate) {
-    if (is_dir($candidate) && (file_exists($candidate . '/gku-deploy.zip') || file_exists($candidate . '/server.js'))) {
-        $appDir = $candidate;
+$zipPath = null;
+foreach ($zipCandidates as $cand) {
+    if (file_exists($cand) && filesize($cand) > 1000000) {
+        $zipPath = $cand;
         break;
     }
 }
 
-if (!$appDir) {
-    $appDir = '/home/prvmcqeftpe4/gku-recruitment-system.git';
-}
-
-$zipPath = $appDir . '/gku-deploy.zip';
-
-// Also check current folder for zip
-if (!file_exists($zipPath) && file_exists(__DIR__ . '/gku-deploy.zip')) {
-    $zipPath = __DIR__ . '/gku-deploy.zip';
-}
-
-if (!file_exists($zipPath)) {
+if (!$zipPath) {
     http_response_code(404);
     echo json_encode([
         'status' => 'error',
-        'message' => 'gku-deploy.zip not found',
-        'searched_paths' => [
-            $appDir . '/gku-deploy.zip',
-            __DIR__ . '/gku-deploy.zip'
-        ]
+        'message' => 'gku-deploy.zip not found or invalid size',
+        'app_dir' => $appDir,
+        'searched' => $zipCandidates
     ]);
     exit;
 }
 
-// 3. Extract Zip Archive
+// 2. Clear stale Next.js cache directory to prevent serving old SSR HTML
+$cacheDir = "{$appDir}/.next/cache";
+if (is_dir($cacheDir)) {
+    try {
+        $it = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($cacheDir, RecursiveDirectoryIterator::SKIP_DOTS),
+            RecursiveIteratorIterator::CHILD_FIRST
+        );
+        foreach ($it as $f) {
+            if ($f->isDir()) {
+                @rmdir($f->getRealPath());
+            } else {
+                @unlink($f->getRealPath());
+            }
+        }
+        @rmdir($cacheDir);
+    } catch (Exception $e) {}
+}
+
+// 3. Extract Archive
 $extracted = false;
-$method = 'none';
+$method = '';
 
 if (class_exists('ZipArchive')) {
     $zip = new ZipArchive();
     if ($zip->open($zipPath) === TRUE) {
         $zip->extractTo($appDir);
-        $numFiles = $zip->numFiles;
+        $num = $zip->numFiles;
         $zip->close();
         $extracted = true;
-        $method = "ZipArchive ($numFiles files)";
+        $method = "ZipArchive ($num files)";
     }
 }
 
 if (!$extracted && function_exists('exec')) {
-    @exec("unzip -o " . escapeshellarg($zipPath) . " -d " . escapeshellarg($appDir), $output, $returnVar);
-    if ($returnVar === 0) {
+    @exec("unzip -o " . escapeshellarg($zipPath) . " -d " . escapeshellarg($appDir), $out, $ret);
+    if ($ret === 0) {
         $extracted = true;
-        $method = 'exec(unzip)';
+        $method = 'exec unzip';
     }
 }
 
 if (!$extracted) {
     http_response_code(500);
-    echo json_encode([
-        'status' => 'error',
-        'message' => 'Failed to extract zip file. Neither ZipArchive nor exec unzip succeeded.'
-    ]);
+    echo json_encode(['status' => 'error', 'message' => 'Zip extraction failed']);
     exit;
 }
 
-// Clean up zip to save storage
+// Clean up zip
 @unlink($zipPath);
 
 // 4. Signal Phusion Passenger to restart
-$tmpDir = $appDir . '/tmp';
+$tmpDir = "{$appDir}/tmp";
 if (!is_dir($tmpDir)) {
     @mkdir($tmpDir, 0755, true);
 }
-@touch($tmpDir . '/restart.txt');
+@touch("{$tmpDir}/restart.txt");
+
+// Kill active node passenger process so Passenger spawns fresh server.js immediately
+if (function_exists('exec')) {
+    @exec("pkill -9 -u {$currentUser} -f node");
+}
+
+$newBuildId = file_exists("{$appDir}/.next/BUILD_ID") ? trim(file_get_contents("{$appDir}/.next/BUILD_ID")) : 'unknown';
 
 echo json_encode([
     'status' => 'success',
-    'message' => 'GKU Recruitment System deployed and Passenger restart triggered successfully!',
+    'message' => 'Deployed successfully and restarted Phusion Passenger!',
     'method' => $method,
+    'new_build_id' => $newBuildId,
     'app_dir' => $appDir,
     'timestamp' => date('Y-m-d H:i:s')
 ]);
