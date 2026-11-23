@@ -20,6 +20,32 @@ $appDir = "{$homeDir}/gku-recruitment-system.git";
 
 $action = $_GET['action'] ?? 'deploy';
 
+if ($action === 'clean') {
+    // Completely wipe old .next folder and tmp/restart.txt
+    if (is_dir("{$appDir}/.next")) {
+        @exec("rm -rf " . escapeshellarg("{$appDir}/.next"));
+    }
+    // Also re-extract if gku-deploy.zip is available, or pull
+    $zipPath = "{$appDir}/gku-deploy.zip";
+    if (file_exists($zipPath)) {
+        $zip = new ZipArchive();
+        if ($zip->open($zipPath) === TRUE) {
+            $zip->extractTo($appDir);
+            $zip->close();
+        }
+    }
+    @touch("{$appDir}/tmp/restart.txt");
+    @exec("pkill -9 -u {$currentUser} -f node");
+    
+    echo json_encode([
+        'status' => 'success',
+        'message' => 'Cleaned .next completely and restarted',
+        'remaining_next' => is_dir("{$appDir}/.next"),
+        'build_id' => file_exists("{$appDir}/.next/BUILD_ID") ? trim(file_get_contents("{$appDir}/.next/BUILD_ID")) : 'none'
+    ]);
+    exit;
+}
+
 if ($action === 'inspect') {
     $buildId = file_exists("{$appDir}/.next/BUILD_ID") ? trim(file_get_contents("{$appDir}/.next/BUILD_ID")) : 'not found';
     $zipExists = file_exists("{$appDir}/gku-deploy.zip");
@@ -70,23 +96,9 @@ if (!$zipPath) {
     exit;
 }
 
-// 2. Clear stale Next.js cache directory to prevent serving old SSR HTML
-$cacheDir = "{$appDir}/.next/cache";
-if (is_dir($cacheDir)) {
-    try {
-        $it = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($cacheDir, RecursiveDirectoryIterator::SKIP_DOTS),
-            RecursiveIteratorIterator::CHILD_FIRST
-        );
-        foreach ($it as $f) {
-            if ($f->isDir()) {
-                @rmdir($f->getRealPath());
-            } else {
-                @unlink($f->getRealPath());
-            }
-        }
-        @rmdir($cacheDir);
-    } catch (Exception $e) {}
+// 2. Completely remove old .next directory to avoid stale route caches
+if (is_dir("{$appDir}/.next")) {
+    @exec("rm -rf " . escapeshellarg("{$appDir}/.next"));
 }
 
 // 3. Extract Archive
