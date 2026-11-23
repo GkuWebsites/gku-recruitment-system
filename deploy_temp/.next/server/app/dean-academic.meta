@@ -1,0 +1,36 @@
+{
+  "status": 200,
+  "headers": {
+    "link": "</recruitment/gku-logo.png>; rel=preload; as=\"image\"",
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/dean-academic/layout,_N_T_/dean-academic/page,_N_T_/dean-academic"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/dean-academic/__PAGE__"
+  ],
+  "prefetchHints": {
+    "hints": 49216,
+    "slots": {
+      "children": {
+        "hints": 49248,
+        "slots": {
+          "children": {
+            "hints": 49312,
+            "slots": null
+          }
+        }
+      }
+    }
+  },
+  "routeCache": {
+    "key": "/route-cache/APP_PAGE/bec21e40b737986cd28fa0f1b7e9a0a2a1a734c7f3bfdb2a360ed3cb1d82dcbd/$/dean-academic",
+    "owner": {
+      "kind": "APP_PAGE",
+      "sourceRoute": "/dean-academic/page"
+    },
+    "isFallback": false
+  }
+}
