@@ -1116,71 +1116,144 @@ export function HRDepartmentModule({
 
   return (
     <div className="space-y-6">
-      {/* Top Banner with Stats Bar */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center space-x-3.5">
-          <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-800">
-            <Users className="w-5 h-5" />
+      {/* 1. Clean Top Header Banner */}
+      <div className="bg-white border border-slate-200/90 rounded-2xl p-6 shadow-xs flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center space-x-4">
+          <div className="w-12 h-12 rounded-2xl bg-linear-to-br from-blue-600 to-indigo-800 flex items-center justify-center text-white shadow-xs">
+            <Users className="w-6 h-6" />
           </div>
           <div>
-            <h2 className="text-lg font-bold text-slate-900">
+            <h1 className="text-xl font-bold text-slate-900 tracking-tight">
               HR Talent Acquisition & Recruitment Pipeline
-            </h2>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Execute stage-by-stage recruitment: Post to media &rarr; Intake resumes &rarr; Coordinate interviews & Score &rarr; Issue offers & onboarding.
+            </h1>
+            <p className="text-xs text-slate-500 mt-1 font-medium">
+              Stage-by-stage recruitment: Post to media &rarr; Intake resumes &rarr; Coordinate interviews & Score &rarr; Shortlist & Issue offers &rarr; Induction.
             </p>
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
-          <div className="bg-blue-50 border border-blue-200 px-3 py-1.5 rounded-xl text-blue-950">
-            Approved: <strong>{approvedForPosting.length}</strong>
-          </div>
-          <div className="bg-indigo-50 border border-indigo-200 px-3 py-1.5 rounded-xl text-indigo-950">
-            Active Posted: <strong>{activePostedJobs.length}</strong>
-          </div>
-          <div className="bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-xl text-amber-950">
-            Interviews: <strong>{totalInterviewCandidates}</strong>
-          </div>
-          <div className="bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-xl text-emerald-950">
-            Shortlisted &amp; Offers: <strong>{totalShortlistedCandidates}</strong>
-          </div>
+        {onOpenNewModal && (
           <button
             type="button"
-            onClick={() => {
-              setActiveTab('archive');
-              setSearchQuery('');
-            }}
-            className="bg-purple-50 hover:bg-purple-100 border border-purple-200 px-3 py-1.5 rounded-xl text-purple-950 font-bold transition flex items-center space-x-1.5 cursor-pointer shadow-2xs"
-            title="Open Recruitment Archive & Records Cabinet"
+            onClick={onOpenNewModal}
+            className="inline-flex items-center space-x-2 bg-[#0f2d59] hover:bg-[#163f7a] text-white px-5 py-2.5 rounded-xl text-xs font-bold shadow-xs transition cursor-pointer"
           >
-            <FolderCheck className="w-3.5 h-3.5 text-purple-700" />
-            <span>Archive Cabinet: <strong>{archivedReqs.length}</strong></span>
+            <Plus className="w-4 h-4" />
+            <span>+ Create Requirement</span>
           </button>
+        )}
+      </div>
 
-          <button
-            type="button"
-            onClick={() => {
-              setIsDeptModalOpen(true);
-              setDeptError('');
-            }}
-            className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-3 py-1.5 rounded-xl font-bold transition flex items-center space-x-1.5 cursor-pointer shadow-xs"
-            title="Register a new academic department or faculty"
-          >
-            <Building2 className="w-3.5 h-3.5 text-blue-600" />
-            <span>+ Add Department</span>
-          </button>
+      {/* 2. Modern Executive Metric Cards Grid (Interactive KPI Boxes) */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
+        {/* Card 1: Approved for Media */}
+        <div
+          onClick={() => {
+            setActiveTab('approved');
+            setSearchQuery('');
+          }}
+          className={`bg-white border rounded-2xl p-4.5 transition cursor-pointer shadow-xs hover:shadow-md ${
+            activeTab === 'approved'
+              ? 'border-blue-500 ring-2 ring-blue-100 bg-blue-50/20'
+              : 'border-slate-200 hover:border-slate-300'
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold text-blue-700 uppercase tracking-wider">Approved</span>
+            <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center">
+              <Megaphone className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="text-2xl font-extrabold text-slate-900 mt-2">{approvedForPosting.length}</div>
+          <div className="text-[11px] text-slate-500 mt-0.5 font-medium">Awaiting Media Posting</div>
+        </div>
 
-          {onOpenNewModal && (
-            <button
-              type="button"
-              onClick={onOpenNewModal}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 rounded-xl font-bold transition flex items-center space-x-1.5 cursor-pointer shadow-xs"
-            >
-              <Plus className="w-4 h-4" />
-              <span>+ Create Requirement</span>
-            </button>
-          )}
+        {/* Card 2: Active Posted Jobs */}
+        <div
+          onClick={() => {
+            setActiveTab('posted');
+            setSearchQuery('');
+          }}
+          className={`bg-white border rounded-2xl p-4.5 transition cursor-pointer shadow-xs hover:shadow-md ${
+            activeTab === 'posted'
+              ? 'border-indigo-500 ring-2 ring-indigo-100 bg-indigo-50/20'
+              : 'border-slate-200 hover:border-slate-300'
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold text-indigo-700 uppercase tracking-wider">Active Intake</span>
+            <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-700 flex items-center justify-center">
+              <Briefcase className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="text-2xl font-extrabold text-slate-900 mt-2">{activePostedJobs.length}</div>
+          <div className="text-[11px] text-slate-500 mt-0.5 font-medium">Live Portal &amp; Resumes</div>
+        </div>
+
+        {/* Card 3: Interviews */}
+        <div
+          onClick={() => {
+            setActiveTab('interviews');
+            setSearchQuery('');
+          }}
+          className={`bg-white border rounded-2xl p-4.5 transition cursor-pointer shadow-xs hover:shadow-md ${
+            activeTab === 'interviews'
+              ? 'border-amber-500 ring-2 ring-amber-100 bg-amber-50/20'
+              : 'border-slate-200 hover:border-slate-300'
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold text-amber-700 uppercase tracking-wider">Interviews</span>
+            <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center">
+              <Calendar className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="text-2xl font-extrabold text-slate-900 mt-2">{totalInterviewCandidates}</div>
+          <div className="text-[11px] text-slate-500 mt-0.5 font-medium">Panel Scoring &amp; Review</div>
+        </div>
+
+        {/* Card 4: Shortlisted & Offers */}
+        <div
+          onClick={() => {
+            setActiveTab('offerLetters');
+            setSearchQuery('');
+          }}
+          className={`bg-white border rounded-2xl p-4.5 transition cursor-pointer shadow-xs hover:shadow-md ${
+            activeTab === 'offerLetters'
+              ? 'border-emerald-500 ring-2 ring-emerald-100 bg-emerald-50/20'
+              : 'border-slate-200 hover:border-slate-300'
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold text-emerald-700 uppercase tracking-wider">Shortlisted</span>
+            <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
+              <Award className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="text-2xl font-extrabold text-slate-900 mt-2">{totalShortlistedCandidates}</div>
+          <div className="text-[11px] text-slate-500 mt-0.5 font-medium">Offers &amp; Onboarding</div>
+        </div>
+
+        {/* Card 5: Archive Cabinet */}
+        <div
+          onClick={() => {
+            setActiveTab('archive');
+            setSearchQuery('');
+          }}
+          className={`bg-white border rounded-2xl p-4.5 transition cursor-pointer shadow-xs hover:shadow-md ${
+            activeTab === 'archive'
+              ? 'border-purple-500 ring-2 ring-purple-100 bg-purple-50/20'
+              : 'border-slate-200 hover:border-slate-300'
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold text-purple-700 uppercase tracking-wider">Archive</span>
+            <div className="w-8 h-8 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center">
+              <FolderCheck className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="text-2xl font-extrabold text-slate-900 mt-2">{archivedReqs.length}</div>
+          <div className="text-[11px] text-slate-500 mt-0.5 font-medium">Fulfilled &amp; History</div>
         </div>
       </div>
 

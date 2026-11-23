@@ -14,6 +14,7 @@ import { RequestDetailModal } from '@/components/RequestDetailModal';
 import { TimelineModal } from '@/components/TimelineModal';
 import { JobDetailsModal } from '@/components/JobDetailsModal';
 import { IHiringRequest, UserRole } from '@/lib/types';
+import { UserProfileHeaderMenu } from '@/components/UserProfileHeaderMenu';
 import { Lock, Mail, ArrowRight, ShieldCheck, CheckCircle2, AlertCircle, LogOut } from 'lucide-react';
 
 export default function HomePage() {
@@ -219,7 +220,11 @@ export default function HomePage() {
   if (currentUser.designation === 'Admin') {
     return (
       <div className="min-h-screen bg-[#f8fafc] text-slate-800 flex flex-col">
-        <AdminHeader adminName={currentUser.name} onLogout={handleLogout} />
+        <AdminHeader
+          adminName={currentUser.name}
+          adminEmail={currentUser.email}
+          onLogout={handleLogout}
+        />
         <main className="flex-1 w-full max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 py-8">
           <AdminUserDashboard />
         </main>
@@ -235,30 +240,20 @@ export default function HomePage() {
   ) {
     return (
       <div className="min-h-screen bg-[#f8fafc] text-slate-800 flex flex-col">
-        {/* Clean Header for Dean without dropdowns */}
+        {/* Clean Header for Dean/HOD with Profile Settings Dropdown */}
         <header className="w-full bg-white border-b border-slate-200 shadow-xs sticky top-0 z-40">
           <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 flex items-center justify-between h-20">
             <UniversityLogo />
             <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2.5 bg-slate-50 border border-slate-200 px-3.5 py-1.5 rounded-xl">
-                <div className="w-7 h-7 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-xs">
-                  {currentUser.name.charAt(0)}
-                </div>
-                <div className="text-left text-xs">
-                  <div className="font-bold text-slate-900 leading-tight">{currentUser.name}</div>
-                  <div className="text-[10px] font-semibold text-blue-700">
-                    {currentUser.designation} • {currentUser.department || 'Faculty'}
-                  </div>
-                </div>
-              </div>
-
-              <button
-                onClick={handleLogout}
-                className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:text-rose-700 hover:bg-rose-50 border border-slate-200 transition"
-              >
-                <LogOut className="w-3.5 h-3.5" />
-                <span>Sign Out</span>
-              </button>
+              <UserProfileHeaderMenu
+                name={currentUser.name}
+                email={currentUser.email}
+                designation={currentUser.designation}
+                department={currentUser.department || 'Faculty'}
+                onLogout={handleLogout}
+                badgeText={currentUser.designation === 'HOD' ? 'HOD' : currentUser.name.charAt(0)}
+                badgeBgColor="bg-blue-600"
+              />
             </div>
           </div>
         </header>
@@ -335,22 +330,15 @@ export default function HomePage() {
           <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 flex items-center justify-between h-20">
             <UniversityLogo />
             <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2.5 bg-purple-50 border border-purple-200 px-3.5 py-1.5 rounded-xl">
-                <div className="w-7 h-7 rounded-lg bg-purple-700 text-white flex items-center justify-center font-bold text-xs">
-                  {roleBadge}
-                </div>
-                <div className="text-left text-xs">
-                  <div className="font-bold text-slate-900 leading-tight">{currentUser.name}</div>
-                  <div className="text-[10px] font-semibold text-purple-700">{deskSubtitle}</div>
-                </div>
-              </div>
-              <button
-                onClick={handleLogout}
-                className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:text-rose-700 hover:bg-rose-50 border border-slate-200 transition"
-              >
-                <LogOut className="w-3.5 h-3.5" />
-                <span>Sign Out</span>
-              </button>
+              <UserProfileHeaderMenu
+                name={currentUser.name}
+                email={currentUser.email}
+                designation={currentUser.designation}
+                department={deskSubtitle}
+                onLogout={handleLogout}
+                badgeText={roleBadge}
+                badgeBgColor="bg-purple-700"
+              />
             </div>
           </div>
         </header>
@@ -388,22 +376,15 @@ export default function HomePage() {
           <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 flex items-center justify-between h-20">
             <UniversityLogo />
             <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2.5 bg-emerald-50 border border-emerald-200 px-3.5 py-1.5 rounded-xl">
-                <div className="w-7 h-7 rounded-lg bg-emerald-700 text-white flex items-center justify-center font-bold text-xs">
-                  HR
-                </div>
-                <div className="text-left text-xs">
-                  <div className="font-bold text-slate-900 leading-tight">{currentUser.name}</div>
-                  <div className="text-[10px] font-semibold text-emerald-700">Talent Acquisition Directorate</div>
-                </div>
-              </div>
-              <button
-                onClick={handleLogout}
-                className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:text-rose-700 hover:bg-rose-50 border border-slate-200 transition"
-              >
-                <LogOut className="w-3.5 h-3.5" />
-                <span>Sign Out</span>
-              </button>
+              <UserProfileHeaderMenu
+                name={currentUser.name}
+                email={currentUser.email}
+                designation={currentUser.designation}
+                department="Talent Acquisition Directorate"
+                onLogout={handleLogout}
+                badgeText="HR"
+                badgeBgColor="bg-emerald-700"
+              />
             </div>
           </div>
         </header>
@@ -439,22 +420,15 @@ export default function HomePage() {
         <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 flex items-center justify-between h-20">
           <UniversityLogo />
           <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2.5 bg-blue-50 border border-blue-200 px-3.5 py-1.5 rounded-xl">
-              <div className="w-7 h-7 rounded-lg bg-blue-700 text-white flex items-center justify-center font-bold text-xs">
-                DA
-              </div>
-              <div className="text-left text-xs">
-                <div className="font-bold text-slate-900 leading-tight">{currentUser.name}</div>
-                <div className="text-[10px] font-semibold text-blue-700">{currentUser.designation}</div>
-              </div>
-            </div>
-            <button
-              onClick={handleLogout}
-              className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:text-rose-700 hover:bg-rose-50 border border-slate-200 transition"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-              <span>Sign Out</span>
-            </button>
+            <UserProfileHeaderMenu
+              name={currentUser.name}
+              email={currentUser.email}
+              designation={currentUser.designation}
+              department={currentUser.department || 'Office of Dean Academic Affairs'}
+              onLogout={handleLogout}
+              badgeText="DA"
+              badgeBgColor="bg-blue-700"
+            />
           </div>
         </div>
       </header>
