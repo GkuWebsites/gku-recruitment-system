@@ -1,0 +1,96 @@
+========================================================================================
+GURU KASHI UNIVERSITY - RECRUITMENT MANAGEMENT SYSTEM LOGIN CREDENTIALS & WORKFLOW
+========================================================================================
+
+UNIVERSAL DEFAULT PASSWORD FOR ALL PROFILES: admin123
+
+Portal Login URL: http://localhost:3000
+
+========================================================================================
+UNIVERSITY RECRUITMENT HIERARCHY & WORKFLOW
+========================================================================================
+
+Stage 1: DEPARTMENT REQUISITION (Deans & Directors)
+  - Dean or Director raises a new hiring requirement for their faculty/department.
+  - Submits cadre type (Teaching / Non-Teaching), positions, workload justification, qualifications, and budget.
+  - Action: "Submit to Dean Academic".
+  - Visibility: At this stage, only Dean Academic and HR see that an application was submitted; VC/Registrar does NOT see it yet.
+
+Stage 2: ACADEMIC SCRUTINY (Dean Academic)
+  - Dean Academic reviews the teaching load, student-faculty ratio, and UGC/AICTE compliance.
+  - Actions:
+      1) Approve & Forward to VC / Registrar for executive & financial sanction.
+      2) Return for Clarification (with query remarks to Dean).
+      3) Reject Requisition.
+
+Stage 3: EXECUTIVE & ADMINISTRATIVE SANCTION (VC / Registrar)
+  - Once approved by Dean Academic, the requisition lands on the VC / Registrar desk.
+  - Reviews institutional priority, post clearance, and sanction budget.
+  - Action: Grant Executive Sanction & Forward to HR Directorate.
+
+Stage 4: ACTIVE SOURCING & JOB POSTING (HR Department)
+  - HR receives the sanctioned requisition.
+  - Posts the job opening on official channels: Indeed, LinkedIn, Newspapers, University Website, etc.
+  - Tracks advertisement spend per channel.
+  - Uploads received candidate resumes and applicant profiles.
+
+Stage 5: INTERVIEW PANEL & SELECTION (HR Department & Selection Committee)
+  - HR schedules interviews with panel members (panel names, interview date, venue/mode).
+  - Panel conducts interviews, scores candidates (subject knowledge, research, teaching aptitude, communication).
+  - Recommends selected candidates, issues offer letters, verifies documents, and completes joining.
+
+========================================================================================
+ALL ACTIVE USER ACCOUNTS (1 Profile per Designation)
+========================================================================================
+
+1. SYSTEM ADMINISTRATOR
+   Name:        System Administrator
+   Email:       admin@gurukashiuniv.edu.in
+   Password:    admin123
+   Designation: Admin
+   Department:  Administration & IT Cell
+   Function:    User provisioning, edit profiles, credentials & system configuration.
+
+2. FACULTY DEAN
+   Name:        Dr. Harpreet Singh
+   Email:       dean@gurukashiuniv.edu.in
+   Password:    admin123
+   Designation: Dean
+   Department:  Computer Science & Engineering
+   Function:    Stage 1 - Raise hiring requisitions and track department workforce needs.
+
+3. DEAN ACADEMIC
+   Name:        Prof. (Dr.) Balwant Singh
+   Email:       deanacademic@gurukashiuniv.edu.in
+   Password:    admin123
+   Designation: Dean Academic
+   Department:  Academic Council & Scrutiny
+   Function:    Stage 2 - Scrutinize requisitions from Deans & forward approved to VC/Registrar.
+
+4. SCHOOL DIRECTOR
+   Name:        Dr. Maninder Kaur
+   Email:       director@gurukashiuniv.edu.in
+   Password:    admin123
+   Designation: Director
+   Department:  Management Studies
+   Function:    Stage 1 - Raise hiring requisitions for School of Management.
+
+5. VC / REGISTRAR
+   Name:        Prof. (Dr.) Gurinder Singh
+   Email:       vc@gurukashiuniv.edu.in
+   Password:    admin123
+   Designation: VC / Registrar
+   Department:  Vice Chancellor's Secretariat
+   Function:    Stage 3 - Administrative sanction & budget clearance after Dean Academic review.
+
+6. HR DEPARTMENT
+   Name:        Mr. Vikram Sharma
+   Email:       hr@gurukashiuniv.edu.in
+   Password:    admin123
+   Designation: HR
+   Department:  HR Recruitment Cell
+   Function:    Stage 4 & 5 - Job postings, media spend, resume uploads, interview scheduling & joining.
+
+========================================================================================
+Total Active Profiles: 6
+========================================================================================

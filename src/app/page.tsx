@@ -1,69 +1,494 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
-  return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+import React, { useState, useEffect } from 'react';
+import { IUserProfile } from '@/lib/models/UserProfile';
+import { AdminHeader } from '@/components/AdminHeader';
+import { AdminUserDashboard } from '@/components/AdminUserDashboard';
+import { UniversityLogo } from '@/components/UniversityLogo';
+import { DeanDepartmentModule } from '@/components/profiles/DeanDepartmentModule';
+import { VCRegistrarModule } from '@/components/profiles/VCRegistrarModule';
+import { HRDepartmentModule } from '@/components/profiles/HRDepartmentModule';
+import { DeanAcademicModule } from '@/components/profiles/DeanAcademicModule';
+import { NewRequestModal } from '@/components/NewRequestModal';
+import { RequestDetailModal } from '@/components/RequestDetailModal';
+import { TimelineModal } from '@/components/TimelineModal';
+import { JobDetailsModal } from '@/components/JobDetailsModal';
+import { IHiringRequest, UserRole } from '@/lib/types';
+import { Lock, Mail, ArrowRight, ShieldCheck, CheckCircle2, AlertCircle, LogOut } from 'lucide-react';
+
+export default function HomePage() {
+  const [currentUser, setCurrentUser] = useState<IUserProfile | null>(null);
+  const [isInitializing, setIsInitializing] = useState(true);
+
+  // Login form state
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loginError, setLoginError] = useState('');
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+
+  // Shared state for Department/Dean views
+  const [requests, setRequests] = useState<IHiringRequest[]>([]);
+  const [selectedRequest, setSelectedRequest] = useState<IHiringRequest | null>(null);
+  const [selectedTimelineRequest, setSelectedTimelineRequest] = useState<IHiringRequest | null>(null);
+  const [selectedJobDetailsRequest, setSelectedJobDetailsRequest] = useState<IHiringRequest | null>(null);
+  const [isNewModalOpen, setIsNewModalOpen] = useState(false);
+
+  // Restore session from localStorage on initial render
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('gku_recruitment_user');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed && parsed.email) {
+          setCurrentUser(parsed);
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsInitializing(false);
+    }
+  }, []);
+
+  // Fetch requisitions when logged in
+  const fetchRequests = async () => {
+    if (!currentUser) return;
+    try {
+      // Map designation to query role
+      const roleQuery = currentUser.designation === 'Dean' || currentUser.designation === 'Director'
+        ? 'Department / Dean'
+        : currentUser.designation === 'Dean Academic'
+        ? 'Dean Academic'
+        : currentUser.designation === 'VC / Registrar'
+        ? 'VC / Registrar'
+        : currentUser.designation === 'HR'
+        ? 'HR Department'
+        : 'Dean Academic';
+
+      const res = await fetch(`/api/requests?role=${encodeURIComponent(roleQuery)}`);
+      const data = await res.json();
+      if (data.success) {
+        setRequests(data.data || []);
+      }
+    } catch (err) {
+      console.error('Error fetching requisitions:', err);
+    }
+  };
+
+  useEffect(() => {
+    if (currentUser) {
+      fetchRequests();
+    }
+  }, [currentUser]);
+
+  // Handle Login submission
+  const handleLogin = async (e?: React.FormEvent, presetEmail?: string, presetPass?: string) => {
+    if (e) e.preventDefault();
+    setLoginError('');
+    setIsLoggingIn(true);
+
+    const loginEmail = presetEmail || email;
+    const loginPassword = presetPass || password;
+
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: loginEmail.trim(), password: loginPassword.trim() })
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Authentication failed');
+      }
+
+      const user = data.user as IUserProfile;
+      setCurrentUser(user);
+      localStorage.setItem('gku_recruitment_user', JSON.stringify(user));
+    } catch (err: unknown) {
+      setLoginError((err as Error).message || 'Invalid credentials');
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+
+  // Handle Logout
+  const handleLogout = () => {
+    setCurrentUser(null);
+    localStorage.removeItem('gku_recruitment_user');
+    setEmail('');
+    setPassword('');
+  };
+
+  if (isInitializing) {
+    return (
+      <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center">
+        <div className="text-slate-400 text-xs font-semibold animate-pulse">
+          Loading Guru Kashi University Recruitment Portal...
+        </div>
+      </div>
+    );
+  }
+
+  // 1. IF NOT LOGGED IN: Render Clean Institutional Authentication Page
+  if (!currentUser) {
+    return (
+      <div className="min-h-screen bg-[#f8fafc] flex flex-col justify-between text-slate-800">
+        {/* Simple Institutional Header */}
+        <header className="w-full bg-white border-b border-slate-200">
+          <div className="max-w-6xl mx-auto px-4 sm:px-8 py-4 flex items-center justify-between">
+            <UniversityLogo />
+            <div className="hidden sm:flex items-center space-x-2 text-xs font-bold text-slate-600">
+              <ShieldCheck className="w-4 h-4 text-blue-600" />
+              <span>Official Institutional Recruitment Portal</span>
+            </div>
+          </div>
+        </header>
+
+        {/* Center Login Box */}
+        <main className="flex-1 flex items-center justify-center p-4 sm:p-6">
+          <div className="max-w-md w-full bg-white border border-slate-200/90 rounded-2xl shadow-xs p-8 space-y-6">
+            <div>
+              <h1 className="text-xl font-bold text-slate-900 tracking-tight">
+                Institutional Sign In
+              </h1>
+              <p className="text-xs text-slate-500 mt-1">
+                Enter your official university credentials to access your designated desk.
+              </p>
+            </div>
+
+            {loginError && (
+              <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl text-xs font-semibold flex items-center space-x-2">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{loginError}</span>
+              </div>
+            )}
+
+            <form onSubmit={(e) => handleLogin(e)} className="space-y-4 text-xs">
+              <div>
+                <label className="block font-bold text-slate-700 uppercase tracking-wider text-[11px] mb-1.5">
+                  Official Email Address
+                </label>
+                <div className="relative">
+                  <Mail className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="e.g. admin@gurukashiuniv.edu.in"
+                    className="w-full pl-9 pr-3 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-800 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 uppercase tracking-wider text-[11px] mb-1.5">
+                  Password
+                </label>
+                <div className="relative">
+                  <Lock className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
+                  <input
+                    type="password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full pl-9 pr-3 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-800 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isLoggingIn}
+                className="w-full bg-[#0f2d59] hover:bg-[#163f7a] text-white py-2.5 rounded-xl font-bold text-xs flex items-center justify-center space-x-2 shadow-xs transition disabled:opacity-50"
+              >
+                <span>{isLoggingIn ? 'Verifying...' : 'Sign In to Portal'}</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </form>
+
+            {/* Quick 1-Click Admin Access Helper */}
+            <div className="pt-4 border-t border-slate-100">
+              <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+                Default Super Admin Credentials
+              </div>
+              <button
+                type="button"
+                onClick={() => handleLogin(undefined, 'admin@gurukashiuniv.edu.in', 'admin123')}
+                disabled={isLoggingIn}
+                className="w-full p-3 bg-slate-50 hover:bg-blue-50/60 border border-slate-200 hover:border-blue-200 rounded-xl text-left transition flex items-center justify-between"
+              >
+                <div className="text-xs">
+                  <div className="font-bold text-slate-900">One-Click Super Admin Login</div>
+                  <div className="text-[11px] text-slate-500 font-mono mt-0.5">
+                    admin@gurukashiuniv.edu.in / admin123
+                  </div>
+                </div>
+                <span className="text-xs font-bold text-blue-700 bg-white border border-blue-200 px-2 py-1 rounded-lg">
+                  Sign In
+                </span>
+              </button>
+            </div>
+          </div>
+        </main>
+
+        {/* Footer */}
+        <footer className="w-full bg-white border-t border-slate-200 py-3 text-center text-xs text-slate-500 font-medium">
+          Guru Kashi University • Talwandi Sabo, Bathinda, Punjab • Recruitment & Academic Governance System
+        </footer>
+      </div>
+    );
+  }
+
+  // 2. IF LOGGED IN AS ADMIN: Clean Admin User Management Dashboard
+  if (currentUser.designation === 'Admin') {
+    return (
+      <div className="min-h-screen bg-[#f8fafc] text-slate-800 flex flex-col">
+        <AdminHeader adminName={currentUser.name} onLogout={handleLogout} />
+        <main className="flex-1 w-full max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 py-8">
+          <AdminUserDashboard />
+        </main>
+      </div>
+    );
+  }
+
+  // 3. IF LOGGED IN AS DEAN / DIRECTOR: Dedicated Dean Workspace
+  if (currentUser.designation === 'Dean' || currentUser.designation === 'Director') {
+    return (
+      <div className="min-h-screen bg-[#f8fafc] text-slate-800 flex flex-col">
+        {/* Clean Header for Dean without dropdowns */}
+        <header className="w-full bg-white border-b border-slate-200 shadow-xs sticky top-0 z-40">
+          <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 flex items-center justify-between h-20">
+            <UniversityLogo />
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2.5 bg-slate-50 border border-slate-200 px-3.5 py-1.5 rounded-xl">
+                <div className="w-7 h-7 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-xs">
+                  {currentUser.name.charAt(0)}
+                </div>
+                <div className="text-left text-xs">
+                  <div className="font-bold text-slate-900 leading-tight">{currentUser.name}</div>
+                  <div className="text-[10px] font-semibold text-blue-700">
+                    {currentUser.designation} • {currentUser.department || 'Faculty'}
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={handleLogout}
+                className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:text-rose-700 hover:bg-rose-50 border border-slate-200 transition"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span>Sign Out</span>
+              </button>
+            </div>
+          </div>
+        </header>
+
+        <main className="flex-1 w-full max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 py-8">
+          <DeanDepartmentModule
+            requests={requests}
+            onSelectRequest={(r) => setSelectedJobDetailsRequest(r)}
+            onOpenTimeline={(r) => setSelectedTimelineRequest(r)}
+            onOpenNewModal={() => setIsNewModalOpen(true)}
+            onRefresh={fetchRequests}
+            currentUser={currentUser}
+          />
+        </main>
+
+        {/* Modal 1: Raise Requisition Modal */}
+        <NewRequestModal
+          isOpen={isNewModalOpen}
+          onClose={() => setIsNewModalOpen(false)}
+          onSuccess={() => {
+            setIsNewModalOpen(false);
+            fetchRequests();
+          }}
+          defaultDepartment={currentUser.department}
+          creatorName={currentUser.name}
+          creatorEmail={currentUser.email}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+
+        {/* Modal 2: Step-by-Step Timeline with Remarks */}
+        {selectedTimelineRequest && (
+          <TimelineModal
+            isOpen={!!selectedTimelineRequest}
+            request={selectedTimelineRequest}
+            onClose={() => setSelectedTimelineRequest(null)}
+            currentUser={currentUser}
+          />
+        )}
+
+        {/* Modal 3: Pure Job Details with Edit Option (until reviewed by Dean Academic) */}
+        {selectedJobDetailsRequest && (
+          <JobDetailsModal
+            isOpen={!!selectedJobDetailsRequest}
+            request={selectedJobDetailsRequest}
+            onClose={() => setSelectedJobDetailsRequest(null)}
+            onSuccess={() => {
+              setSelectedJobDetailsRequest(null);
+              fetchRequests();
+            }}
+          />
+        )}
+      </div>
+    );
+  }
+
+  // 4. IF LOGGED IN AS VC / REGISTRAR
+  if (currentUser.designation === 'VC / Registrar') {
+    return (
+      <div className="min-h-screen bg-[#f8fafc] text-slate-800 flex flex-col">
+        <header className="w-full bg-white border-b border-slate-200 shadow-xs sticky top-0 z-40">
+          <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 flex items-center justify-between h-20">
+            <UniversityLogo />
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2.5 bg-purple-50 border border-purple-200 px-3.5 py-1.5 rounded-xl">
+                <div className="w-7 h-7 rounded-lg bg-purple-700 text-white flex items-center justify-center font-bold text-xs">
+                  VC
+                </div>
+                <div className="text-left text-xs">
+                  <div className="font-bold text-slate-900 leading-tight">{currentUser.name}</div>
+                  <div className="text-[10px] font-semibold text-purple-700">Executive Sanction Desk</div>
+                </div>
+              </div>
+              <button
+                onClick={handleLogout}
+                className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:text-rose-700 hover:bg-rose-50 border border-slate-200 transition"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span>Sign Out</span>
+              </button>
+            </div>
+          </div>
+        </header>
+
+        <main className="flex-1 w-full max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 py-8">
+          <VCRegistrarModule
+            requests={requests}
+            onSelectRequest={(r) => setSelectedRequest(r)}
+            onRefresh={fetchRequests}
+            currentUser={currentUser}
+          />
+        </main>
+
+        {selectedRequest && (
+          <RequestDetailModal
+            isOpen={!!selectedRequest}
+            request={selectedRequest}
+            onClose={() => setSelectedRequest(null)}
+            currentRole="VC / Registrar"
+            onActionComplete={() => {
+              setSelectedRequest(null);
+              fetchRequests();
+            }}
+          />
+        )}
+      </div>
+    );
+  }
+
+  // 5. IF LOGGED IN AS HR
+  if (currentUser.designation === 'HR') {
+    return (
+      <div className="min-h-screen bg-[#f8fafc] text-slate-800 flex flex-col">
+        <header className="w-full bg-white border-b border-slate-200 shadow-xs sticky top-0 z-40">
+          <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 flex items-center justify-between h-20">
+            <UniversityLogo />
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2.5 bg-emerald-50 border border-emerald-200 px-3.5 py-1.5 rounded-xl">
+                <div className="w-7 h-7 rounded-lg bg-emerald-700 text-white flex items-center justify-center font-bold text-xs">
+                  HR
+                </div>
+                <div className="text-left text-xs">
+                  <div className="font-bold text-slate-900 leading-tight">{currentUser.name}</div>
+                  <div className="text-[10px] font-semibold text-emerald-700">Talent Acquisition Directorate</div>
+                </div>
+              </div>
+              <button
+                onClick={handleLogout}
+                className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:text-rose-700 hover:bg-rose-50 border border-slate-200 transition"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span>Sign Out</span>
+              </button>
+            </div>
+          </div>
+        </header>
+
+        <main className="flex-1 w-full max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 py-8">
+          <HRDepartmentModule
+            requests={requests}
+            onSelectRequest={(r) => setSelectedRequest(r)}
+            onRefresh={fetchRequests}
+          />
+        </main>
+
+        {selectedRequest && (
+          <RequestDetailModal
+            isOpen={!!selectedRequest}
+            request={selectedRequest}
+            onClose={() => setSelectedRequest(null)}
+            currentRole="HR Department"
+            onActionComplete={() => {
+              setSelectedRequest(null);
+              fetchRequests();
+            }}
+          />
+        )}
+      </div>
+    );
+  }
+
+  // 6. DEFAULT FALLBACK: Dean Academic
+  return (
+    <div className="min-h-screen bg-[#f8fafc] text-slate-800 flex flex-col">
+      <header className="w-full bg-white border-b border-slate-200 shadow-xs sticky top-0 z-40">
+        <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 flex items-center justify-between h-20">
+          <UniversityLogo />
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2.5 bg-blue-50 border border-blue-200 px-3.5 py-1.5 rounded-xl">
+              <div className="w-7 h-7 rounded-lg bg-blue-700 text-white flex items-center justify-center font-bold text-xs">
+                DA
+              </div>
+              <div className="text-left text-xs">
+                <div className="font-bold text-slate-900 leading-tight">{currentUser.name}</div>
+                <div className="text-[10px] font-semibold text-blue-700">{currentUser.designation}</div>
+              </div>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:text-rose-700 hover:bg-rose-50 border border-slate-200 transition"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+              <LogOut className="w-3.5 h-3.5" />
+              <span>Sign Out</span>
+            </button>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+      </header>
+
+      <main className="flex-1 w-full max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 py-8">
+        <DeanAcademicModule
+          requests={requests}
+          onSelectRequest={(r) => setSelectedRequest(r)}
+          onRefresh={fetchRequests}
+          currentUser={currentUser}
+        />
       </main>
+
+      {selectedRequest && (
+        <RequestDetailModal
+          isOpen={!!selectedRequest}
+          request={selectedRequest}
+          onClose={() => setSelectedRequest(null)}
+          currentRole="Dean Academic"
+          onActionComplete={() => {
+            setSelectedRequest(null);
+            fetchRequests();
+          }}
+        />
+      )}
     </div>
   );
 }
