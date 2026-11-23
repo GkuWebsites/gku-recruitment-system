@@ -1,25 +1,72 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/db';
-import { UserProfileModel } from '@/lib/models/UserProfile';
+import { UserProfileModel, UserDesignation } from '@/lib/models/UserProfile';
 
-// Default Administrator Credentials
-const DEFAULT_ADMIN: {
+// Default Institutional Accounts for immediate system access
+const DEFAULT_ACCOUNTS: {
   name: string;
   email: string;
   password: string;
-  designation: 'Admin';
+  designation: UserDesignation;
   department: string;
   phone: string;
-  status: 'Active';
-} = {
-  name: 'System Administrator',
-  email: 'admin@gku.ac.in',
-  password: 'admin123',
-  designation: 'Admin',
-  department: 'Administration & IT Cell',
-  phone: '+91 98721 00001',
-  status: 'Active'
-};
+  status: 'Active' | 'Inactive';
+}[] = [
+  {
+    name: 'System Administrator',
+    email: 'admin@gku.ac.in',
+    password: 'admin123',
+    designation: 'Admin',
+    department: 'Administration & IT Cell',
+    phone: '+91 98721 00001',
+    status: 'Active'
+  },
+  {
+    name: 'Central HR Directorate',
+    email: 'hr@gku.ac.in',
+    password: 'admin123',
+    designation: 'HR',
+    department: 'Human Resources Directorate',
+    phone: '+91 98721 00002',
+    status: 'Active'
+  },
+  {
+    name: 'Dean Academic Affairs',
+    email: 'deanacademic@gku.ac.in',
+    password: 'admin123',
+    designation: 'Dean Academic',
+    department: 'Office of Dean Academic Affairs',
+    phone: '+91 98721 00003',
+    status: 'Active'
+  },
+  {
+    name: 'Dean Faculty of Sciences & Technology',
+    email: 'dean@gku.ac.in',
+    password: 'admin123',
+    designation: 'Dean',
+    department: 'Faculty of Engineering & Technology',
+    phone: '+91 98721 00004',
+    status: 'Active'
+  },
+  {
+    name: 'Vice Chancellor & Registrar Secretariat',
+    email: 'vc@gku.ac.in',
+    password: 'admin123',
+    designation: 'VC / Registrar',
+    department: 'Vice Chancellor Secretariat',
+    phone: '+91 98721 00005',
+    status: 'Active'
+  },
+  {
+    name: 'Campus Director',
+    email: 'director@gku.ac.in',
+    password: 'admin123',
+    designation: 'Director',
+    department: 'Directorate of Academic Institutions',
+    phone: '+91 98721 00006',
+    status: 'Active'
+  }
+];
 
 export async function POST(req: NextRequest) {
   try {
@@ -34,13 +81,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Ensure default admin exists
-    const adminExists = await UserProfileModel.findOne({ email: DEFAULT_ADMIN.email });
-    if (!adminExists) {
-      await UserProfileModel.create(DEFAULT_ADMIN);
-    }
-
     const cleanEmail = email.toLowerCase().trim();
+
+    // Ensure default institutional account exists if requested
+    const defaultAcc = DEFAULT_ACCOUNTS.find(a => a.email === cleanEmail);
+    if (defaultAcc) {
+      const exists = await UserProfileModel.findOne({ email: cleanEmail });
+      if (!exists) {
+        await UserProfileModel.create(defaultAcc);
+      }
+    }
     const user = await UserProfileModel.findOne({ email: cleanEmail });
 
     if (!user) {

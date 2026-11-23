@@ -19,28 +19,35 @@ if (!global.mongooseCache) {
 }
 
 export async function connectToDatabase(): Promise<typeof mongoose> {
-  const uri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/gku_recruitment';
+  const primaryUri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/gku_recruitment';
+  const fallbackUri = 'mongodb://127.0.0.1:27017/gku_recruitment';
 
-  if (cached.conn) {
+  if (cached.conn && cached.conn.connection.readyState === 1) {
     return cached.conn;
   }
 
-  if (!cached.promise) {
-    const opts: mongoose.ConnectOptions = {
-      bufferCommands: false,
-      serverSelectionTimeoutMS: 10000,
-    };
+  const opts: mongoose.ConnectOptions = {
+    bufferCommands: false,
+    serverSelectionTimeoutMS: 3000,
+  };
 
-    cached.promise = mongoose.connect(uri, opts).then((mongooseInstance) => {
-      return mongooseInstance;
-    });
-  }
-
+  // If running in production with an external Atlas URI that might be blocked by firewall,
+  // try primary first, then fallback to local daemon
   try {
-    cached.conn = await cached.promise;
+    const conn = await mongoose.connect(primaryUri, opts);
+    cached.conn = conn;
     return cached.conn;
-  } catch (e) {
-    cached.promise = null;
-    throw e;
+  } catch (primaryErr) {
+    if (primaryUri !== fallbackUri) {
+      console.warn('External MongoDB connection timed out or blocked. Falling back to local MongoDB daemon (127.0.0.1:27017)...');
+      try {
+        const fallbackConn = await mongoose.connect(fallbackUri, opts);
+        cached.conn = fallbackConn;
+        return cached.conn;
+      } catch (fallbackErr) {
+        throw primaryErr;
+      }
+    }
+    throw primaryErr;
   }
 }
