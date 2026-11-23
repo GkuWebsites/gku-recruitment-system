@@ -47,40 +47,66 @@ jobs:
           mkdir -p pkg_out
           cd deploy_out && zip -q -r ../pkg_out/gku-deploy.zip . && cd ..
 
-          # Prepare webhook payload
-          mkdir -p webhook_out
-          cp deploy.php webhook_out/deploy.php
-          # Also copy deploy.php to pkg_out
-          cp deploy.php pkg_out/deploy.php
+      - name: Fast Direct FTP Upload
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+        run: |
+          python3 -c "
+          import os, sys
+          from ftplib import FTP
 
-      - name: Upload Webhook Helper to public_html
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        continue-on-error: true
-        with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: /public_html/
-          local-dir: ./webhook_out/
+          raw_server = os.environ.get('FTP_SERVER', '').strip()
+          server = raw_server.replace('ftp://', '').replace('http://', '').replace('https://', '').strip('/')
+          user = os.environ.get('FTP_USERNAME', '').strip()
+          passwd = os.environ.get('FTP_PASSWORD', '').strip()
 
-      - name: Upload Single Deployment Package to Node App Directory
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: /gku-recruitment-system.git/
-          local-dir: ./pkg_out/
+          print(f'Connecting to FTP: {server} as {user}...')
+          ftp = FTP(server, timeout=120)
+          ftp.login(user, passwd)
+          print('Logged in successfully.')
+
+          # 1. Upload deploy.php to public_html (for web trigger)
+          try:
+              ftp.cwd('/public_html')
+              with open('deploy.php', 'rb') as f:
+                  ftp.storbinary('STOR deploy.php', f)
+              print('deploy.php uploaded to /public_html/deploy.php')
+          except Exception as e:
+              print(f'public_html notice: {e}')
+
+          # 2. Upload gku-deploy.zip directly to gku-recruitment-system.git
+          try:
+              ftp.cwd('/gku-recruitment-system.git')
+          except Exception as e:
+              print(f'cwd to /gku-recruitment-system.git: {e}')
+
+          print('Uploading gku-deploy.zip...')
+          with open('pkg_out/gku-deploy.zip', 'rb') as f:
+              ftp.storbinary('STOR gku-deploy.zip', f)
+          print('gku-deploy.zip uploaded successfully!')
+
+          # 3. Also upload deploy.php to app root
+          try:
+              with open('deploy.php', 'rb') as f:
+                  ftp.storbinary('STOR deploy.php', f)
+              print('deploy.php uploaded to app root.')
+          except Exception as e:
+              print(f'app root deploy.php notice: {e}')
+
+          ftp.quit()
+          print('FTP upload completed successfully.')
+          "
 
       - name: Trigger Server Extraction & Phusion Passenger Restart
         run: |
           echo "Triggering deployment webhook..."
-          # Try primary temp domain endpoint
-          RES1=$(curl -k -s "http://a7n.f1f.mytemp.website/deploy.php?token=gku_deploy_2026" || echo "failed")
-          echo "Trigger Result (mytemp.website): $RES1"
+          RES1=$(curl -k -s "http://a7n.f1f.mytemp.website/deploy.php?token=gku_deploy_2026")
+          echo "Trigger Result: $RES1"
           
-          # If not yet extracted, try hrm.gku.ac.in directly
           if [[ "$RES1" != *"success"* ]]; then
-            RES2=$(curl -k -s "https://hrm.gku.ac.in/deploy.php?token=gku_deploy_2026" || echo "failed")
-            echo "Trigger Result (hrm.gku.ac.in): $RES2"
+            echo "Trying alternate trigger at hrm.gku.ac.in..."
+            RES2=$(curl -k -s "https://hrm.gku.ac.in/deploy.php?token=gku_deploy_2026")
+            echo "Alternate Result: $RES2"
           fi
