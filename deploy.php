@@ -58,15 +58,17 @@ if ($action === 'clean') {
 
 if ($action === 'test_ports') {
     $tests = [
+        ['127.0.0.1', 27017],
+        ['127.0.0.1', 3306],
         ['google.com', 80],
         ['google.com', 443],
-        ['1.1.1.1', 53],
         ['portquiz.net', 80],
         ['portquiz.net', 443],
         ['portquiz.net', 27017],
-        ['portquiz.net', 8080],
     ];
     $results = [];
+    $uname = function_exists('shell_exec') ? @shell_exec('uname -a') : 'no shell_exec';
+    $mongodCheck = function_exists('shell_exec') ? @shell_exec('which mongod 2>&1') : 'no shell_exec';
     foreach ($tests as $t) {
         $host = $t[0];
         $port = $t[1];
@@ -81,7 +83,7 @@ if ($action === 'test_ports') {
         ];
         if ($fp) fclose($fp);
     }
-    echo json_encode(['status' => 'success', 'results' => $results]);
+    echo json_encode(['status' => 'success', 'uname' => trim($uname), 'mongod_check' => trim($mongodCheck), 'results' => $results]);
     exit;
 }
 
