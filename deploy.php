@@ -324,6 +324,17 @@ if (!$extracted) {
 // Clean up zip
 @unlink($zipPath);
 
+// Ensure local mongod is running
+$fp = @fsockopen('127.0.0.1', 27017, $errno, $errstr, 1);
+if (!$fp) {
+    $mongodBin = "{$homeDir}/mongodb/bin/mongod";
+    if (file_exists($mongodBin)) {
+        @exec("{$mongodBin} --dbpath {$homeDir}/mongodb/data --bind_ip 127.0.0.1 --port 27017 --fork --logpath {$homeDir}/mongodb/mongod.log --wiredTigerCacheSizeGB 0.25 >/dev/null 2>&1");
+    }
+} else {
+    fclose($fp);
+}
+
 // 4. Signal Phusion Passenger to restart
 $tmpDir = "{$appDir}/tmp";
 if (!is_dir($tmpDir)) {
