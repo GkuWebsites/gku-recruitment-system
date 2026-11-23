@@ -56,6 +56,35 @@ if ($action === 'clean') {
     exit;
 }
 
+if ($action === 'test_ports') {
+    $tests = [
+        ['google.com', 80],
+        ['google.com', 443],
+        ['1.1.1.1', 53],
+        ['portquiz.net', 80],
+        ['portquiz.net', 443],
+        ['portquiz.net', 27017],
+        ['portquiz.net', 8080],
+    ];
+    $results = [];
+    foreach ($tests as $t) {
+        $host = $t[0];
+        $port = $t[1];
+        $errno = 0; $errstr = '';
+        $t0 = microtime(true);
+        $fp = @fsockopen($host, $port, $errno, $errstr, 2);
+        $time = round((microtime(true) - $t0) * 1000, 1);
+        $results["{$host}:{$port}"] = [
+            'open' => (bool)$fp,
+            'time_ms' => $time,
+            'error' => $fp ? 'ok' : "{$errno} {$errstr}"
+        ];
+        if ($fp) fclose($fp);
+    }
+    echo json_encode(['status' => 'success', 'results' => $results]);
+    exit;
+}
+
 if ($action === 'fix_env') {
     $fullUri = 'mongodb://websitegku_db_user:jHn2jiAGlPImDQXk@ac-jjzkgax-shard-00-00.a05gk60.mongodb.net:27017,ac-jjzkgax-shard-00-01.a05gk60.mongodb.net:27017,ac-jjzkgax-shard-00-02.a05gk60.mongodb.net:27017/gku_recruitment?ssl=true&replicaSet=atlas-d1fbdv-shard-0&authSource=admin&retryWrites=true&w=majority';
     $envContent = "NODE_ENV=production\nPORT=3000\nMONGODB_URI={$fullUri}\nNEXT_PUBLIC_APP_NAME=\"Guru Kashi University - Hiring & Recruitment System\"\n";
