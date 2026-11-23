@@ -98,39 +98,21 @@ export function OfferLetterWorkbench({
 
   // Pre-Joining Document Verification State
   const initialDocs: DocumentVerification = candidate.joiningDetails?.documentVerification || {
-    identityProof: true,
-    degreesVerified: true,
-    experienceCertificates: true,
+    identityProof: false,
+    degreesVerified: false,
+    experienceCertificates: false,
     policeVerification: false,
     medicalFitness: false,
     nocRelieving: false
   };
   const [docs, setDocs] = useState<DocumentVerification>(initialDocs);
   const [verificationRemarks, setVerificationRemarks] = useState(
-    initialDocs.verificationRemarks || 'Academic credentials and identity documents preliminarily verified by HR desk.'
+    initialDocs.verificationRemarks || ''
   );
 
-  // Uploaded Documents Collection
-  const initialFiles: Record<string, DocumentFileMeta> = candidate.joiningDetails?.documentVerification?.uploadedFiles || {
-    identityProof: {
-      fileName: `Aadhaar_${candidate.fullName.replace(/\s+/g, '_')}_Verified.pdf`,
-      fileSize: '1.4 MB',
-      uploadedAt: 'Today, 11:20 AM',
-      category: 'Identity Proof'
-    },
-    degreesVerified: {
-      fileName: `Doctoral_Degree_${candidate.fullName.replace(/\s+/g, '_')}_Attested.pdf`,
-      fileSize: '3.8 MB',
-      uploadedAt: 'Today, 11:22 AM',
-      category: 'Degree Certificates'
-    },
-    experienceCertificates: {
-      fileName: `Experience_Service_Relieving_${candidate.fullName.replace(/\s+/g, '_')}.pdf`,
-      fileSize: '2.1 MB',
-      uploadedAt: 'Today, 11:25 AM',
-      category: 'Experience & Relieving'
-    }
-  };
+  // Uploaded Documents Collection - Only real uploaded files, no fake defaults
+  const initialFiles: Record<string, DocumentFileMeta> =
+    candidate.joiningDetails?.documentVerification?.uploadedFiles || {};
   const [uploadedFiles, setUploadedFiles] = useState<Record<string, DocumentFileMeta>>(initialFiles);
 
   // Document Viewer / Inspection Modal State
@@ -815,7 +797,7 @@ export function OfferLetterWorkbench({
                           className="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 cursor-pointer shrink-0"
                         />
                         <span
-                          className={`text-xs truncate ${
+                          className={`text-xs ${
                             isChecked ? 'font-bold text-emerald-950' : 'font-semibold text-slate-800'
                           }`}
                           title={item.title}

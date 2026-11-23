@@ -3422,7 +3422,6 @@ export function HRDepartmentModule({
                       <span className="font-semibold text-xs truncate">Academic Degrees &amp; Ph.D. Certificates</span>
                     </div>
                     <div className="flex items-center space-x-2 shrink-0">
-                      <span className="text-[10px] text-slate-500 font-mono bg-slate-100 px-2 py-0.5 rounded">PhD_Degree_Cert.pdf</span>
                       <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
                         docDegreesVerified ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-500'
                       }`}>
@@ -3445,7 +3444,6 @@ export function HRDepartmentModule({
                       <span className="font-semibold text-xs truncate">Government Photo ID (Aadhaar / Passport)</span>
                     </div>
                     <div className="flex items-center space-x-2 shrink-0">
-                      <span className="text-[10px] text-slate-500 font-mono bg-slate-100 px-2 py-0.5 rounded">Aadhaar_Card_Verified.pdf</span>
                       <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
                         docIdentityProof ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-500'
                       }`}>
@@ -3468,7 +3466,6 @@ export function HRDepartmentModule({
                       <span className="font-semibold text-xs truncate">Experience Certificates &amp; Relieving Order</span>
                     </div>
                     <div className="flex items-center space-x-2 shrink-0">
-                      <span className="text-[10px] text-slate-500 font-mono bg-slate-100 px-2 py-0.5 rounded">Relieving_Exp_Letter.pdf</span>
                       <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
                         docExperienceCertificates ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-500'
                       }`}>
@@ -3491,7 +3488,6 @@ export function HRDepartmentModule({
                       <span className="font-semibold text-xs truncate">Medical Fitness Certificate</span>
                     </div>
                     <div className="flex items-center space-x-2 shrink-0">
-                      <span className="text-[10px] text-slate-500 font-mono bg-slate-100 px-2 py-0.5 rounded">Medical_Fitness_Cert.pdf</span>
                       <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
                         docMedicalFitness ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-500'
                       }`}>
@@ -3514,7 +3510,6 @@ export function HRDepartmentModule({
                       <span className="font-semibold text-xs truncate">Character &amp; Police Verification Clearance</span>
                     </div>
                     <div className="flex items-center space-x-2 shrink-0">
-                      <span className="text-[10px] text-slate-500 font-mono bg-slate-100 px-2 py-0.5 rounded">Character_Clearance.pdf</span>
                       <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
                         docPoliceVerification ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-500'
                       }`}>
