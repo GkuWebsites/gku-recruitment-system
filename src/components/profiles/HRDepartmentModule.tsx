@@ -2161,9 +2161,9 @@ export function HRDepartmentModule({
                   <th className="py-3.5 px-6">Requisition ID</th>
                   <th className="py-3.5 px-6">Department & Post</th>
                   <th className="py-3.5 px-6">Submitted By (Dean)</th>
-                  <th className="py-3.5 px-6">Positions</th>
-                  <th className="py-3.5 px-6">Current Approval Stage</th>
-                  <th className="py-3.5 px-6 text-right">Review Details</th>
+                  <th className="py-3.5 px-6 whitespace-nowrap">Positions</th>
+                  <th className="py-3.5 px-6 whitespace-nowrap">Current Approval Stage</th>
+                  <th className="py-3.5 px-6 text-right whitespace-nowrap">Review Details</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -2189,12 +2189,12 @@ export function HRDepartmentModule({
                         <div className="font-semibold text-slate-900">{req.creator?.name || 'Department Dean'}</div>
                         <div className="text-slate-400 text-[11px]">{req.creator?.email || ''}</div>
                       </td>
-                      <td className="py-4 px-6 font-bold text-slate-800">
+                      <td className="py-4 px-6 font-bold text-slate-800 whitespace-nowrap">
                         {req.numberOfPositions} Position(s)
                       </td>
-                      <td className="py-4 px-6">
+                      <td className="py-4 px-6 whitespace-nowrap">
                         <span
-                          className={`px-2.5 py-1 rounded-full text-[11px] font-bold border ${req.status === 'Approved by Dean Academic'
+                          className={`inline-block px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap border ${req.status === 'Approved by Dean Academic'
                             ? 'bg-purple-50 text-purple-900 border-purple-200'
                             : req.status === 'Returned for Clarification'
                               ? 'bg-rose-50 text-rose-800 border-rose-200'
@@ -2203,11 +2203,6 @@ export function HRDepartmentModule({
                         >
                           {req.status}
                         </span>
-                        <div className="text-[10px] text-slate-500 mt-1">
-                          {req.currentStage === 1 && 'Stage 1: Department Submission'}
-                          {req.currentStage === 2 && 'Stage 2: Under Dean Academic Scrutiny'}
-                          {req.currentStage === 3 && 'Stage 3: Under VC / Registrar Sanction'}
-                        </div>
                       </td>
                       <td className="py-4 px-6 text-right space-x-2">
                         <button
