@@ -25,23 +25,18 @@ if ($action === 'inspect') {
     $zipExists = file_exists("{$appDir}/gku-deploy.zip");
     $zipSize = $zipExists ? filesize("{$appDir}/gku-deploy.zip") : 0;
     
-    // Check passenger log
-    $passengerLog = '';
-    $logPath = "{$homeDir}/logs/passenger.log";
-    if (file_exists($logPath)) {
-        $lines = file($logPath);
-        $passengerLog = implode('', array_slice($lines, -15));
-    }
+    // Check running processes
+    $psOut = function_exists('shell_exec') ? @shell_exec("ps aux | grep node") : 'shell_exec disabled';
+    $disabled = ini_get('disable_functions');
 
     echo json_encode([
         'status' => 'success',
         'current_user' => $currentUser,
         'app_dir' => $appDir,
-        'app_dir_exists' => is_dir($appDir),
         'build_id' => $buildId,
-        'zip_exists' => $zipExists,
-        'zip_size' => $zipSize,
-        'passenger_log' => $passengerLog,
+        'ps' => $psOut,
+        'disabled_functions' => $disabled,
+        'restart_txt_mtime' => file_exists("{$appDir}/tmp/restart.txt") ? date('Y-m-d H:i:s', filemtime("{$appDir}/tmp/restart.txt")) : 'none',
         'timestamp' => date('Y-m-d H:i:s')
     ]);
     exit;
