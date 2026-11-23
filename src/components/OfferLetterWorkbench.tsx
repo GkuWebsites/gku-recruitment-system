@@ -136,6 +136,46 @@ export function OfferLetterWorkbench({
   // Document Viewer / Inspection Modal State
   const [previewingDoc, setPreviewingDoc] = useState<DocumentFileMeta | null>(null);
 
+  interface DocItem {
+    key: string;
+    title: string;
+    isCustom?: boolean;
+  }
+
+  const defaultDocItems: DocItem[] = [
+    { key: 'identityProof', title: 'National Identity Proof (Aadhaar / Passport / Voter ID)' },
+    { key: 'degreesVerified', title: 'Degree Certificates & Transcripts (Ph.D. / PG / NET / GATE)' },
+    { key: 'experienceCertificates', title: 'Service & Teaching Experience Certificates' },
+    { key: 'nocRelieving', title: 'Relieving Order & No Objection Certificate (NOC)' },
+    { key: 'medicalFitness', title: 'Medical Fitness Certificate' },
+    { key: 'policeVerification', title: 'Police & Character Verification Clearance' }
+  ];
+
+  const [docItems, setDocItems] = useState<DocItem[]>(() => {
+    const customKeys = Object.keys(initialFiles).filter(
+      (k) => !defaultDocItems.some((d) => d.key === k)
+    );
+    const customItems: DocItem[] = customKeys.map((k) => ({
+      key: k,
+      title: initialFiles[k]?.category || initialFiles[k]?.fileName || 'Additional Document',
+      isCustom: true
+    }));
+    return [...defaultDocItems, ...customItems];
+  });
+  const [newDocName, setNewDocName] = useState('');
+
+  const handleAddNewDoc = () => {
+    if (!newDocName.trim()) return;
+    const key = `custom_${Date.now()}`;
+    setDocItems((prev) => [...prev, { key, title: newDocName.trim(), isCustom: true }]);
+    setNewDocName('');
+  };
+
+  const handleRemoveDocItem = (key: string) => {
+    setDocItems((prev) => prev.filter((d) => d.key !== key));
+    handleRemoveFile(key);
+  };
+
   // Additional custom document upload state
   const [customDocLabel, setCustomDocLabel] = useState('');
   const additionalFileInputRef = useRef<HTMLInputElement>(null);
@@ -150,16 +190,14 @@ export function OfferLetterWorkbench({
   const [draftSaved, setDraftSaved] = useState(false);
 
   // Helper toggle doc
-  const toggleDoc = (key: keyof DocumentVerification) => {
+  const toggleDoc = (key: string) => {
     setDocs((prev) => ({
       ...prev,
       [key]: !prev[key]
     }));
   };
 
-  const verifiedDocCount = Object.entries(docs).filter(
-    ([k, v]) => k !== 'verificationRemarks' && k !== 'uploadedFiles' && v === true
-  ).length;
+  const verifiedDocCount = docItems.filter((item) => docs[item.key] === true).length;
 
   // Handle file upload for standard items
   const handleFileUpload = (docKey: string, file: File, categoryTitle: string) => {
@@ -428,7 +466,7 @@ export function OfferLetterWorkbench({
           <div className="min-w-0">
             <div className="text-[11px] font-bold text-purple-800 uppercase tracking-wider">Pre-Joining Verification</div>
             <div className="font-extrabold text-slate-900 text-sm">
-              {verifiedDocCount} of 6 Verified
+              {verifiedDocCount} of {docItems.length} Verified
             </div>
             <div className="text-[11px] text-slate-500">
               {Object.keys(uploadedFiles).length} Document(s) Attached
@@ -709,154 +747,105 @@ export function OfferLetterWorkbench({
             <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-4 text-xs">
               <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
                 <div>
-                  <h3 className="font-bold text-slate-900 text-sm">Document Vetting &amp; Attachment Desk</h3>
+                  <h3 className="font-bold text-slate-900 text-sm">Document Vetting &amp; Verification Desk</h3>
                   <p className="text-[11px] text-slate-500">
-                    Upload and verify statutory certificates, degrees, and clearances.
+                    Verify statutory certificates, degrees, and clearances.
                   </p>
                 </div>
                 <div className="flex items-center space-x-2">
                   <span className="text-[11px] font-bold text-purple-900 bg-purple-50 border border-purple-200 px-2.5 py-0.5 rounded-full">
-                    {verifiedDocCount}/6 Verified
+                    {verifiedDocCount}/{docItems.length} Verified
                   </span>
                   <FileCheck className="w-5 h-5 text-purple-600" />
                 </div>
               </div>
 
-              {/* Document rows with real upload capability */}
-              <div className="space-y-3">
-                {[
-                  {
-                    key: 'identityProof' as keyof DocumentVerification,
-                    title: 'National Identity Proof (Aadhaar / Passport / Voter ID)',
-                    subtitle: 'Verified against national database records'
-                  },
-                  {
-                    key: 'degreesVerified' as keyof DocumentVerification,
-                    title: 'Degree Certificates & Transcripts (Ph.D. / PG / NET / GATE)',
-                    subtitle: 'Original certificates cross-checked against UGC / University repositories'
-                  },
-                  {
-                    key: 'experienceCertificates' as keyof DocumentVerification,
-                    title: 'Service & Teaching Experience Certificates',
-                    subtitle: 'Verified past academic service and teaching load credentials'
-                  },
-                  {
-                    key: 'nocRelieving' as keyof DocumentVerification,
-                    title: 'Relieving Order & No Objection Certificate (NOC)',
-                    subtitle: 'Formal clearance from previous employing institution'
-                  },
-                  {
-                    key: 'medicalFitness' as keyof DocumentVerification,
-                    title: 'Medical Fitness Certificate',
-                    subtitle: 'Approved by Civil Surgeon or University Chief Medical Officer'
-                  },
-                  {
-                    key: 'policeVerification' as keyof DocumentVerification,
-                    title: 'Police & Character Verification Clearance',
-                    subtitle: 'Clean background check without pending statutory inquiries'
-                  }
-                ].map((item) => {
+              {/* Add Custom Document Bar */}
+              <div className="p-3 bg-purple-50/50 border border-purple-200 rounded-xl space-y-1.5">
+                <span className="font-bold text-slate-800 text-xs block">
+                  Add Additional Document
+                </span>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={newDocName}
+                    onChange={(e) => setNewDocName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleAddNewDoc();
+                      }
+                    }}
+                    placeholder="Document Name (e.g. Salary Slips, PAN Card, Form 16, Caste Certificate)..."
+                    className="flex-1 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:ring-2 focus:ring-purple-500 font-medium"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAddNewDoc}
+                    disabled={!newDocName.trim()}
+                    className="px-3.5 py-1.5 bg-purple-700 hover:bg-purple-800 disabled:opacity-40 text-white rounded-lg text-xs font-bold transition flex items-center space-x-1 cursor-pointer shrink-0 shadow-2xs"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>+ Add</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Document List: Clean, Sleek, Professional Rows */}
+              <div className="space-y-2">
+                {docItems.map((item) => {
                   const isChecked = !!docs[item.key];
                   const attachedFile = uploadedFiles[item.key];
 
                   return (
                     <div
                       key={item.key}
-                      className={`p-3.5 rounded-xl border transition space-y-2.5 ${
+                      className={`p-3 rounded-xl border transition flex items-center justify-between gap-3 ${
                         isChecked
                           ? 'bg-emerald-50/40 border-emerald-300'
                           : 'bg-slate-50 border-slate-200 hover:border-slate-300'
                       }`}
                     >
-                      {/* Top Checkbox & Title */}
-                      <div className="flex items-start justify-between gap-3">
-                        <label className="flex items-start space-x-2.5 cursor-pointer min-w-0">
-                          <input
-                            type="checkbox"
-                            checked={isChecked}
-                            onChange={() => toggleDoc(item.key)}
-                            className="mt-0.5 rounded text-emerald-600 focus:ring-emerald-500 w-4 h-4 cursor-pointer"
-                          />
-                          <div className="min-w-0">
-                            <span className="font-bold text-slate-900 block truncate">{item.title}</span>
-                            <span className="text-[11px] text-slate-500 block">{item.subtitle}</span>
-                          </div>
-                        </label>
-
+                      {/* Left: Checkbox & Document Title */}
+                      <label className="flex items-center space-x-2.5 min-w-0 flex-1 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={() => toggleDoc(item.key)}
+                          className="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 cursor-pointer shrink-0"
+                        />
                         <span
-                          className={`text-[10px] font-bold px-2 py-0.5 rounded shrink-0 ${
-                            isChecked
-                              ? 'bg-emerald-100 text-emerald-800'
-                              : 'bg-slate-200 text-slate-600'
+                          className={`text-xs truncate ${
+                            isChecked ? 'font-bold text-emerald-950' : 'font-semibold text-slate-800'
                           }`}
+                          title={item.title}
                         >
-                          {isChecked ? 'Verified ✓' : 'Pending'}
+                          {item.title}
                         </span>
-                      </div>
+                      </label>
 
-                      {/* Upload / Attached Document Card */}
-                      <div className="pt-1 border-t border-slate-200/60">
+                      {/* Middle/Right: Attached File & Actions */}
+                      <div className="flex items-center space-x-2 shrink-0">
                         {attachedFile ? (
-                          <div className="bg-white p-2.5 rounded-lg border border-slate-200 flex flex-wrap items-center justify-between gap-2 shadow-2xs">
-                            <div className="flex items-center space-x-2 min-w-0">
-                              <div className="w-7 h-7 rounded bg-blue-50 text-blue-700 flex items-center justify-center shrink-0">
-                                <FileText className="w-4 h-4" />
-                              </div>
-                              <div className="min-w-0">
-                                <div className="font-bold text-slate-900 truncate max-w-[200px] sm:max-w-[280px]">
-                                  {attachedFile.fileName}
-                                </div>
-                                <div className="text-[10px] text-slate-400">
-                                  {attachedFile.fileSize || '2.4 MB'} &bull; Uploaded {attachedFile.uploadedAt || 'Today'}
-                                </div>
-                              </div>
-                            </div>
-
-                            <div className="flex items-center space-x-1.5 shrink-0">
-                              <button
-                                type="button"
-                                onClick={() => setPreviewingDoc(attachedFile)}
-                                className="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-[11px] font-semibold transition flex items-center space-x-1 cursor-pointer"
-                                title="View Document"
-                              >
-                                <Eye className="w-3 h-3 text-slate-500" />
-                                <span>View</span>
-                              </button>
-
-                              <label className="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-[11px] font-semibold transition flex items-center space-x-1 cursor-pointer">
-                                <FileUp className="w-3 h-3 text-slate-500" />
-                                <span>Replace</span>
-                                <input
-                                  type="file"
-                                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                                  onChange={(e) => {
-                                    const file = e.target.files?.[0];
-                                    if (file) handleFileUpload(item.key, file, item.title);
-                                  }}
-                                  className="hidden"
-                                />
-                              </label>
-
-                              <button
-                                type="button"
-                                onClick={() => handleRemoveFile(item.key)}
-                                className="p-1 text-slate-400 hover:text-rose-600 transition cursor-pointer"
-                                title="Delete file"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="flex items-center justify-between bg-white/70 p-2 rounded-lg border border-dashed border-slate-300">
-                            <span className="text-[11px] text-slate-400 italic">No document file attached</span>
-                            <label className="px-2.5 py-1 bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 rounded text-[11px] font-bold transition flex items-center space-x-1 cursor-pointer shadow-2xs">
-                              <UploadCloud className="w-3.5 h-3.5 text-purple-600" />
-                              <span>+ Upload Document</span>
+                          <div className="flex items-center space-x-1.5 bg-white border border-slate-200 px-2.5 py-1 rounded-lg shadow-2xs">
+                            <FileText className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                            <span
+                              className="font-medium text-[11px] text-slate-800 truncate max-w-[120px] sm:max-w-[160px]"
+                              title={attachedFile.fileName}
+                            >
+                              {attachedFile.fileName}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => setPreviewingDoc(attachedFile)}
+                              className="text-[11px] text-blue-700 hover:underline font-semibold cursor-pointer ml-1"
+                              title="View Document"
+                            >
+                              View
+                            </button>
+                            <label className="text-[11px] text-slate-500 hover:text-slate-800 font-semibold cursor-pointer">
+                              Replace
                               <input
-                                ref={(el) => {
-                                  fileInputRefs.current[item.key] = el;
-                                }}
                                 type="file"
                                 accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
                                 onChange={(e) => {
@@ -866,43 +855,59 @@ export function OfferLetterWorkbench({
                                 className="hidden"
                               />
                             </label>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveFile(item.key)}
+                              className="text-slate-400 hover:text-rose-600 transition cursor-pointer p-0.5"
+                              title="Remove File"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
                           </div>
+                        ) : (
+                          <label className="inline-flex items-center space-x-1 px-2.5 py-1 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 hover:border-slate-300 rounded-lg text-xs font-semibold cursor-pointer shadow-2xs transition">
+                            <UploadCloud className="w-3.5 h-3.5 text-purple-600" />
+                            <span>Upload</span>
+                            <input
+                              type="file"
+                              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) handleFileUpload(item.key, file, item.title);
+                              }}
+                              className="hidden"
+                            />
+                          </label>
+                        )}
+
+                        {/* Verified Toggle Pill */}
+                        <button
+                          type="button"
+                          onClick={() => toggleDoc(item.key)}
+                          className={`text-[10px] font-bold px-2.5 py-1 rounded-lg cursor-pointer transition select-none ${
+                            isChecked
+                              ? 'bg-emerald-100 text-emerald-800 border border-emerald-300 hover:bg-emerald-200'
+                              : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200'
+                          }`}
+                        >
+                          {isChecked ? 'Verified ✓' : 'Mark Verified'}
+                        </button>
+
+                        {/* Remove custom document */}
+                        {item.isCustom && (
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveDocItem(item.key)}
+                            className="p-1 text-slate-400 hover:text-rose-600 transition cursor-pointer"
+                            title="Delete custom document"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
                         )}
                       </div>
                     </div>
                   );
                 })}
-              </div>
-
-              {/* Upload Additional Documents Dropzone */}
-              <div className="bg-slate-50 border border-dashed border-slate-300 rounded-xl p-3.5 space-y-2">
-                <div className="flex items-center space-x-2">
-                  <UploadCloud className="w-4 h-4 text-slate-500" />
-                  <span className="font-bold text-slate-900 text-xs">Upload Additional Certificate / Annexure</span>
-                </div>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={customDocLabel}
-                    onChange={(e) => setCustomDocLabel(e.target.value)}
-                    placeholder="Document Title (e.g. Caste Certificate, NET Scorecard, Salary Slips)"
-                    className="flex-1 p-2 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:ring-1 focus:ring-purple-500"
-                  />
-                  <label className="px-3 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-bold transition flex items-center space-x-1 cursor-pointer shrink-0">
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>Select &amp; Upload</span>
-                    <input
-                      ref={additionalFileInputRef}
-                      type="file"
-                      accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) handleAddCustomDocument(file);
-                      }}
-                      className="hidden"
-                    />
-                  </label>
-                </div>
               </div>
 
               {/* Remarks */}

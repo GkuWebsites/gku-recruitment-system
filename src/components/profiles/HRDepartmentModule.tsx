@@ -3388,146 +3388,161 @@ export function HRDepartmentModule({
               </button>
             </div>
 
-            <form onSubmit={handleVerifyDocs} className="space-y-4 text-xs">
-              <div>
-                <span className="font-bold text-slate-800 block text-xs mb-2">
-                  Mandatory Statutory Pre-Joining Credentials Checklist:
+            <form onSubmit={handleVerifyDocs} className="space-y-3.5 text-xs">
+              <div className="space-y-2">
+                <span className="font-bold text-slate-800 block text-xs">
+                  Statutory Pre-Joining Documents Checklist
                 </span>
 
-                <div className="space-y-2.5">
+                <div className="space-y-1.5">
                   {/* Item 1: Statutory Degrees */}
-                  <label className={`flex items-start space-x-3 p-3 rounded-xl border cursor-pointer select-none transition ${docDegreesVerified ? 'bg-emerald-50/70 border-emerald-300 text-emerald-950 font-semibold' : 'bg-white border-slate-200 text-slate-700'
-                    }`}>
-                    <input
-                      type="checkbox"
-                      checked={docDegreesVerified}
-                      onChange={(e) => setDocDegreesVerified(e.target.checked)}
-                      className="w-4 h-4 rounded text-emerald-600 border-slate-300 focus:ring-emerald-500 mt-0.5 cursor-pointer"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold text-xs">1. Statutory Academic Degrees & Ph.D. Verified</span>
-                        <span className="text-[10px] text-emerald-700 font-mono bg-emerald-100/60 px-2 py-0.5 rounded">PhD_Degree_Cert.pdf</span>
-                      </div>
-                      <p className="text-[11px] text-slate-500 font-normal mt-0.5">
-                        Original Ph.D. degree, Master marksheet, and UGC-NET / GATE certificates verified against UGC norms.
-                      </p>
+                  <label className={`flex items-center justify-between p-2.5 rounded-lg border cursor-pointer select-none transition ${
+                    docDegreesVerified ? 'bg-emerald-50/70 border-emerald-300 text-emerald-950 font-semibold' : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
+                  }`}>
+                    <div className="flex items-center space-x-2.5 min-w-0">
+                      <input
+                        type="checkbox"
+                        checked={docDegreesVerified}
+                        onChange={(e) => setDocDegreesVerified(e.target.checked)}
+                        className="w-4 h-4 rounded text-emerald-600 border-slate-300 focus:ring-emerald-500 cursor-pointer shrink-0"
+                      />
+                      <span className="font-semibold text-xs truncate">Academic Degrees &amp; Ph.D. Certificates</span>
+                    </div>
+                    <div className="flex items-center space-x-2 shrink-0">
+                      <span className="text-[10px] text-slate-500 font-mono bg-slate-100 px-2 py-0.5 rounded">PhD_Degree_Cert.pdf</span>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
+                        docDegreesVerified ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-500'
+                      }`}>
+                        {docDegreesVerified ? 'Verified ✓' : 'Pending'}
+                      </span>
                     </div>
                   </label>
 
                   {/* Item 2: Government ID & Address */}
-                  <label className={`flex items-start space-x-3 p-3 rounded-xl border cursor-pointer select-none transition ${docIdentityProof ? 'bg-emerald-50/70 border-emerald-300 text-emerald-950 font-semibold' : 'bg-white border-slate-200 text-slate-700'
-                    }`}>
-                    <input
-                      type="checkbox"
-                      checked={docIdentityProof}
-                      onChange={(e) => setDocIdentityProof(e.target.checked)}
-                      className="w-4 h-4 rounded text-emerald-600 border-slate-300 focus:ring-emerald-500 mt-0.5 cursor-pointer"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold text-xs">2. Government Photo ID & Address Proof</span>
-                        <span className="text-[10px] text-emerald-700 font-mono bg-emerald-100/60 px-2 py-0.5 rounded">Aadhaar_Card_Verified.pdf</span>
-                      </div>
-                      <p className="text-[11px] text-slate-500 font-normal mt-0.5">
-                        Aadhaar card / Passport verified for identity, date of birth, and permanent address.
-                      </p>
+                  <label className={`flex items-center justify-between p-2.5 rounded-lg border cursor-pointer select-none transition ${
+                    docIdentityProof ? 'bg-emerald-50/70 border-emerald-300 text-emerald-950 font-semibold' : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
+                  }`}>
+                    <div className="flex items-center space-x-2.5 min-w-0">
+                      <input
+                        type="checkbox"
+                        checked={docIdentityProof}
+                        onChange={(e) => setDocIdentityProof(e.target.checked)}
+                        className="w-4 h-4 rounded text-emerald-600 border-slate-300 focus:ring-emerald-500 cursor-pointer shrink-0"
+                      />
+                      <span className="font-semibold text-xs truncate">Government Photo ID (Aadhaar / Passport)</span>
+                    </div>
+                    <div className="flex items-center space-x-2 shrink-0">
+                      <span className="text-[10px] text-slate-500 font-mono bg-slate-100 px-2 py-0.5 rounded">Aadhaar_Card_Verified.pdf</span>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
+                        docIdentityProof ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-500'
+                      }`}>
+                        {docIdentityProof ? 'Verified ✓' : 'Pending'}
+                      </span>
                     </div>
                   </label>
 
                   {/* Item 3: Relieving & Experience */}
-                  <label className={`flex items-start space-x-3 p-3 rounded-xl border cursor-pointer select-none transition ${docExperienceCertificates ? 'bg-emerald-50/70 border-emerald-300 text-emerald-950 font-semibold' : 'bg-white border-slate-200 text-slate-700'
-                    }`}>
-                    <input
-                      type="checkbox"
-                      checked={docExperienceCertificates}
-                      onChange={(e) => setDocExperienceCertificates(e.target.checked)}
-                      className="w-4 h-4 rounded text-emerald-600 border-slate-300 focus:ring-emerald-500 mt-0.5 cursor-pointer"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold text-xs">3. Prior Experience Certificates & Relieving Order</span>
-                        <span className="text-[10px] text-emerald-700 font-mono bg-emerald-100/60 px-2 py-0.5 rounded">Relieving_Exp_Letter.pdf</span>
-                      </div>
-                      <p className="text-[11px] text-slate-500 font-normal mt-0.5">
-                        Previous university experience letters, service certificate, and relieving order submitted.
-                      </p>
+                  <label className={`flex items-center justify-between p-2.5 rounded-lg border cursor-pointer select-none transition ${
+                    docExperienceCertificates ? 'bg-emerald-50/70 border-emerald-300 text-emerald-950 font-semibold' : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
+                  }`}>
+                    <div className="flex items-center space-x-2.5 min-w-0">
+                      <input
+                        type="checkbox"
+                        checked={docExperienceCertificates}
+                        onChange={(e) => setDocExperienceCertificates(e.target.checked)}
+                        className="w-4 h-4 rounded text-emerald-600 border-slate-300 focus:ring-emerald-500 cursor-pointer shrink-0"
+                      />
+                      <span className="font-semibold text-xs truncate">Experience Certificates &amp; Relieving Order</span>
+                    </div>
+                    <div className="flex items-center space-x-2 shrink-0">
+                      <span className="text-[10px] text-slate-500 font-mono bg-slate-100 px-2 py-0.5 rounded">Relieving_Exp_Letter.pdf</span>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
+                        docExperienceCertificates ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-500'
+                      }`}>
+                        {docExperienceCertificates ? 'Verified ✓' : 'Pending'}
+                      </span>
                     </div>
                   </label>
 
                   {/* Item 4: Medical Fitness */}
-                  <label className={`flex items-start space-x-3 p-3 rounded-xl border cursor-pointer select-none transition ${docMedicalFitness ? 'bg-emerald-50/70 border-emerald-300 text-emerald-950 font-semibold' : 'bg-white border-slate-200 text-slate-700'
-                    }`}>
-                    <input
-                      type="checkbox"
-                      checked={docMedicalFitness}
-                      onChange={(e) => setDocMedicalFitness(e.target.checked)}
-                      className="w-4 h-4 rounded text-emerald-600 border-slate-300 focus:ring-emerald-500 mt-0.5 cursor-pointer"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold text-xs">4. Medical Fitness Certificate</span>
-                        <span className="text-[10px] text-emerald-700 font-mono bg-emerald-100/60 px-2 py-0.5 rounded">Medical_Fitness_Cert.pdf</span>
-                      </div>
-                      <p className="text-[11px] text-slate-500 font-normal mt-0.5">
-                        Fitness clearance from Civil Hospital / University Medical Officer recorded.
-                      </p>
+                  <label className={`flex items-center justify-between p-2.5 rounded-lg border cursor-pointer select-none transition ${
+                    docMedicalFitness ? 'bg-emerald-50/70 border-emerald-300 text-emerald-950 font-semibold' : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
+                  }`}>
+                    <div className="flex items-center space-x-2.5 min-w-0">
+                      <input
+                        type="checkbox"
+                        checked={docMedicalFitness}
+                        onChange={(e) => setDocMedicalFitness(e.target.checked)}
+                        className="w-4 h-4 rounded text-emerald-600 border-slate-300 focus:ring-emerald-500 cursor-pointer shrink-0"
+                      />
+                      <span className="font-semibold text-xs truncate">Medical Fitness Certificate</span>
+                    </div>
+                    <div className="flex items-center space-x-2 shrink-0">
+                      <span className="text-[10px] text-slate-500 font-mono bg-slate-100 px-2 py-0.5 rounded">Medical_Fitness_Cert.pdf</span>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
+                        docMedicalFitness ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-500'
+                      }`}>
+                        {docMedicalFitness ? 'Verified ✓' : 'Pending'}
+                      </span>
                     </div>
                   </label>
 
                   {/* Item 5: Police & Character Verification */}
-                  <label className={`flex items-start space-x-3 p-3 rounded-xl border cursor-pointer select-none transition ${docPoliceVerification ? 'bg-emerald-50/70 border-emerald-300 text-emerald-950 font-semibold' : 'bg-white border-slate-200 text-slate-700'
-                    }`}>
-                    <input
-                      type="checkbox"
-                      checked={docPoliceVerification}
-                      onChange={(e) => setDocPoliceVerification(e.target.checked)}
-                      className="w-4 h-4 rounded text-emerald-600 border-slate-300 focus:ring-emerald-500 mt-0.5 cursor-pointer"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold text-xs">5. Character Certificate & Police Verification</span>
-                        <span className="text-[10px] text-emerald-700 font-mono bg-emerald-100/60 px-2 py-0.5 rounded">Character_Clearance.pdf</span>
-                      </div>
-                      <p className="text-[11px] text-slate-500 font-normal mt-0.5">
-                        Two character testimonials and institutional background check cleared.
-                      </p>
+                  <label className={`flex items-center justify-between p-2.5 rounded-lg border cursor-pointer select-none transition ${
+                    docPoliceVerification ? 'bg-emerald-50/70 border-emerald-300 text-emerald-950 font-semibold' : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
+                  }`}>
+                    <div className="flex items-center space-x-2.5 min-w-0">
+                      <input
+                        type="checkbox"
+                        checked={docPoliceVerification}
+                        onChange={(e) => setDocPoliceVerification(e.target.checked)}
+                        className="w-4 h-4 rounded text-emerald-600 border-slate-300 focus:ring-emerald-500 cursor-pointer shrink-0"
+                      />
+                      <span className="font-semibold text-xs truncate">Character &amp; Police Verification Clearance</span>
+                    </div>
+                    <div className="flex items-center space-x-2 shrink-0">
+                      <span className="text-[10px] text-slate-500 font-mono bg-slate-100 px-2 py-0.5 rounded">Character_Clearance.pdf</span>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
+                        docPoliceVerification ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-500'
+                      }`}>
+                        {docPoliceVerification ? 'Verified ✓' : 'Pending'}
+                      </span>
                     </div>
                   </label>
                 </div>
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">
-                  Document Verification Officer Observations:
+                <label className="block font-bold text-slate-800 mb-1">
+                  Verification Remarks
                 </label>
                 <textarea
                   rows={2}
                   value={docRemarks}
                   onChange={(e) => setDocRemarks(e.target.value)}
-                  placeholder="Record verification findings, original document check notes..."
+                  placeholder="Record verification findings or clearance notes..."
                   className="w-full p-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 font-normal text-slate-800 bg-white"
                 />
               </div>
 
-              <div className="flex items-center justify-end space-x-2 pt-3 border-t border-slate-100">
+              <div className="flex items-center justify-end space-x-2 pt-2 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => {
                     setDocVerifyReq(null);
                     setDocVerifyCand(null);
                   }}
-                  className="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-900 cursor-pointer"
+                  className="px-3.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 rounded-lg hover:bg-slate-100 transition cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-xl text-xs font-bold transition disabled:opacity-50 cursor-pointer flex items-center space-x-1.5"
+                  className="px-4 py-1.5 bg-blue-700 hover:bg-blue-800 text-white rounded-lg text-xs font-bold transition disabled:opacity-50 cursor-pointer flex items-center space-x-1.5 shadow-xs"
                 >
-                  <FileCheck2 className="w-4 h-4" />
-                  <span>{isSubmitting ? 'Saving...' : 'Save Document Verification Audit'}</span>
+                  <FileCheck2 className="w-3.5 h-3.5" />
+                  <span>{isSubmitting ? 'Saving...' : 'Save Verification'}</span>
                 </button>
               </div>
             </form>

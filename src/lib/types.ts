@@ -88,6 +88,7 @@ export interface DocumentVerification {
   nocRelieving?: boolean;
   verificationRemarks?: string;
   uploadedFiles?: Record<string, DocumentFileMeta>;
+  [key: string]: any;
 }
 
 export interface Candidate {
