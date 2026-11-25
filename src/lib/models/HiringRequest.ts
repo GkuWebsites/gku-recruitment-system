@@ -87,7 +87,11 @@ const CandidateSchema = new Schema({
     employeeId: { type: String },
     officialEmail: { type: String },
     reportingHead: { type: String },
-    joiningRemarks: { type: String }
+    joiningRemarks: { type: String },
+    dispatchedFromEmail: { type: String },
+    dispatchedFromName: { type: String },
+    dispatchedAt: { type: String },
+    emailDispatchStatus: { type: String, enum: ['Sent', 'Failed', 'Draft'], default: 'Draft' }
   }
 }, { _id: false });
 

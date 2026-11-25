@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/db';
 import { HiringRequestModel } from '@/lib/models/HiringRequest';
+import { UserProfileModel } from '@/lib/models/UserProfile';
+import { SystemSettingsModel } from '@/lib/models/SystemSettings';
+import { sendOfferLetterEmail } from '@/lib/emailService';
 import { Candidate, PromotionChannel } from '@/lib/types';
 
 // API Category 4: HR Department (Consolidated)
@@ -349,7 +352,15 @@ export async function POST(req: NextRequest) {
         offerLetterFile,
         signedOfferLetterCopy,
         documentVerification,
-        actorName
+        actorName,
+        // Email Dispatch Parameters
+        sendOfferEmail,
+        selectedDesk,
+        senderEmail,
+        senderName,
+        replyToEmail,
+        ccList,
+        currentUserEmail
       } = body;
 
       const candidateIndex = request.candidates.findIndex((c) => c.id === candidateId);
@@ -371,8 +382,70 @@ export async function POST(req: NextRequest) {
         uploadedFiles: {}
       };
 
+      const finalRef = offerLetterRef || `GKU/EST/OFFER/${new Date().getFullYear()}/${Math.floor(1000 + Math.random() * 9000)}`;
+
+      // Execute Email Dispatch if requested
+      let emailResult: { success: boolean; messageId?: string; error?: string } = { success: false };
+      let effectiveSenderEmail = senderEmail || '';
+      let effectiveSenderName = senderName || actorName || 'Directorate of HR & Faculty Affairs';
+
+      if (sendOfferEmail && candidate.email) {
+        let smtpConfig: any = null;
+
+        if (selectedDesk === 'personal') {
+          // Look up user's configured personal mailbox
+          const searchEmail = (currentUserEmail || senderEmail || '').toLowerCase().trim();
+          const user = await UserProfileModel.findOne({ email: searchEmail });
+          if (user && user.mailSettings && user.mailSettings.smtpPass) {
+            smtpConfig = {
+              host: user.mailSettings.smtpHost || 'smtp.gmail.com',
+              port: user.mailSettings.smtpPort || 465,
+              user: user.email,
+              pass: user.mailSettings.smtpPass,
+              senderName: user.mailSettings.senderName || user.name
+            };
+            effectiveSenderEmail = user.email;
+            effectiveSenderName = user.mailSettings.senderName || user.name;
+          }
+        } else {
+          // Look up central mail desks (hr or hrm)
+          const deskKey = selectedDesk === 'hrm' ? 'hrm' : 'hr';
+          const settings = await SystemSettingsModel.findOne({ key: 'global_settings' });
+          if (settings && settings.centralMailDesks && settings.centralMailDesks[deskKey]?.smtpPass) {
+            const desk = settings.centralMailDesks[deskKey];
+            smtpConfig = {
+              host: desk.smtpHost || 'smtp.gmail.com',
+              port: desk.smtpPort || 465,
+              user: desk.email,
+              pass: desk.smtpPass,
+              senderName: desk.deskName
+            };
+            effectiveSenderEmail = desk.email;
+            effectiveSenderName = desk.deskName;
+          }
+        }
+
+        if (smtpConfig && smtpConfig.pass) {
+          emailResult = await sendOfferLetterEmail({
+            candidateName: candidate.fullName,
+            candidateEmail: candidate.email,
+            postTitle: request.postTitle,
+            department: request.department,
+            offerRef: finalRef,
+            offeredCtc: offeredCtc || request.tentativeBudget,
+            joiningDeadline: joiningDeadline || '2026-12-31',
+            specialClauses: offerRemarks || '',
+            senderName: effectiveSenderName,
+            senderEmail: effectiveSenderEmail,
+            replyTo: replyToEmail || effectiveSenderEmail,
+            ccList: Array.isArray(ccList) ? ccList : [],
+            smtpConfig
+          });
+        }
+      }
+
       candidate.joiningDetails = {
-        offerLetterRef: offerLetterRef || `GKU/EST/OFFER/${new Date().getFullYear()}/${Math.floor(1000 + Math.random() * 9000)}`,
+        offerLetterRef: finalRef,
         offerLetterDate: now,
         offeredCtc: offeredCtc || request.tentativeBudget,
         basicSalary: basicSalary || '',
@@ -383,24 +456,32 @@ export async function POST(req: NextRequest) {
         offerLetterFile: offerLetterFile || 'Formal_Appointment_Offer.pdf',
         signedOfferLetterCopy: signedOfferLetterCopy || '',
         documentVerification: prevDocs,
-        inductionCompleted: false
+        inductionCompleted: false,
+        dispatchedFromEmail: effectiveSenderEmail || undefined,
+        dispatchedFromName: effectiveSenderName || undefined,
+        dispatchedAt: sendOfferEmail ? new Date().toISOString() : undefined,
+        emailDispatchStatus: sendOfferEmail ? (emailResult.success ? 'Sent' : 'Failed') : 'Draft'
       };
 
       request.candidates[candidateIndex] = candidate;
 
+      const auditDetails = `Official offer released. Ref: ${finalRef}. Package: ${candidate.joiningDetails.offeredCtc}. Joining deadline: ${candidate.joiningDetails.joiningDeadline}.${offerRemarks ? ` Remarks: ${offerRemarks}` : ''}${sendOfferEmail ? ` [Emailed via ${effectiveSenderEmail}: ${emailResult.success ? 'Delivered' : 'Failed/Simulated'}]` : ''}`;
+
       request.auditTrail.unshift({
         id: `audit-${Date.now()}`,
         action: `Formal Offer Letter Released (${candidate.fullName})`,
-        performedBy: actorName || 'HR Selection Directorate',
+        performedBy: actorName || effectiveSenderName,
         role: 'HR Department',
-        details: `Official offer released. Ref: ${candidate.joiningDetails.offerLetterRef}. Package: ${candidate.joiningDetails.offeredCtc}. Joining deadline: ${candidate.joiningDetails.joiningDeadline}.${offerRemarks ? ` Remarks: ${offerRemarks}` : ''}`,
+        details: auditDetails,
         timestamp
       });
 
       await request.save();
       return NextResponse.json({
         success: true,
-        message: `Official Offer Letter (${candidate.joiningDetails.offerLetterRef}) released to ${candidate.fullName}`,
+        message: `Official Offer Letter (${finalRef}) released to ${candidate.fullName}${sendOfferEmail ? (emailResult.success ? ' and emailed successfully' : ' (email dispatch logged)') : ''}`,
+        emailStatus: sendOfferEmail ? (emailResult.success ? 'Sent' : 'Failed') : 'None',
+        emailError: emailResult.error || undefined,
         data: request
       });
     }

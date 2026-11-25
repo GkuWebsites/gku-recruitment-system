@@ -117,7 +117,7 @@ export async function POST(req: NextRequest) {
   try {
     await connectToDatabase();
     const body = await req.json();
-    const { name, email, password, designation, department, phone } = body;
+    const { name, email, password, designation, department, phone, canUseOfficialEmail } = body;
 
     if (!name || !email || !designation) {
       return NextResponse.json(
@@ -142,7 +142,8 @@ export async function POST(req: NextRequest) {
       designation,
       department: department?.trim() || '',
       phone: phone?.trim() || '',
-      status: 'Active'
+      status: 'Active',
+      canUseOfficialEmail: Boolean(canUseOfficialEmail)
     });
 
     await newUser.save();
@@ -188,6 +189,9 @@ export async function PATCH(req: NextRequest) {
     if (typeof updates.department === 'string') sanitizedUpdates.department = updates.department.trim();
     if (typeof updates.phone === 'string') sanitizedUpdates.phone = updates.phone.trim();
     if (updates.status) sanitizedUpdates.status = updates.status;
+    if (typeof updates.canUseOfficialEmail === 'boolean') {
+      sanitizedUpdates.canUseOfficialEmail = updates.canUseOfficialEmail;
+    }
 
     const updated = await UserProfileModel.findByIdAndUpdate(id, sanitizedUpdates, { new: true });
     if (!updated) {

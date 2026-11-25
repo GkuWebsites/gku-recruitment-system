@@ -96,6 +96,41 @@ export function OfferLetterWorkbench({
     candidate.joiningDetails?.signedOfferLetterCopy || ''
   );
 
+  // Email Dispatch & Multi-Desk State
+  const isExecutiveRole = /vice chancellor|registrar|director|dean|professor/i.test(request.postTitle || '');
+  const [sendOfferEmail, setSendOfferEmail] = useState(true);
+  const [selectedDesk, setSelectedDesk] = useState<'central_hr' | 'central_hrm' | 'personal'>(
+    isExecutiveRole ? 'personal' : 'central_hr'
+  );
+  const [senderEmail, setSenderEmail] = useState(isExecutiveRole ? 'nancy172122@gku.ac.in' : 'hr@gku.ac.in');
+  const [senderName, setSenderName] = useState(
+    isExecutiveRole ? 'Nancy Sharma (Head - Corporate HR)' : 'Directorate of HR & Faculty Affairs'
+  );
+  const [replyToEmail, setReplyToEmail] = useState(isExecutiveRole ? 'nancy172122@gku.ac.in' : 'hr@gku.ac.in');
+  const [ccEmails, setCcEmails] = useState('vc@gku.ac.in, registrar@gku.ac.in');
+  const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
+  const [availableDesks, setAvailableDesks] = useState({
+    personalEmail: 'nancy172122@gku.ac.in',
+    personalName: 'Nancy Sharma (Head - Corporate HR)',
+    personalConfigured: false
+  });
+
+  React.useEffect(() => {
+    // Check Nancy's mailbox status
+    fetch('/api/user/mail-settings?email=nancy172122@gku.ac.in')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          setAvailableDesks({
+            personalEmail: 'nancy172122@gku.ac.in',
+            personalName: data.mailSettings?.senderName || 'Nancy Sharma (Head - Corporate HR)',
+            personalConfigured: Boolean(data.mailSettings?.isConfigured)
+          });
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   // Pre-Joining Document Verification State
   const initialDocs: DocumentVerification = candidate.joiningDetails?.documentVerification || {
     identityProof: false,
@@ -280,7 +315,14 @@ export function OfferLetterWorkbench({
             verificationRemarks: verificationRemarks.trim(),
             uploadedFiles
           },
-          actorName: 'Directorate of HR & Faculty Affairs'
+          actorName: selectedDesk === 'personal' ? senderName : 'Directorate of HR & Faculty Affairs',
+          sendOfferEmail,
+          selectedDesk,
+          senderEmail,
+          senderName,
+          replyToEmail,
+          ccList: ccEmails.split(',').map((s) => s.trim()).filter(Boolean),
+          currentUserEmail: selectedDesk === 'personal' ? availableDesks.personalEmail : undefined
         })
       });
 
@@ -290,7 +332,7 @@ export function OfferLetterWorkbench({
       }
 
       setStatusMessage(
-        `✓ Formal University Appointment Offer (${offerLetterRef}) successfully generated & released to ${candidate.fullName}!`
+        `✓ Formal University Appointment Offer (${offerLetterRef}) successfully generated & released to ${candidate.fullName}!${sendOfferEmail ? ' (Email dispatched from ' + senderEmail + ')' : ''}`
       );
       setTimeout(() => {
         onComplete();
@@ -718,6 +760,173 @@ export function OfferLetterWorkbench({
                         className="hidden"
                       />
                     </label>
+                  </div>
+                )}
+              </div>
+
+              {/* ============================================================== */}
+              {/* OUTGOING MAILBOX & SENDER DESK DISPATCH SECTION */}
+              {/* ============================================================== */}
+              <div className="pt-4 border-t border-slate-200/80 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <Mail className="w-4 h-4 text-purple-600" />
+                    <h4 className="font-bold text-slate-900 text-xs">Email Dispatch Channel & Outgoing Mailbox</h4>
+                  </div>
+                  <label className="flex items-center space-x-2 cursor-pointer text-xs font-semibold text-slate-700">
+                    <input
+                      type="checkbox"
+                      checked={sendOfferEmail}
+                      onChange={(e) => setSendOfferEmail(e.target.checked)}
+                      className="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500 cursor-pointer"
+                    />
+                    <span>Email formal offer directly to candidate</span>
+                  </label>
+                </div>
+
+                {sendOfferEmail && (
+                  <div className="p-4 bg-purple-50/50 border border-purple-200/80 rounded-2xl space-y-3">
+                    <div className="text-[11px] text-slate-600">
+                      Select which official university mailbox will dispatch this appointment offer:
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                      {/* Desk 1: Nancy Sharma / Corporate Head */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedDesk('personal');
+                          setSenderEmail(availableDesks.personalEmail);
+                          setSenderName(availableDesks.personalName);
+                          setReplyToEmail(availableDesks.personalEmail);
+                        }}
+                        className={`p-3 rounded-xl border text-left transition cursor-pointer flex flex-col justify-between ${
+                          selectedDesk === 'personal'
+                            ? 'bg-white border-purple-600 ring-2 ring-purple-500/20 shadow-xs'
+                            : 'bg-white/80 border-slate-200 hover:border-purple-300'
+                        }`}
+                      >
+                        <div>
+                          <div className="flex items-center justify-between">
+                            <span className="font-bold text-purple-950 text-xs">👑 Corporate Head Desk</span>
+                            <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded-full bg-purple-100 text-purple-800">
+                              Confidential
+                            </span>
+                          </div>
+                          <p className="text-[11px] font-mono text-slate-700 mt-1 truncate font-semibold">
+                            {availableDesks.personalEmail}
+                          </p>
+                          <p className="text-[10px] text-slate-500 mt-0.5 truncate">{availableDesks.personalName}</p>
+                        </div>
+                        <div className="mt-2 text-[10px] font-bold text-purple-700">
+                          {isExecutiveRole ? '★ Recommended for Executive / VC / Registrar' : 'Direct Officer Dispatch'}
+                        </div>
+                      </button>
+
+                      {/* Desk 2: HR Directorate */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedDesk('central_hr');
+                          setSenderEmail('hr@gku.ac.in');
+                          setSenderName('Directorate of HR & Faculty Affairs');
+                          setReplyToEmail('hr@gku.ac.in');
+                        }}
+                        className={`p-3 rounded-xl border text-left transition cursor-pointer flex flex-col justify-between ${
+                          selectedDesk === 'central_hr'
+                            ? 'bg-white border-emerald-600 ring-2 ring-emerald-500/20 shadow-xs'
+                            : 'bg-white/80 border-slate-200 hover:border-emerald-300'
+                        }`}
+                      >
+                        <div>
+                          <div className="flex items-center justify-between">
+                            <span className="font-bold text-slate-900 text-xs">🏢 HR Directorate</span>
+                            <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                              Faculty
+                            </span>
+                          </div>
+                          <p className="text-[11px] font-mono text-slate-700 mt-1 truncate font-semibold">hr@gku.ac.in</p>
+                          <p className="text-[10px] text-slate-500 mt-0.5">Directorate of HR</p>
+                        </div>
+                        <div className="mt-2 text-[10px] font-semibold text-slate-500">
+                          For General Teaching & Department Hires
+                        </div>
+                      </button>
+
+                      {/* Desk 3: Portal Desk */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedDesk('central_hrm');
+                          setSenderEmail('hrm@gku.ac.in');
+                          setSenderName('GKU Talent Acquisition & Recruitment Portal');
+                          setReplyToEmail('hrm@gku.ac.in');
+                        }}
+                        className={`p-3 rounded-xl border text-left transition cursor-pointer flex flex-col justify-between ${
+                          selectedDesk === 'central_hrm'
+                            ? 'bg-white border-blue-600 ring-2 ring-blue-500/20 shadow-xs'
+                            : 'bg-white/80 border-slate-200 hover:border-blue-300'
+                        }`}
+                      >
+                        <div>
+                          <div className="flex items-center justify-between">
+                            <span className="font-bold text-slate-900 text-xs">🌐 Recruitment Portal</span>
+                            <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-800">
+                              Portal Desk
+                            </span>
+                          </div>
+                          <p className="text-[11px] font-mono text-slate-700 mt-1 truncate font-semibold">hrm@gku.ac.in</p>
+                          <p className="text-[10px] text-slate-500 mt-0.5">GKU Talent Acquisition</p>
+                        </div>
+                        <div className="mt-2 text-[10px] font-semibold text-slate-500">
+                          System Automated Dispatch
+                        </div>
+                      </button>
+                    </div>
+
+                    {/* Routing Details: Reply-To and CC */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                      <div>
+                        <label className="block font-semibold text-slate-700 mb-1">
+                          Candidate Reply-To Inbox:
+                        </label>
+                        <input
+                          type="email"
+                          value={replyToEmail}
+                          onChange={(e) => setReplyToEmail(e.target.value)}
+                          className="w-full p-2 bg-white border border-slate-200 rounded-xl font-mono text-xs focus:ring-2 focus:ring-purple-500 outline-none"
+                        />
+                        <p className="text-[10px] text-slate-400 mt-0.5">When the candidate clicks Reply, their email lands here.</p>
+                      </div>
+
+                      <div>
+                        <label className="block font-semibold text-slate-700 mb-1">
+                          CC Officials (comma-separated):
+                        </label>
+                        <input
+                          type="text"
+                          value={ccEmails}
+                          onChange={(e) => setCcEmails(e.target.value)}
+                          placeholder="e.g. vc@gku.ac.in, registrar@gku.ac.in"
+                          className="w-full p-2 bg-white border border-slate-200 rounded-xl font-mono text-xs focus:ring-2 focus:ring-purple-500 outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="pt-1 flex items-center justify-between">
+                      <button
+                        type="button"
+                        onClick={() => setIsPreviewModalOpen(true)}
+                        className="px-3 py-1.5 bg-purple-100 hover:bg-purple-200 text-purple-900 rounded-xl font-bold transition text-xs flex items-center space-x-1.5 cursor-pointer"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                        <span>Preview Candidate Email</span>
+                      </button>
+
+                      <span className="text-[11px] text-slate-500">
+                        Candidate recipient: <strong className="font-mono text-slate-800">{candidate.email}</strong>
+                      </span>
+                    </div>
                   </div>
                 )}
               </div>
@@ -1251,6 +1460,114 @@ export function OfferLetterWorkbench({
                   Close
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ============================================================== */}
+      {/* EMAIL PREVIEW MODAL */}
+      {/* ============================================================== */}
+      {isPreviewModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden">
+            <div className="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+              <div className="flex items-center space-x-2">
+                <Mail className="w-5 h-5 text-purple-600" />
+                <div>
+                  <h3 className="font-bold text-slate-900 text-sm">Live Email Preview</h3>
+                  <p className="text-[11px] text-slate-500">
+                    Candidate inbox appearance when dispatched from <span className="font-mono text-purple-700 font-bold">{senderEmail}</span>
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsPreviewModalOpen(false)}
+                className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-200 rounded-lg transition cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-4 bg-slate-100 border-b border-slate-200 text-xs space-y-1.5 font-mono">
+              <div><strong className="text-slate-500">From:</strong> {senderName} &lt;{senderEmail}&gt;</div>
+              <div><strong className="text-slate-500">To:</strong> {candidate.fullName} &lt;{candidate.email}&gt;</div>
+              {ccEmails.trim() && <div><strong className="text-slate-500">CC:</strong> {ccEmails}</div>}
+              <div><strong className="text-slate-500">Reply-To:</strong> {replyToEmail}</div>
+              <div><strong className="text-slate-500">Subject:</strong> Formal Appointment Offer: {request.postTitle} - Guru Kashi University [Ref: {offerLetterRef}]</div>
+            </div>
+
+            <div className="p-6 overflow-y-auto max-h-[60vh] bg-slate-50">
+              <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-xs">
+                {/* Email Header */}
+                <div className="bg-[#0b1f3a] text-white p-6 text-center border-b-4 border-amber-400">
+                  <h2 className="text-lg font-extrabold tracking-wide m-0">GURU KASHI UNIVERSITY</h2>
+                  <p className="text-[11px] text-slate-300 mt-1">Sardulgarh Road, Talwandi Sabo, Bathinda, Punjab</p>
+                  <span className="inline-block mt-2 bg-amber-400 text-slate-950 font-bold text-[10px] px-2.5 py-0.5 rounded-full">
+                    NAAC A++ ACCREDITED UNIVERSITY
+                  </span>
+                </div>
+
+                <div className="p-6 space-y-4 text-xs text-slate-800">
+                  <p className="font-bold text-sm text-slate-900">Dear {candidate.fullName},</p>
+                  <p className="text-slate-600">
+                    On behalf of Guru Kashi University, we are pleased to offer you the formal appointment for the position of{' '}
+                    <strong>{request.postTitle}</strong> in the <strong>{request.department}</strong>.
+                  </p>
+
+                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
+                    <div className="flex justify-between py-1 border-b border-slate-200/60">
+                      <span className="text-slate-500 font-semibold">Offer Reference:</span>
+                      <span className="font-bold font-mono">{offerLetterRef}</span>
+                    </div>
+                    <div className="flex justify-between py-1 border-b border-slate-200/60">
+                      <span className="text-slate-500 font-semibold">Post Title:</span>
+                      <span className="font-bold">{request.postTitle}</span>
+                    </div>
+                    <div className="flex justify-between py-1 border-b border-slate-200/60">
+                      <span className="text-slate-500 font-semibold">Department:</span>
+                      <span className="font-bold">{request.department}</span>
+                    </div>
+                    <div className="flex justify-between py-1 border-b border-slate-200/60">
+                      <span className="text-slate-500 font-semibold">Offered Package (CTC):</span>
+                      <span className="font-bold text-emerald-700 text-sm">{offeredCtc}</span>
+                    </div>
+                    <div className="flex justify-between py-1 border-b border-slate-200/60">
+                      <span className="text-slate-500 font-semibold">Reporting Head:</span>
+                      <span className="font-medium">{reportingHead}</span>
+                    </div>
+                    <div className="flex justify-between py-1">
+                      <span className="text-slate-500 font-semibold">Joining Deadline:</span>
+                      <span className="font-bold text-rose-600">{joiningDeadline}</span>
+                    </div>
+                  </div>
+
+                  {specialClauses && (
+                    <div className="p-3 bg-blue-50 border-l-4 border-blue-600 rounded text-[11px] text-blue-900">
+                      <strong>Appointment Clauses:</strong>
+                      <p className="mt-1">{specialClauses}</p>
+                    </div>
+                  )}
+
+                  <div className="pt-4 border-t border-slate-200 text-xs">
+                    <p className="text-slate-500">With Warm Regards,</p>
+                    <p className="font-bold text-slate-900 mt-1">{senderName}</p>
+                    <p className="text-slate-500 text-[11px]">Directorate of HR &amp; Executive Affairs</p>
+                    <p className="text-blue-700 text-[11px] font-medium">Guru Kashi University, Punjab</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-3.5 bg-slate-100 border-t border-slate-200 flex items-center justify-end space-x-2">
+              <button
+                type="button"
+                onClick={() => setIsPreviewModalOpen(false)}
+                className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition cursor-pointer"
+              >
+                Close Preview
+              </button>
             </div>
           </div>
         </div>

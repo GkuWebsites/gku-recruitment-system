@@ -46,7 +46,8 @@ import {
   Ban,
   UploadCloud,
   Trash2,
-  Upload
+  Upload,
+  Mail
 } from 'lucide-react';
 
 interface HRDepartmentModuleProps {
@@ -2305,6 +2306,12 @@ export function HRDepartmentModule({
                                   <div className="text-[10px] text-slate-500 font-mono mt-0.5">
                                     Ref: {candidate.joiningDetails.offerLetterRef}
                                   </div>
+                                  {candidate.joiningDetails.dispatchedFromEmail && (
+                                    <div className="text-[10px] text-purple-700 font-semibold flex items-center space-x-1 mt-0.5" title={`Dispatched from: ${candidate.joiningDetails.dispatchedFromEmail}`}>
+                                      <Mail className="w-3 h-3 text-purple-500 shrink-0" />
+                                      <span className="truncate max-w-[140px]">via {candidate.joiningDetails.dispatchedFromEmail}</span>
+                                    </div>
+                                  )}
                                 </div>
                               ) : (
                                 <span className="text-slate-400 text-xs">—</span>
@@ -2509,6 +2516,12 @@ export function HRDepartmentModule({
                                         <div className="text-[10px] text-slate-500 font-mono mt-0.5">
                                           Ref: {candidate.joiningDetails.offerLetterRef}
                                         </div>
+                                        {candidate.joiningDetails.dispatchedFromEmail && (
+                                          <div className="text-[10px] text-purple-700 font-semibold flex items-center space-x-1 mt-0.5" title={`Dispatched from: ${candidate.joiningDetails.dispatchedFromEmail}`}>
+                                            <Mail className="w-3 h-3 text-purple-500 shrink-0" />
+                                            <span className="truncate max-w-[140px]">via {candidate.joiningDetails.dispatchedFromEmail}</span>
+                                          </div>
+                                        )}
                                       </div>
                                     ) : (
                                       <span className="text-slate-400 text-xs">—</span>

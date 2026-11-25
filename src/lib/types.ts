@@ -137,6 +137,10 @@ export interface Candidate {
     officialEmail?: string;
     reportingHead?: string;
     joiningRemarks?: string;
+    dispatchedFromEmail?: string;
+    dispatchedFromName?: string;
+    dispatchedAt?: string;
+    emailDispatchStatus?: 'Sent' | 'Failed' | 'Draft';
   };
 }
 

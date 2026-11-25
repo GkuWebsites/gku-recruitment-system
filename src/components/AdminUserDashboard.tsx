@@ -11,7 +11,10 @@ import {
   Building2,
   Trash2,
   Edit,
-  X
+  X,
+  Mail,
+  CheckCircle2,
+  ShieldCheck
 } from 'lucide-react';
 
 export function AdminUserDashboard() {
@@ -36,6 +39,7 @@ export function AdminUserDashboard() {
   const [createDesignation, setCreateDesignation] = useState<UserDesignation>('Dean');
   const [createDepartment, setCreateDepartment] = useState<string>(UNIVERSITY_DEPARTMENTS[0]);
   const [createPhone, setCreatePhone] = useState('');
+  const [createCanUseOfficialEmail, setCreateCanUseOfficialEmail] = useState(false);
 
   // Edit User Modal State
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -47,6 +51,7 @@ export function AdminUserDashboard() {
   const [editDepartment, setEditDepartment] = useState<string>(UNIVERSITY_DEPARTMENTS[0]);
   const [editPhone, setEditPhone] = useState('');
   const [editStatus, setEditStatus] = useState<'Active' | 'Inactive'>('Active');
+  const [editCanUseOfficialEmail, setEditCanUseOfficialEmail] = useState(false);
 
   // Notification and Status
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -155,7 +160,8 @@ export function AdminUserDashboard() {
           password: createPassword.trim() || 'password123',
           designation: createDesignation,
           department: deptToSave,
-          phone: createPhone.trim()
+          phone: createPhone.trim(),
+          canUseOfficialEmail: createCanUseOfficialEmail
         })
       });
 
@@ -170,6 +176,7 @@ export function AdminUserDashboard() {
       setCreateEmail('');
       setCreatePhone('');
       setCreatePassword('password123');
+      setCreateCanUseOfficialEmail(false);
       fetchUsers();
     } catch (err: unknown) {
       setErrorMsg((err as Error).message);
@@ -190,6 +197,7 @@ export function AdminUserDashboard() {
     setEditDepartment((user.department as any) || departments[0] || UNIVERSITY_DEPARTMENTS[0]);
     setEditPhone(user.phone || '');
     setEditStatus(user.status || 'Active');
+    setEditCanUseOfficialEmail(Boolean(user.canUseOfficialEmail));
     setIsEditModalOpen(true);
   };
 
@@ -208,7 +216,8 @@ export function AdminUserDashboard() {
         designation: editDesignation,
         department: deptToSave,
         phone: editPhone.trim(),
-        status: editDesignation === 'Admin' ? 'Active' : editStatus
+        status: editDesignation === 'Admin' ? 'Active' : editStatus,
+        canUseOfficialEmail: editCanUseOfficialEmail
       };
 
       if (editPassword.trim()) {
@@ -236,6 +245,30 @@ export function AdminUserDashboard() {
       setErrorMsg((err as Error).message);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  // 1-Click Toggle for Mail Permission
+  const handleToggleMailPermission = async (user: IUserProfile) => {
+    const uid = (user as any)._id || user.email;
+    const nextVal = !user.canUseOfficialEmail;
+    try {
+      const res = await fetch('/api/admin/users', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: uid,
+          updates: { canUseOfficialEmail: nextVal }
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setUsers((prev) =>
+          prev.map((u) => ((u as any)._id === uid || u.email === user.email ? { ...u, canUseOfficialEmail: nextVal } : u))
+        );
+      }
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -451,6 +484,7 @@ export function AdminUserDashboard() {
                 <th className="py-3.5 px-6 whitespace-nowrap">Assigned Faculty / Dept</th>
                 <th className="py-3.5 px-6 whitespace-nowrap">Phone Number</th>
                 <th className="py-3.5 px-6 text-center whitespace-nowrap">Status</th>
+                <th className="py-3.5 px-6 text-center whitespace-nowrap">Personal Mailbox</th>
                 <th className="py-3.5 px-6 text-right whitespace-nowrap">Actions</th>
               </tr>
             </thead>
@@ -515,6 +549,22 @@ export function AdminUserDashboard() {
                         >
                           {u.status}
                         </span>
+                      </td>
+
+                      <td className="py-4 px-6 text-center whitespace-nowrap">
+                        <button
+                          type="button"
+                          onClick={() => handleToggleMailPermission(u)}
+                          className={`inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-[10px] font-bold border transition cursor-pointer ${
+                            u.canUseOfficialEmail
+                              ? 'bg-purple-50 text-purple-800 border-purple-200 hover:bg-purple-100'
+                              : 'bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100'
+                          }`}
+                          title="Click to toggle personal official mailbox dispatch permission"
+                        >
+                          <Mail className="w-3 h-3" />
+                          <span>{u.canUseOfficialEmail ? '✓ Permitted' : 'Disabled'}</span>
+                        </button>
                       </td>
 
                       {/* Actions Column: Edit on all users; Deactivate/Delete ONLY on non-admin */}
@@ -686,6 +736,22 @@ export function AdminUserDashboard() {
                 />
               </div>
 
+              <div className="flex items-start space-x-2.5 p-3 bg-purple-50/70 border border-purple-200 rounded-xl">
+                <input
+                  type="checkbox"
+                  id="createCanUseOfficialEmail"
+                  checked={createCanUseOfficialEmail}
+                  onChange={(e) => setCreateCanUseOfficialEmail(e.target.checked)}
+                  className="w-4 h-4 text-purple-600 rounded focus:ring-purple-500 cursor-pointer mt-0.5"
+                />
+                <label htmlFor="createCanUseOfficialEmail" className="text-xs font-bold text-purple-950 cursor-pointer">
+                  Allow Personal Official Mailbox Dispatch (`canUseOfficialEmail`)
+                  <span className="block text-[11px] text-purple-800/80 font-normal mt-0.5">
+                    Permits this user (e.g. Nancy Sharma / Corporate Head) to connect their official Google Workspace mailbox for confidential offers.
+                  </span>
+                </label>
+              </div>
+
               <div className="pt-3 border-t border-slate-100 flex items-center justify-end space-x-3">
                 <button
                   type="button"
@@ -852,6 +918,22 @@ export function AdminUserDashboard() {
                     </select>
                   )}
                 </div>
+              </div>
+
+              <div className="flex items-start space-x-2.5 p-3 bg-purple-50/70 border border-purple-200 rounded-xl">
+                <input
+                  type="checkbox"
+                  id="editCanUseOfficialEmail"
+                  checked={editCanUseOfficialEmail}
+                  onChange={(e) => setEditCanUseOfficialEmail(e.target.checked)}
+                  className="w-4 h-4 text-purple-600 rounded focus:ring-purple-500 cursor-pointer mt-0.5"
+                />
+                <label htmlFor="editCanUseOfficialEmail" className="text-xs font-bold text-purple-950 cursor-pointer">
+                  Allow Personal Official Mailbox Dispatch (`canUseOfficialEmail`)
+                  <span className="block text-[11px] text-purple-800/80 font-normal mt-0.5">
+                    Permits this user (e.g. Nancy Sharma / Corporate Head) to connect their official Google Workspace mailbox for confidential offers.
+                  </span>
+                </label>
               </div>
 
               <div className="pt-3 border-t border-slate-100 flex items-center justify-end space-x-3">

@@ -13,6 +13,16 @@ export type UserDesignation =
 
 export type ProfileRole = string;
 
+export interface IUserMailSettings {
+  smtpHost?: string;
+  smtpPort?: number;
+  smtpUser?: string;
+  smtpPass?: string;
+  senderName?: string;
+  isConfigured?: boolean;
+  lastTestedAt?: string;
+}
+
 export interface IUserProfile {
   name: string;
   email: string;
@@ -22,6 +32,8 @@ export interface IUserProfile {
   department?: string;
   phone?: string;
   status: 'Active' | 'Inactive';
+  canUseOfficialEmail?: boolean;
+  mailSettings?: IUserMailSettings;
   createdAt?: string;
 }
 
@@ -40,7 +52,17 @@ const UserProfileSchema = new Schema<UserProfileDocument>(
     role: { type: String, required: false },
     department: { type: String, default: '' },
     phone: { type: String, default: '' },
-    status: { type: String, enum: ['Active', 'Inactive'], default: 'Active' }
+    status: { type: String, enum: ['Active', 'Inactive'], default: 'Active' },
+    canUseOfficialEmail: { type: Boolean, default: false },
+    mailSettings: {
+      smtpHost: { type: String, default: 'smtp.gmail.com' },
+      smtpPort: { type: Number, default: 465 },
+      smtpUser: { type: String, default: '' },
+      smtpPass: { type: String, default: '' },
+      senderName: { type: String, default: '' },
+      isConfigured: { type: Boolean, default: false },
+      lastTestedAt: { type: String, default: '' }
+    }
   },
   { timestamps: true }
 );
