@@ -30,6 +30,41 @@ if ($action === 'autossl') {
     exit;
 }
 
+if ($action === 'setup_cron') {
+    $scriptPath = "{$homeDir}/mongodb/keep_alive.sh";
+    $scriptContent = "#!/bin/bash\n" .
+        "if ! pgrep -f 'mongod.*27017' > /dev/null 2>&1; then\n" .
+        "    {$homeDir}/mongodb/bin/mongod --dbpath {$homeDir}/mongodb/data --bind_ip 127.0.0.1 --port 27017 --fork --logpath {$homeDir}/mongodb/mongod.log --wiredTigerCacheSizeGB 0.25 >/dev/null 2>&1\n" .
+        "fi\n";
+    @file_put_contents($scriptPath, $scriptContent);
+    @chmod($scriptPath, 0755);
+
+    $cronOut = 'no crontab command';
+    if (function_exists('shell_exec')) {
+        $existing = (string)@shell_exec('crontab -l 2>&1');
+        if (strpos($existing, 'keep_alive.sh') === false) {
+            $newLine = "* * * * * {$scriptPath} >/dev/null 2>&1\n@reboot {$scriptPath} >/dev/null 2>&1\n";
+            $cleanExisting = (strpos($existing, 'no crontab') !== false ? '' : trim($existing) . "\n");
+            $newCron = $cleanExisting . $newLine;
+            $tmpFile = tempnam('/tmp', 'cron');
+            file_put_contents($tmpFile, $newCron);
+            $cronOut = @shell_exec("crontab " . escapeshellarg($tmpFile) . " 2>&1");
+            @unlink($tmpFile);
+        } else {
+            $cronOut = 'cron already installed';
+        }
+    }
+
+    echo json_encode([
+        'status' => 'success',
+        'script_created' => file_exists($scriptPath),
+        'cron_output' => trim((string)$cronOut),
+        'crontab_list' => function_exists('shell_exec') ? trim((string)@shell_exec('crontab -l 2>&1')) : 'disabled',
+        'timestamp' => date('Y-m-d H:i:s')
+    ]);
+    exit;
+}
+
 if ($action === 'clean') {
     // Completely wipe old .next folder and tmp/restart.txt
     if (is_dir("{$appDir}/.next")) {

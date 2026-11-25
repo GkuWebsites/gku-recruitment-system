@@ -18,6 +18,26 @@ if (!global.mongooseCache) {
   global.mongooseCache = cached;
 }
 
+/**
+ * Self-healing helper: if running on Linux cPanel host and mongod is down,
+ * attempt to start the daemon in the background before connecting.
+ */
+async function ensureLocalMongodRunning(): Promise<void> {
+  if (process.platform === 'linux') {
+    try {
+      const { exec } = await import('child_process');
+      const cmd = 'pgrep -f "mongod.*27017" >/dev/null 2>&1 || (/home/prvmcqeftpe4/mongodb/bin/mongod --dbpath /home/prvmcqeftpe4/mongodb/data --bind_ip 127.0.0.1 --port 27017 --fork --logpath /home/prvmcqeftpe4/mongodb/mongod.log --wiredTigerCacheSizeGB 0.25 >/dev/null 2>&1)';
+      await new Promise<void>((resolve) => {
+        exec(cmd, { timeout: 4000 }, () => {
+          setTimeout(resolve, 600);
+        });
+      });
+    } catch {
+      // Best-effort execution
+    }
+  }
+}
+
 export async function connectToDatabase(): Promise<typeof mongoose> {
   const primaryUri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/gku_recruitment';
   const fallbackUri = 'mongodb://127.0.0.1:27017/gku_recruitment';
@@ -41,13 +61,23 @@ export async function connectToDatabase(): Promise<typeof mongoose> {
     if (primaryUri !== fallbackUri) {
       console.warn('External MongoDB connection timed out or blocked. Falling back to local MongoDB daemon (127.0.0.1:27017)...');
       try {
+        await ensureLocalMongodRunning();
         const fallbackConn = await mongoose.connect(fallbackUri, opts);
         cached.conn = fallbackConn;
         return cached.conn;
       } catch (fallbackErr) {
         throw primaryErr;
       }
+    } else {
+      // Local daemon failed to respond directly, try auto-reviving once
+      try {
+        await ensureLocalMongodRunning();
+        const retryConn = await mongoose.connect(primaryUri, opts);
+        cached.conn = retryConn;
+        return cached.conn;
+      } catch {
+        throw primaryErr;
+      }
     }
-    throw primaryErr;
   }
 }
