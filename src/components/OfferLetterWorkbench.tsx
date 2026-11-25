@@ -92,6 +92,12 @@ export function OfferLetterWorkbench({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Editable Letter Content Sections
+  const [letterUniversityStatutory, setLetterUniversityStatutory] = useState(
+    '(Established by Punjab Act No. 37 of 2011 & Recognised by UGC under Section 2(f) of the UGC Act 1956)'
+  );
+  const [letterUniversityNaac, setLetterUniversityNaac] = useState(
+    'NAAC Grade "A++" Accredited University • Member of AIU'
+  );
   const [letterOfficeTitle, setLetterOfficeTitle] = useState(
     'OFFICE OF THE REGISTRAR • DIRECTORATE OF HUMAN RESOURCES & FACULTY AFFAIRS'
   );
@@ -201,6 +207,11 @@ export function OfferLetterWorkbench({
 
   // Section labels for easy restoration
   const sectionLabels: Record<string, string> = {
+    headerStatutory: 'Statutory Act/UGC Subtitle',
+    headerNaac: 'NAAC Accreditation Subtitle',
+    headerAddress: 'Campus Address',
+    headerDirectorate: 'Directorate / Issuing Office',
+    refAndDate: 'Ref. No. & Date',
     topRecipient: 'Recipient Details',
     subject: 'Subject Line',
     salutation: 'Salutation',
@@ -211,7 +222,8 @@ export function OfferLetterWorkbench({
     conduct: '4. Service Conditions & Conduct',
     special: '5. Special Terms & Prerequisites',
     acceptance: '6. Acceptance & Joining Deadline',
-    copyTo: 'Copy Forwarded To List'
+    copyTo: 'Copy Forwarded To List',
+    signatory: 'Authorized Signatory Block'
   };
 
   // Save and Exit Inline Edit Mode ("blow button to update of save")
@@ -229,6 +241,8 @@ export function OfferLetterWorkbench({
   const handleResetTemplate = () => {
     setDeletedSections([]);
     setCustomClauses([]);
+    setLetterUniversityStatutory('(Established by Punjab Act No. 37 of 2011 & Recognised by UGC under Section 2(f) of the UGC Act 1956)');
+    setLetterUniversityNaac('NAAC Grade "A++" Accredited University • Member of AIU');
     setLetterOfficeTitle('OFFICE OF THE REGISTRAR • DIRECTORATE OF HUMAN RESOURCES & FACULTY AFFAIRS');
     setLetterUniversitySub('Sardulgarh Road, Talwandi Sabo, Bathinda, Punjab - 151302, India');
     setLetterDate(new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' }));
@@ -922,69 +936,167 @@ export function OfferLetterWorkbench({
                 <h2 className="text-xl font-serif font-black tracking-wide text-slate-950 uppercase">
                   GURU KASHI UNIVERSITY
                 </h2>
-                <div className="text-[11px] text-slate-700 font-medium space-y-0.5">
-                  <p>(Established by Punjab Act No. 37 of 2011 &amp; Recognised by UGC under Section 2(f) of the UGC Act 1956)</p>
-                  <p className="font-bold text-slate-900">NAAC Grade &ldquo;A++&rdquo; Accredited University &bull; Member of AIU</p>
-                  {isEditMode ? (
-                    <div className="flex items-center justify-center space-x-1.5 mt-1">
-                      <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wide">Campus Address:</span>
-                      <input
-                        type="text"
-                        value={letterUniversitySub}
-                        onChange={(e) => setLetterUniversitySub(e.target.value)}
-                        className="w-full max-w-md text-center text-[11px] p-1 bg-amber-50/70 border border-amber-300 rounded font-normal text-slate-800 outline-none"
-                      />
-                    </div>
-                  ) : (
-                    <p className="text-slate-600">{letterUniversitySub}</p>
-                  )}
-                </div>
-                <div className="pt-1.5 text-xs font-bold text-slate-800 tracking-wider uppercase border-t border-slate-200 mt-2">
-                  {isEditMode ? (
-                    <div className="flex items-center justify-center space-x-1.5">
-                      <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wide">Directorate / Office:</span>
-                      <input
-                        type="text"
-                        value={letterOfficeTitle}
-                        onChange={(e) => setLetterOfficeTitle(e.target.value)}
-                        className="w-full max-w-lg text-center font-bold text-xs p-1 bg-amber-50/70 border border-amber-300 rounded text-slate-900 outline-none"
-                      />
-                    </div>
-                  ) : (
-                    letterOfficeTitle
-                  )}
-                </div>
+
+                {/* Statutory Act Subtitle */}
+                {!isDeleted('headerStatutory') && (
+                  <div>
+                    {isEditMode ? (
+                      <div className="flex items-center justify-between p-1 bg-amber-50/70 border border-amber-300 rounded-lg my-1">
+                        <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wide mr-2 shrink-0">Statutory Line:</span>
+                        <input
+                          type="text"
+                          value={letterUniversityStatutory}
+                          onChange={(e) => setLetterUniversityStatutory(e.target.value)}
+                          className="flex-1 text-center text-[11px] p-0.5 bg-white border border-amber-300 rounded text-slate-800 outline-none"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => deleteSection('headerStatutory')}
+                          className="text-[10px] font-bold text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-2 py-0.5 rounded flex items-center space-x-1 cursor-pointer ml-2 shrink-0"
+                          title="Delete Statutory line"
+                        >
+                          <Trash2 className="w-2.5 h-2.5" />
+                          <span>Delete</span>
+                        </button>
+                      </div>
+                    ) : (
+                      <p className="text-[11px] text-slate-700 font-medium">{letterUniversityStatutory}</p>
+                    )}
+                  </div>
+                )}
+
+                {/* NAAC Accreditation Subtitle */}
+                {!isDeleted('headerNaac') && (
+                  <div>
+                    {isEditMode ? (
+                      <div className="flex items-center justify-between p-1 bg-amber-50/70 border border-amber-300 rounded-lg my-1">
+                        <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wide mr-2 shrink-0">NAAC Grade:</span>
+                        <input
+                          type="text"
+                          value={letterUniversityNaac}
+                          onChange={(e) => setLetterUniversityNaac(e.target.value)}
+                          className="flex-1 text-center text-[11px] p-0.5 bg-white border border-amber-300 rounded font-bold text-slate-900 outline-none"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => deleteSection('headerNaac')}
+                          className="text-[10px] font-bold text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-2 py-0.5 rounded flex items-center space-x-1 cursor-pointer ml-2 shrink-0"
+                          title="Delete NAAC line"
+                        >
+                          <Trash2 className="w-2.5 h-2.5" />
+                          <span>Delete</span>
+                        </button>
+                      </div>
+                    ) : (
+                      <p className="text-[11px] font-bold text-slate-900">{letterUniversityNaac}</p>
+                    )}
+                  </div>
+                )}
+
+                {/* Campus Address Line */}
+                {!isDeleted('headerAddress') && (
+                  <div>
+                    {isEditMode ? (
+                      <div className="flex items-center justify-between p-1 bg-amber-50/70 border border-amber-300 rounded-lg my-1">
+                        <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wide mr-2 shrink-0">Campus Address:</span>
+                        <input
+                          type="text"
+                          value={letterUniversitySub}
+                          onChange={(e) => setLetterUniversitySub(e.target.value)}
+                          className="flex-1 text-center text-[11px] p-0.5 bg-white border border-amber-300 rounded text-slate-800 outline-none"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => deleteSection('headerAddress')}
+                          className="text-[10px] font-bold text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-2 py-0.5 rounded flex items-center space-x-1 cursor-pointer ml-2 shrink-0"
+                          title="Delete Address line"
+                        >
+                          <Trash2 className="w-2.5 h-2.5" />
+                          <span>Delete</span>
+                        </button>
+                      </div>
+                    ) : (
+                      <p className="text-[11px] text-slate-600">{letterUniversitySub}</p>
+                    )}
+                  </div>
+                )}
+
+                {/* Directorate / Office Title */}
+                {!isDeleted('headerDirectorate') && (
+                  <div className="pt-1.5 text-xs font-bold text-slate-800 tracking-wider uppercase border-t border-slate-200 mt-2">
+                    {isEditMode ? (
+                      <div className="flex items-center justify-between p-1 bg-amber-50/70 border border-amber-300 rounded-lg">
+                        <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wide mr-2 shrink-0">Directorate / Office:</span>
+                        <input
+                          type="text"
+                          value={letterOfficeTitle}
+                          onChange={(e) => setLetterOfficeTitle(e.target.value)}
+                          className="flex-1 text-center font-bold text-xs p-0.5 bg-white border border-amber-300 rounded text-slate-900 outline-none"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => deleteSection('headerDirectorate')}
+                          className="text-[10px] font-bold text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-2 py-0.5 rounded flex items-center space-x-1 cursor-pointer ml-2 shrink-0"
+                          title="Delete Directorate line"
+                        >
+                          <Trash2 className="w-2.5 h-2.5" />
+                          <span>Delete</span>
+                        </button>
+                      </div>
+                    ) : (
+                      letterOfficeTitle
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Ref No & Date */}
-              <div className="flex justify-between items-center text-xs font-semibold text-slate-800 pt-1">
-                <div className="flex items-center space-x-1">
-                  <span className="font-bold text-slate-900">Ref. No.: </span>
+              {!isDeleted('refAndDate') && (
+                <div className="flex justify-between items-center text-xs font-semibold text-slate-800 pt-1">
                   {isEditMode ? (
-                    <input
-                      type="text"
-                      value={offerLetterRef}
-                      onChange={(e) => setOfferLetterRef(e.target.value)}
-                      className="font-mono font-bold text-xs p-1 bg-amber-50/70 border border-amber-300 rounded text-slate-900 w-56 outline-none"
-                    />
+                    <div className="w-full flex items-center justify-between p-1.5 bg-amber-50/70 border border-amber-300 rounded-lg">
+                      <div className="flex items-center space-x-1">
+                        <span className="text-[10px] font-bold text-slate-500 uppercase">Ref. No.:</span>
+                        <input
+                          type="text"
+                          value={offerLetterRef}
+                          onChange={(e) => setOfferLetterRef(e.target.value)}
+                          className="font-mono font-bold text-xs p-0.5 bg-white border border-amber-300 rounded text-slate-900 w-52 outline-none"
+                        />
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <span className="text-[10px] font-bold text-slate-500 uppercase">Date:</span>
+                        <input
+                          type="text"
+                          value={letterDate}
+                          onChange={(e) => setLetterDate(e.target.value)}
+                          className="font-bold text-xs p-0.5 bg-white border border-amber-300 rounded text-slate-900 w-36 text-right outline-none"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => deleteSection('refAndDate')}
+                        className="text-[10px] font-bold text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-2 py-0.5 rounded flex items-center space-x-1 cursor-pointer shrink-0"
+                        title="Delete Ref & Date"
+                      >
+                        <Trash2 className="w-2.5 h-2.5" />
+                        <span>Delete</span>
+                      </button>
+                    </div>
                   ) : (
-                    <span className="font-mono font-bold text-slate-900">{offerLetterRef}</span>
+                    <>
+                      <div>
+                        <span className="font-bold text-slate-900">Ref. No.: </span>
+                        <span className="font-mono font-bold text-slate-900">{offerLetterRef}</span>
+                      </div>
+                      <div>
+                        <span className="font-bold text-slate-900">Date: </span>
+                        <span>{letterDate}</span>
+                      </div>
+                    </>
                   )}
                 </div>
-                <div className="flex items-center space-x-1">
-                  <span className="font-bold text-slate-900">Date: </span>
-                  {isEditMode ? (
-                    <input
-                      type="text"
-                      value={letterDate}
-                      onChange={(e) => setLetterDate(e.target.value)}
-                      className="font-bold text-xs p-1 bg-amber-50/70 border border-amber-300 rounded text-slate-900 w-40 text-right outline-none"
-                    />
-                  ) : (
-                    <span>{letterDate}</span>
-                  )}
-                </div>
-              </div>
+              )}
 
               {/* Recipient Block */}
               {!isDeleted('topRecipient') && (
@@ -1418,32 +1530,48 @@ export function OfferLetterWorkbench({
                   <div></div>
                 )}
 
-                <div className="text-right space-y-1">
-                  <div className="h-10"></div>
-                  {isEditMode ? (
-                    <div className="space-y-1 text-right">
-                      <label className="text-[10px] text-slate-400 font-bold block">Signatory Name</label>
-                      <input
-                        type="text"
-                        value={letterSignatoryName}
-                        onChange={(e) => setLetterSignatoryName(e.target.value)}
-                        className="font-bold text-right p-1 bg-white border border-amber-300 rounded text-xs outline-none w-52"
-                      />
-                      <label className="text-[10px] text-slate-400 font-bold block mt-1">Designation &amp; Campus</label>
-                      <input
-                        type="text"
-                        value={letterSignatoryTitle}
-                        onChange={(e) => setLetterSignatoryTitle(e.target.value)}
-                        className="text-right p-1 bg-white border border-amber-300 rounded text-[11px] outline-none w-52 text-slate-500"
-                      />
-                    </div>
-                  ) : (
-                    <>
-                      <div className="font-bold text-slate-900 text-xs">{letterSignatoryName}</div>
-                      <div className="text-[11px] text-slate-600">{letterSignatoryTitle}</div>
-                    </>
-                  )}
-                </div>
+                {!isDeleted('signatory') ? (
+                  <div className="text-right space-y-1">
+                    <div className="h-10"></div>
+                    {isEditMode ? (
+                      <div className="space-y-1 text-right p-2.5 bg-amber-50/70 border border-amber-300 rounded-xl">
+                        <div className="flex items-center justify-between pb-1 border-b border-amber-200">
+                          <span className="text-[10px] font-bold text-amber-900 uppercase">Signatory Authority</span>
+                          <button
+                            type="button"
+                            onClick={() => deleteSection('signatory')}
+                            className="text-[10px] font-bold text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-1.5 py-0.5 rounded flex items-center space-x-1 cursor-pointer"
+                            title="Delete Signatory block"
+                          >
+                            <Trash2 className="w-2.5 h-2.5" />
+                            <span>Delete</span>
+                          </button>
+                        </div>
+                        <label className="text-[10px] text-slate-400 font-bold block">Signatory Name</label>
+                        <input
+                          type="text"
+                          value={letterSignatoryName}
+                          onChange={(e) => setLetterSignatoryName(e.target.value)}
+                          className="font-bold text-right p-1 bg-white border border-amber-300 rounded text-xs outline-none w-52"
+                        />
+                        <label className="text-[10px] text-slate-400 font-bold block mt-1">Designation &amp; Campus</label>
+                        <input
+                          type="text"
+                          value={letterSignatoryTitle}
+                          onChange={(e) => setLetterSignatoryTitle(e.target.value)}
+                          className="text-right p-1 bg-white border border-amber-300 rounded text-[11px] outline-none w-52 text-slate-500"
+                        />
+                      </div>
+                    ) : (
+                      <>
+                        <div className="font-bold text-slate-900 text-xs">{letterSignatoryName}</div>
+                        <div className="text-[11px] text-slate-600">{letterSignatoryTitle}</div>
+                      </>
+                    )}
+                  </div>
+                ) : (
+                  <div></div>
+                )}
               </div>
 
               {/* Prominent Below/Bottom Button to Update or Save ("blow button to update of save") */}
