@@ -26,7 +26,8 @@ async function ensureLocalMongodRunning(): Promise<void> {
   if (process.platform === 'linux') {
     try {
       const { exec } = await import('child_process');
-      const cmd = 'pgrep -f "mongod.*27017" >/dev/null 2>&1 || (/home/prvmcqeftpe4/mongodb/bin/mongod --dbpath /home/prvmcqeftpe4/mongodb/data --bind_ip 127.0.0.1 --port 27017 --fork --logpath /home/prvmcqeftpe4/mongodb/mongod.log --wiredTigerCacheSizeGB 0.25 >/dev/null 2>&1)';
+      const home = process.env.HOME || '/home/prvmcqeftpe4';
+      const cmd = `pgrep -f "mongod.*27017" >/dev/null 2>&1 || (${home}/mongodb/bin/mongod --dbpath ${home}/mongodb/data --bind_ip 127.0.0.1 --port 27017 --fork --logpath ${home}/mongodb/mongod.log --wiredTigerCacheSizeGB 0.25 >/dev/null 2>&1)`;
       await new Promise<void>((resolve) => {
         exec(cmd, { timeout: 4000 }, () => {
           setTimeout(resolve, 600);

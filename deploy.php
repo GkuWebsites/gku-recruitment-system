@@ -31,33 +31,78 @@ if ($action === 'autossl') {
 }
 
 if ($action === 'setup_cron') {
-    $scriptPath = "{$homeDir}/mongodb/keep_alive.sh";
+    $mongoDir = "{$homeDir}/mongodb";
+    $binDir = "{$mongoDir}/bin";
+    $dataDir = "{$mongoDir}/data";
+    $backupDir = "{$mongoDir}/backups";
+    $logFile = "{$mongoDir}/mongod.log";
+    $mongodBin = "{$binDir}/mongod";
+    $scriptPath = "{$mongoDir}/keep_alive.sh";
+    $backupScriptPath = "{$mongoDir}/backup.sh";
+
+    if (!is_dir($backupDir)) @mkdir($backupDir, 0755, true);
+
+    // 1. Rock-solid Watchdog script with port testing & log maintenance
     $scriptContent = "#!/bin/bash\n" .
-        "if ! pgrep -f 'mongod.*27017' > /dev/null 2>&1; then\n" .
-        "    {$homeDir}/mongodb/bin/mongod --dbpath {$homeDir}/mongodb/data --bind_ip 127.0.0.1 --port 27017 --fork --logpath {$homeDir}/mongodb/mongod.log --wiredTigerCacheSizeGB 0.25 >/dev/null 2>&1\n" .
+        "PORT_OPEN=0\n" .
+        "if (exec 3<>/dev/tcp/127.0.0.1/27017) 2>/dev/null; then\n" .
+        "    exec 3<&-\n" .
+        "    exec 3>&-\n" .
+        "    PORT_OPEN=1\n" .
+        "fi\n\n" .
+        "if [ \$PORT_OPEN -eq 0 ]; then\n" .
+        "    pkill -9 -f 'mongod.*27017' 2>/dev/null\n" .
+        "    rm -f /tmp/mongodb-27017.sock\n" .
+        "    {$mongodBin} --dbpath {$dataDir} --bind_ip 127.0.0.1 --port 27017 --fork --logpath {$logFile} --wiredTigerCacheSizeGB 0.25 >/dev/null 2>&1\n" .
+        "fi\n\n" .
+        "# Rotate log if over 20MB\n" .
+        "if [ -f {$logFile} ] && [ $(stat -c%s {$logFile} 2>/dev/null || echo 0) -gt 20971520 ]; then\n" .
+        "    tail -n 5000 {$logFile} > {$logFile}.tmp && mv {$logFile}.tmp {$logFile}\n" .
         "fi\n";
     @file_put_contents($scriptPath, $scriptContent);
     @chmod($scriptPath, 0755);
 
+    // 2. Automated Daily Snapshot Backup script (Retains last 7 days)
+    $backupContent = "#!/bin/bash\n" .
+        "DATE=\$(date +%Y-%m-%d_%H%M%S)\n" .
+        "BACKUP_FILE=\"{$backupDir}/gku_mongo_\${DATE}.tar.gz\"\n" .
+        "tar --exclude='*.lock' --exclude='journal' -czf \"\$BACKUP_FILE\" -C \"{$mongoDir}\" data >/dev/null 2>&1\n" .
+        "# Keep only last 7 daily archives\n" .
+        "find \"{$backupDir}\" -name 'gku_mongo_*.tar.gz' -mtime +7 -delete >/dev/null 2>&1\n";
+    @file_put_contents($backupScriptPath, $backupContent);
+    @chmod($backupScriptPath, 0755);
+
     $cronOut = 'no crontab command';
     if (function_exists('shell_exec')) {
         $existing = (string)@shell_exec('crontab -l 2>&1');
-        if (strpos($existing, 'keep_alive.sh') === false) {
-            $newLine = "* * * * * {$scriptPath} >/dev/null 2>&1\n@reboot {$scriptPath} >/dev/null 2>&1\n";
-            $cleanExisting = (strpos($existing, 'no crontab') !== false ? '' : trim($existing) . "\n");
-            $newCron = $cleanExisting . $newLine;
-            $tmpFile = tempnam('/tmp', 'cron');
-            file_put_contents($tmpFile, $newCron);
-            $cronOut = @shell_exec("crontab " . escapeshellarg($tmpFile) . " 2>&1");
-            @unlink($tmpFile);
-        } else {
-            $cronOut = 'cron already installed';
+        // Clean out existing keep_alive or backup entries to replace with clean current ones
+        $lines = explode("\n", (strpos($existing, 'no crontab') !== false ? '' : trim($existing)));
+        $filtered = [];
+        foreach ($lines as $line) {
+            $lineTrim = trim($line);
+            if (empty($lineTrim)) continue;
+            if (strpos($lineTrim, 'keep_alive.sh') !== false) continue;
+            if (strpos($lineTrim, 'backup.sh') !== false) continue;
+            $filtered[] = $lineTrim;
         }
+        
+        // Add watchdog: runs every minute and on every reboot
+        $filtered[] = "* * * * * {$scriptPath} >/dev/null 2>&1";
+        $filtered[] = "@reboot {$scriptPath} >/dev/null 2>&1";
+        // Add backup: runs daily at 02:30 AM
+        $filtered[] = "30 2 * * * {$backupScriptPath} >/dev/null 2>&1";
+
+        $newCron = implode("\n", $filtered) . "\n";
+        $tmpFile = tempnam('/tmp', 'cron');
+        file_put_contents($tmpFile, $newCron);
+        $cronOut = @shell_exec("crontab " . escapeshellarg($tmpFile) . " 2>&1");
+        @unlink($tmpFile);
     }
 
     echo json_encode([
         'status' => 'success',
-        'script_created' => file_exists($scriptPath),
+        'watchdog_script' => file_exists($scriptPath),
+        'backup_script' => file_exists($backupScriptPath),
         'cron_output' => trim((string)$cronOut),
         'crontab_list' => function_exists('shell_exec') ? trim((string)@shell_exec('crontab -l 2>&1')) : 'disabled',
         'timestamp' => date('Y-m-d H:i:s')
