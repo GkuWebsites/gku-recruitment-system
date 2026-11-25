@@ -285,111 +285,87 @@ export function NewRequestModal({
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {/* Option 1: Direct Recruitment (No Approval Required) */}
+                {/* Option 1: Direct Recruitment */}
                 <div
                   onClick={() => setHrWorkflowMode('direct')}
-                  className={`p-3.5 rounded-xl border cursor-pointer transition select-none flex flex-col justify-between ${
+                  className={`p-3.5 rounded-xl border cursor-pointer transition select-none flex items-center justify-between ${
                     hrWorkflowMode === 'direct'
                       ? 'bg-emerald-50/90 border-emerald-500 ring-2 ring-emerald-500/20'
                       : 'bg-white border-slate-200 hover:border-slate-300'
                   }`}
                 >
-                  <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="font-bold text-slate-900 text-xs flex items-center space-x-1.5">
-                        <Zap className="w-4 h-4 text-emerald-600 fill-emerald-600" />
-                        <span>Direct Recruitment</span>
-                      </span>
-                      <input
-                        type="radio"
-                        name="hrWorkflow"
-                        checked={hrWorkflowMode === 'direct'}
-                        onChange={() => setHrWorkflowMode('direct')}
-                        className="text-emerald-600 cursor-pointer"
-                      />
-                    </div>
-                    <p className="text-[11px] text-slate-600 leading-relaxed mt-1">
-                      Directly create and publish this requirement without seeking approval. Bypasses VC / Registrar review and moves straight to HR Active Pipeline for posting.
-                    </p>
-                  </div>
-                  <div className="mt-3 pt-2 border-t border-slate-200/60 flex items-center justify-between">
-                    <span className="text-[10px] font-bold text-emerald-800 bg-emerald-100/80 px-2 py-0.5 rounded border border-emerald-300">
-                      ✓ No Approval Required
-                    </span>
-                    <span className="text-[10px] text-slate-500 font-semibold">Immediate Active</span>
-                  </div>
+                  <span className="font-bold text-slate-900 text-xs sm:text-sm flex items-center space-x-2">
+                    <Zap className="w-4 h-4 text-emerald-600 fill-emerald-600" />
+                    <span>Direct Recruitment</span>
+                  </span>
+                  <input
+                    type="radio"
+                    name="hrWorkflow"
+                    checked={hrWorkflowMode === 'direct'}
+                    onChange={() => setHrWorkflowMode('direct')}
+                    className="text-emerald-600 cursor-pointer w-4 h-4"
+                  />
                 </div>
 
-                {/* Option 2: Request Approval (Configurable Authority) */}
+                {/* Option 2: Request Approval */}
                 <div
                   onClick={() => setHrWorkflowMode('request_approval')}
-                  className={`p-3.5 rounded-xl border cursor-pointer transition select-none flex flex-col justify-between ${
+                  className={`p-3.5 rounded-xl border cursor-pointer transition select-none space-y-2 ${
                     hrWorkflowMode === 'request_approval'
                       ? 'bg-purple-50/90 border-purple-500 ring-2 ring-purple-500/20'
                       : 'bg-white border-slate-200 hover:border-slate-300'
                   }`}
                 >
-                  <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="font-bold text-slate-900 text-xs flex items-center space-x-1.5">
-                        <Building2 className="w-4 h-4 text-purple-600" />
-                        <span>Request Approval</span>
-                      </span>
-                      <input
-                        type="radio"
-                        name="hrWorkflow"
-                        checked={hrWorkflowMode === 'request_approval'}
-                        onChange={() => setHrWorkflowMode('request_approval')}
-                        className="text-purple-600 cursor-pointer"
-                      />
-                    </div>
-                    <p className="text-[11px] text-slate-600 leading-relaxed mt-1">
-                      Request formal approval from university leadership before proceeding with recruitment. Select authority:
-                    </p>
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-slate-900 text-xs sm:text-sm flex items-center space-x-2">
+                      <Building2 className="w-4 h-4 text-purple-600" />
+                      <span>Request Approval</span>
+                    </span>
+                    <input
+                      type="radio"
+                      name="hrWorkflow"
+                      checked={hrWorkflowMode === 'request_approval'}
+                      onChange={() => setHrWorkflowMode('request_approval')}
+                      className="text-purple-600 cursor-pointer w-4 h-4"
+                    />
                   </div>
 
-                  {/* Authority Checkboxes */}
-                  <div className="mt-2.5 pt-2 border-t border-slate-200/60 space-y-1.5">
-                    <div className="text-[10px] font-bold text-slate-600 uppercase tracking-wide">
-                      Select Approval Authority:
-                    </div>
-                    <div className="flex items-center space-x-4">
-                      <label
-                        onClick={(e) => e.stopPropagation()}
-                        className="flex items-center space-x-1.5 text-xs font-semibold text-slate-800 cursor-pointer"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={targetAuthorities.vc}
-                          onChange={(e) => {
-                            setTargetAuthorities((prev) => ({
-                              ...prev,
-                              vc: e.target.checked || !prev.registrar
-                            }));
-                          }}
-                          className="rounded border-slate-300 text-purple-600 focus:ring-purple-500 cursor-pointer w-4 h-4"
-                        />
-                        <span>Vice-Chancellor (VC)</span>
-                      </label>
+                  <div className="flex items-center space-x-4 pt-1.5 border-t border-purple-200/60">
+                    <label
+                      onClick={(e) => e.stopPropagation()}
+                      className="flex items-center space-x-1.5 text-xs font-semibold text-slate-800 cursor-pointer"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={targetAuthorities.vc}
+                        onChange={(e) => {
+                          setTargetAuthorities((prev) => ({
+                            ...prev,
+                            vc: e.target.checked || !prev.registrar
+                          }));
+                        }}
+                        className="rounded border-slate-300 text-purple-600 focus:ring-purple-500 cursor-pointer w-4 h-4"
+                      />
+                      <span>Vice-Chancellor (VC)</span>
+                    </label>
 
-                      <label
-                        onClick={(e) => e.stopPropagation()}
-                        className="flex items-center space-x-1.5 text-xs font-semibold text-slate-800 cursor-pointer"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={targetAuthorities.registrar}
-                          onChange={(e) => {
-                            setTargetAuthorities((prev) => ({
-                              ...prev,
-                              registrar: e.target.checked || !prev.vc
-                            }));
-                          }}
-                          className="rounded border-slate-300 text-purple-600 focus:ring-purple-500 cursor-pointer w-4 h-4"
-                        />
-                        <span>Registrar</span>
-                      </label>
-                    </div>
+                    <label
+                      onClick={(e) => e.stopPropagation()}
+                      className="flex items-center space-x-1.5 text-xs font-semibold text-slate-800 cursor-pointer"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={targetAuthorities.registrar}
+                        onChange={(e) => {
+                          setTargetAuthorities((prev) => ({
+                            ...prev,
+                            registrar: e.target.checked || !prev.vc
+                          }));
+                        }}
+                        className="rounded border-slate-300 text-purple-600 focus:ring-purple-500 cursor-pointer w-4 h-4"
+                      />
+                      <span>Registrar</span>
+                    </label>
                   </div>
                 </div>
               </div>
@@ -705,9 +681,7 @@ export function NewRequestModal({
 
           {/* Footer buttons */}
           <div className="pt-2 flex items-center justify-between border-t border-slate-100">
-            <span className="text-[11px] text-slate-500">
-              {routingSubtext}
-            </span>
+            <span></span>
             <div className="flex items-center space-x-2">
               <button
                 type="button"
