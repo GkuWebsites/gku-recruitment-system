@@ -11,6 +11,9 @@ export async function GET(req: NextRequest) {
     const role = searchParams.get('role');
     const search = searchParams.get('search');
     const stage = searchParams.get('stage');
+    const userEmail = searchParams.get('userEmail');
+    const userRole = searchParams.get('userRole');
+    const userDepartment = searchParams.get('userDepartment');
 
     const query: Record<string, unknown> = {};
 
@@ -36,9 +39,26 @@ export async function GET(req: NextRequest) {
     }
 
     // Role-specific scoping:
-    // When role is 'VC / Registrar', only show requisitions that have passed Dean Academic review!
-    // New job requirements submitted by Deans are visible only to Dean Academic and HR until approved.
-    if (role === 'VC / Registrar') {
+    // 1. Department / Dean role: Strictly isolated to own requisitions or HR requisitions marked visibleToDean
+    const isDean = role === 'Department / Dean' || userRole === 'Dean' || userRole === 'HOD' || userRole === 'Director';
+    if (isDean) {
+      const orConditions: any[] = [];
+      if (userEmail) {
+        orConditions.push({ 'creator.email': { $regex: `^${userEmail.trim()}$`, $options: 'i' } });
+      }
+      if (userDepartment) {
+        orConditions.push({
+          department: userDepartment,
+          visibleToDean: true
+        });
+      }
+      if (orConditions.length > 0) {
+        query.$or = orConditions;
+      } else {
+        query._id = null;
+      }
+    } else if (role === 'VC / Registrar') {
+      // When role is 'VC / Registrar', only show requisitions that have passed Dean Academic review!
       query.$or = [
         { currentStage: { $gte: 3 } },
         { 'deanAcademicApproval.decision': 'Approved' },
@@ -160,6 +180,7 @@ export async function POST(req: NextRequest) {
         role: creatorRole,
         email: creatorEmail
       },
+      visibleToDean: body.visibleToDean ?? (creatorRole === 'HR Department' ? false : true),
       status,
       currentStage,
       deanAcademicApproval,

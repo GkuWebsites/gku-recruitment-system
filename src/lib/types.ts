@@ -196,6 +196,7 @@ export interface IHiringRequest {
     role: UserRole;
     email: string;
   };
+  visibleToDean?: boolean;
   status: HiringStatus;
   currentStage: number; // 1 to 6
   deanAcademicApproval?: {

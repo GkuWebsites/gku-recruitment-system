@@ -81,14 +81,21 @@ export default function HomePage() {
       const roleQuery = isDeanOrHod
         ? 'Department / Dean'
         : currentUser.designation === 'Dean Academic'
-          ? 'Dean Academic'
-          : isVCRegistrar
-            ? 'VC / Registrar'
-            : currentUser.designation === 'HR'
-              ? 'HR Department'
-              : 'Dean Academic';
+        ? 'Dean Academic'
+        : isVCRegistrar
+        ? 'VC / Registrar'
+        : currentUser.designation === 'HR'
+        ? 'HR Department'
+        : 'Dean Academic';
 
-      const res = await fetch(`/api/requests?role=${encodeURIComponent(roleQuery)}`);
+      const queryParams = new URLSearchParams({
+        role: roleQuery,
+        userEmail: currentUser.email || '',
+        userRole: currentUser.designation || currentUser.role || '',
+        userDepartment: currentUser.department || ''
+      });
+
+      const res = await fetch(`/api/requests?${queryParams.toString()}`);
       const data = await res.json();
       if (data.success) {
         setRequests(data.data || []);
@@ -162,7 +169,7 @@ export default function HomePage() {
         <main className="flex-1 flex items-center justify-center p-4 sm:p-6">
           <div className="max-w-md w-full bg-white rounded-2xl shadow-xl border border-slate-200 p-8 sm:p-10 space-y-6">
             <div className="space-y-1">
-              <h1 className="text-center text-2xl font-bold text-slate-900 tracking-tight">
+              <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
                 Institutional Sign In
               </h1>
               <p className="text-xs text-slate-500">
@@ -351,8 +358,8 @@ export default function HomePage() {
     const deskSubtitle = isVC
       ? "Vice Chancellor's Secretariat"
       : isRegistrar
-        ? "Registrar's Statutory Office"
-        : 'Executive Sanction Desk';
+      ? "Registrar's Statutory Office"
+      : 'Executive Sanction Desk';
 
     return (
       <div className="min-h-screen bg-[#f8fafc] text-slate-800 flex flex-col">

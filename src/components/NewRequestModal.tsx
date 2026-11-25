@@ -62,6 +62,7 @@ export function NewRequestModal({
     vc: true,
     registrar: true
   });
+  const [visibleToDean, setVisibleToDean] = useState(false);
   const [jobDescriptionFileName, setJobDescriptionFileName] = useState('');
   const [jobDescriptionFileSize, setJobDescriptionFileSize] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -184,6 +185,7 @@ export function NewRequestModal({
           requiredQualifications: qualifications.trim(),
           experienceRequired: experience.trim(),
           jobDescriptionFile: jobDescriptionFileName || undefined,
+          visibleToDean: isHR ? visibleToDean : true,
           approvalRouting: effectiveRouting,
           authorities: authoritiesList,
           creatorName: defaultCreatorName,
@@ -368,6 +370,26 @@ export function NewRequestModal({
                     </label>
                   </div>
                 </div>
+              </div>
+
+              {/* Show/Share with Department Dean Checkbox */}
+              <div className="p-3 bg-white border border-slate-200 rounded-xl">
+                <label className="flex items-start space-x-2.5 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={visibleToDean}
+                    onChange={(e) => setVisibleToDean(e.target.checked)}
+                    className="w-4 h-4 mt-0.5 text-blue-600 rounded border-slate-300 focus:ring-blue-500 cursor-pointer"
+                  />
+                  <div>
+                    <span className="text-xs font-bold text-slate-800">
+                      Show this hiring requirement to Department Dean
+                    </span>
+                    <p className="text-[11px] text-slate-500 mt-0.5">
+                      Check this if you want the Dean of {department} to view and track this requirement in their Department Workspace. If left unchecked, this requirement remains confidential to HR &amp; Leadership.
+                    </p>
+                  </div>
+                </label>
               </div>
             </div>
           ) : (

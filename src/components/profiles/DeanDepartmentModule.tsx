@@ -50,8 +50,26 @@ export function DeanDepartmentModule({
       .catch((e) => console.error(e));
   }, [currentUser]);
 
-  // Filter requests belonging to this department (or all departments)
-  const deptRequests = selectedDept === 'all' ? requests : requests.filter((r) => r.department === selectedDept);
+  // Filter requests: Strict Scoping for Dean:
+  // 1. Requisitions created by this specific Dean (matching creator email or name)
+  // 2. OR requisitions in this department where HR explicitly granted visibility (visibleToDean === true)
+  const userEmail = currentUser?.email?.toLowerCase().trim() || '';
+  const userName = currentUser?.name?.toLowerCase().trim() || '';
+  const userDept = (currentUser?.department || selectedDept || '').trim().toLowerCase();
+
+  const deptRequests = requests.filter((r) => {
+    // 1. Requisitions created by this Dean
+    const isOwner =
+      (r.creator?.email && r.creator.email.toLowerCase().trim() === userEmail) ||
+      (r.creator?.name && r.creator.name.toLowerCase().trim() === userName);
+    if (isOwner) return true;
+
+    // 2. Requisitions created by HR for this department with explicit permission
+    const isHrShared =
+      r.department?.toLowerCase().trim() === userDept &&
+      r.visibleToDean === true;
+    return isHrShared;
+  });
 
   // Available Post Titles derived dynamically
   const availablePostTitles = useMemo(() => {
@@ -204,20 +222,13 @@ export function DeanDepartmentModule({
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          {/* Department Selector */}
+          {/* Assigned Department Badge */}
           <div className="flex items-center space-x-2">
             <span className="text-xs font-semibold text-slate-500">My Department:</span>
-            <select
-              value={selectedDept}
-              onChange={(e) => setSelectedDept(e.target.value)}
-              className="text-xs font-bold bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
-            >
-              {departments.map((dept) => (
-                <option key={dept} value={dept}>
-                  {dept}
-                </option>
-              ))}
-            </select>
+            <div className="flex items-center space-x-1.5 px-3.5 py-2 bg-blue-50 border border-blue-200 rounded-xl text-xs font-bold text-blue-900">
+              <Building2 className="w-3.5 h-3.5 text-blue-600" />
+              <span>{currentUser?.department || selectedDept}</span>
+            </div>
           </div>
 
           <button
@@ -287,44 +298,27 @@ export function DeanDepartmentModule({
                 />
               </div>
 
-              {/* Department Filter */}
+              {/* Post Title Filter */}
               <div className="flex items-center space-x-1.5">
                 <Filter className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                 <select
-                  value={selectedDept}
-                  onChange={(e) => {
-                    setSelectedDept(e.target.value);
-                    setSelectedPostFilter('all');
-                  }}
-                  className="text-xs bg-white border border-slate-200 rounded-xl px-3 py-2 font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer max-w-[190px] truncate"
-                  title="Filter by Department"
+                  value={selectedPostFilter}
+                  onChange={(e) => setSelectedPostFilter(e.target.value)}
+                  className="text-xs bg-white border border-slate-200 rounded-xl px-3 py-2 font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer max-w-[220px] truncate"
+                  title="Filter by Post Title"
                 >
-                  <option value="all">All Departments</option>
-                  {departments.map((dept) => (
-                    <option key={dept} value={dept}>{dept}</option>
+                  <option value="all">All Post Titles</option>
+                  {availablePostTitles.map((title) => (
+                    <option key={title} value={title}>{title}</option>
                   ))}
                 </select>
               </div>
 
-              {/* Post Title Filter */}
-              <select
-                value={selectedPostFilter}
-                onChange={(e) => setSelectedPostFilter(e.target.value)}
-                className="text-xs bg-white border border-slate-200 rounded-xl px-3 py-2 font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer max-w-[200px] truncate"
-                title="Filter by Post Title"
-              >
-                <option value="all">All Post Titles</option>
-                {availablePostTitles.map((title) => (
-                  <option key={title} value={title}>{title}</option>
-                ))}
-              </select>
-
               {/* Reset button */}
-              {(selectedDept !== (currentUser?.department || 'all') || selectedPostFilter !== 'all' || searchQuery.trim()) && (
+              {(selectedPostFilter !== 'all' || searchQuery.trim()) && (
                 <button
                   type="button"
                   onClick={() => {
-                    setSelectedDept(currentUser?.department || UNIVERSITY_DEPARTMENTS[0]);
                     setSelectedPostFilter('all');
                     setSearchQuery('');
                   }}
@@ -337,7 +331,7 @@ export function DeanDepartmentModule({
 
             <div className="text-xs text-slate-500 font-medium shrink-0">
               Showing {filteredRequests.length} of {deptRequests.length} requisitions for{' '}
-              <strong className="text-slate-800">{selectedDept === 'all' ? 'All Departments' : selectedDept}</strong>
+              <strong className="text-slate-800">{currentUser?.department || selectedDept}</strong>
             </div>
           </div>
 
@@ -490,43 +484,26 @@ export function DeanDepartmentModule({
                 />
               </div>
 
-              {/* Department Filter */}
+              {/* Post Title Filter */}
               <div className="flex items-center space-x-1.5">
                 <Filter className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                 <select
-                  value={selectedDept}
-                  onChange={(e) => {
-                    setSelectedDept(e.target.value);
-                    setSelectedPostFilter('all');
-                  }}
-                  className="text-xs bg-white border border-slate-200 rounded-xl px-3 py-2 font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer max-w-[190px] truncate"
-                  title="Filter by Department"
+                  value={selectedPostFilter}
+                  onChange={(e) => setSelectedPostFilter(e.target.value)}
+                  className="text-xs bg-white border border-slate-200 rounded-xl px-3 py-2 font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer max-w-[220px] truncate"
+                  title="Filter by Post Title"
                 >
-                  <option value="all">All Departments</option>
-                  {departments.map((dept) => (
-                    <option key={dept} value={dept}>{dept}</option>
+                  <option value="all">All Post Titles</option>
+                  {availablePostTitles.map((title) => (
+                    <option key={title} value={title}>{title}</option>
                   ))}
                 </select>
               </div>
 
-              {/* Post Title Filter */}
-              <select
-                value={selectedPostFilter}
-                onChange={(e) => setSelectedPostFilter(e.target.value)}
-                className="text-xs bg-white border border-slate-200 rounded-xl px-3 py-2 font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer max-w-[200px] truncate"
-                title="Filter by Post Title"
-              >
-                <option value="all">All Post Titles</option>
-                {availablePostTitles.map((title) => (
-                  <option key={title} value={title}>{title}</option>
-                ))}
-              </select>
-
-              {(selectedDept !== (currentUser?.department || 'all') || selectedPostFilter !== 'all' || searchQuery.trim()) && (
+              {(selectedPostFilter !== 'all' || searchQuery.trim()) && (
                 <button
                   type="button"
                   onClick={() => {
-                    setSelectedDept(currentUser?.department || UNIVERSITY_DEPARTMENTS[0]);
                     setSelectedPostFilter('all');
                     setSearchQuery('');
                   }}
@@ -542,7 +519,7 @@ export function DeanDepartmentModule({
               <span>
                 Showing <strong className="text-slate-900">{filteredCleared.length}</strong> of{' '}
                 <strong className="text-slate-900">{clearedRequests.length}</strong> cleared requisitions for{' '}
-                <strong className="text-slate-900">{selectedDept === 'all' ? 'All Departments' : selectedDept}</strong>
+                <strong className="text-slate-900">{currentUser?.department || selectedDept}</strong>
               </span>
             </div>
           </div>

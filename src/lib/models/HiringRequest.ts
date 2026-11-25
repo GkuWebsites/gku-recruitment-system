@@ -173,6 +173,7 @@ const HiringRequestSchema = new Schema<IHiringRequest>(
       role: { type: String, required: true },
       email: { type: String, required: true }
     },
+    visibleToDean: { type: Boolean, default: false },
     status: {
       type: String,
       enum: [
