@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { IHiringRequest } from '@/lib/types';
 import { UNIVERSITY_DEPARTMENTS } from '@/lib/constants';
-import { Plus, Search, Building2, MessageSquare, CheckCircle2, Clock, AlertCircle, FileText, Check, ShieldCheck } from 'lucide-react';
+import { Plus, Search, Building2, MessageSquare, CheckCircle2, Clock, AlertCircle, FileText, Check, ShieldCheck, Filter } from 'lucide-react';
 import { ClarificationThreadChat } from '../ClarificationThreadChat';
 
 interface DeanDepartmentModuleProps {
@@ -30,6 +30,7 @@ export function DeanDepartmentModule({
 }: DeanDepartmentModuleProps) {
   const [departments, setDepartments] = useState<string[]>(UNIVERSITY_DEPARTMENTS);
   const [selectedDept, setSelectedDept] = useState<string>(currentUser?.department || UNIVERSITY_DEPARTMENTS[0]);
+  const [selectedPostFilter, setSelectedPostFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<'myRequests' | 'clarifications' | 'cleared'>('myRequests');
   const [replyText, setReplyText] = useState<{ [id: string]: string }>({});
@@ -49,15 +50,28 @@ export function DeanDepartmentModule({
       .catch((e) => console.error(e));
   }, [currentUser]);
 
-  // Filter requests belonging to this department
-  const deptRequests = requests.filter((r) => r.department === selectedDept);
+  // Filter requests belonging to this department (or all departments)
+  const deptRequests = selectedDept === 'all' ? requests : requests.filter((r) => r.department === selectedDept);
+
+  // Available Post Titles derived dynamically
+  const availablePostTitles = useMemo(() => {
+    const set = new Set<string>();
+    deptRequests.forEach((r) => {
+      if (r.postTitle && r.postTitle.trim()) set.add(r.postTitle.trim());
+    });
+    return Array.from(set).sort();
+  }, [deptRequests]);
 
   const filteredRequests = deptRequests.filter((r) => {
+    if (selectedPostFilter !== 'all' && r.postTitle?.trim().toLowerCase() !== selectedPostFilter.trim().toLowerCase()) {
+      return false;
+    }
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       return (
         r.requestId.toLowerCase().includes(q) ||
         r.postTitle.toLowerCase().includes(q) ||
+        r.department.toLowerCase().includes(q) ||
         r.creator?.name?.toLowerCase().includes(q)
       );
     }
@@ -85,11 +99,15 @@ export function DeanDepartmentModule({
   );
 
   const filteredCleared = clearedRequests.filter((r) => {
+    if (selectedPostFilter !== 'all' && r.postTitle?.trim().toLowerCase() !== selectedPostFilter.trim().toLowerCase()) {
+      return false;
+    }
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       return (
         r.requestId.toLowerCase().includes(q) ||
         r.postTitle.toLowerCase().includes(q) ||
+        r.department.toLowerCase().includes(q) ||
         r.creator?.name?.toLowerCase().includes(q)
       );
     }
@@ -255,21 +273,71 @@ export function DeanDepartmentModule({
       {/* TAB 1: REQUISITIONS LIST */}
       {activeTab === 'myRequests' && (
         <div className="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
-          {/* Search Bar */}
-          <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between gap-4">
-            <div className="relative max-w-sm w-full">
-              <Search className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Search requisitions..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium"
-              />
+          {/* Search & Filter Bar */}
+          <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex flex-wrap items-center justify-between gap-4">
+            <div className="flex flex-wrap items-center gap-2.5 flex-1 min-w-[280px]">
+              <div className="relative max-w-xs w-full">
+                <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Search requisitions..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium"
+                />
+              </div>
+
+              {/* Department Filter */}
+              <div className="flex items-center space-x-1.5">
+                <Filter className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                <select
+                  value={selectedDept}
+                  onChange={(e) => {
+                    setSelectedDept(e.target.value);
+                    setSelectedPostFilter('all');
+                  }}
+                  className="text-xs bg-white border border-slate-200 rounded-xl px-3 py-2 font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer max-w-[190px] truncate"
+                  title="Filter by Department"
+                >
+                  <option value="all">All Departments</option>
+                  {departments.map((dept) => (
+                    <option key={dept} value={dept}>{dept}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Post Title Filter */}
+              <select
+                value={selectedPostFilter}
+                onChange={(e) => setSelectedPostFilter(e.target.value)}
+                className="text-xs bg-white border border-slate-200 rounded-xl px-3 py-2 font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer max-w-[200px] truncate"
+                title="Filter by Post Title"
+              >
+                <option value="all">All Post Titles</option>
+                {availablePostTitles.map((title) => (
+                  <option key={title} value={title}>{title}</option>
+                ))}
+              </select>
+
+              {/* Reset button */}
+              {(selectedDept !== (currentUser?.department || 'all') || selectedPostFilter !== 'all' || searchQuery.trim()) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedDept(currentUser?.department || UNIVERSITY_DEPARTMENTS[0]);
+                    setSelectedPostFilter('all');
+                    setSearchQuery('');
+                  }}
+                  className="text-[11px] font-bold text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-2.5 py-1.5 rounded-lg transition cursor-pointer"
+                >
+                  ✕ Reset
+                </button>
+              )}
             </div>
-            <div className="text-xs text-slate-500 font-medium">
+
+            <div className="text-xs text-slate-500 font-medium shrink-0">
               Showing {filteredRequests.length} of {deptRequests.length} requisitions for{' '}
-              <strong className="text-slate-800">{selectedDept}</strong>
+              <strong className="text-slate-800">{selectedDept === 'all' ? 'All Departments' : selectedDept}</strong>
             </div>
           </div>
 
@@ -410,22 +478,71 @@ export function DeanDepartmentModule({
         <div className="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
           {/* Search & Summary Bar */}
           <div className="p-4 border-b border-slate-100 bg-emerald-50/30 flex flex-wrap items-center justify-between gap-4">
-            <div className="relative max-w-sm w-full">
-              <Search className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Search cleared requisitions..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium"
-              />
+            <div className="flex flex-wrap items-center gap-2.5 flex-1 min-w-[280px]">
+              <div className="relative max-w-xs w-full">
+                <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Search cleared requisitions..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium"
+                />
+              </div>
+
+              {/* Department Filter */}
+              <div className="flex items-center space-x-1.5">
+                <Filter className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                <select
+                  value={selectedDept}
+                  onChange={(e) => {
+                    setSelectedDept(e.target.value);
+                    setSelectedPostFilter('all');
+                  }}
+                  className="text-xs bg-white border border-slate-200 rounded-xl px-3 py-2 font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer max-w-[190px] truncate"
+                  title="Filter by Department"
+                >
+                  <option value="all">All Departments</option>
+                  {departments.map((dept) => (
+                    <option key={dept} value={dept}>{dept}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Post Title Filter */}
+              <select
+                value={selectedPostFilter}
+                onChange={(e) => setSelectedPostFilter(e.target.value)}
+                className="text-xs bg-white border border-slate-200 rounded-xl px-3 py-2 font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer max-w-[200px] truncate"
+                title="Filter by Post Title"
+              >
+                <option value="all">All Post Titles</option>
+                {availablePostTitles.map((title) => (
+                  <option key={title} value={title}>{title}</option>
+                ))}
+              </select>
+
+              {(selectedDept !== (currentUser?.department || 'all') || selectedPostFilter !== 'all' || searchQuery.trim()) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedDept(currentUser?.department || UNIVERSITY_DEPARTMENTS[0]);
+                    setSelectedPostFilter('all');
+                    setSearchQuery('');
+                  }}
+                  className="text-[11px] font-bold text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-2.5 py-1.5 rounded-lg transition cursor-pointer"
+                >
+                  ✕ Reset
+                </button>
+              )}
             </div>
-            <div className="text-xs text-slate-600 font-medium flex items-center space-x-1.5">
+
+            <div className="text-xs text-slate-600 font-medium flex items-center space-x-1.5 shrink-0">
               <span className="w-2 h-2 rounded-full bg-emerald-500" />
               <span>
                 Showing <strong className="text-slate-900">{filteredCleared.length}</strong> of{' '}
                 <strong className="text-slate-900">{clearedRequests.length}</strong> cleared requisitions for{' '}
-                <strong className="text-slate-900">{selectedDept}</strong>
+                <strong className="text-slate-900">{selectedDept === 'all' ? 'All Departments' : selectedDept}</strong>
               </span>
             </div>
           </div>

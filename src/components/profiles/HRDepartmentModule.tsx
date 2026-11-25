@@ -13,6 +13,7 @@ import {
   CheckCircle2,
   Clock,
   Search,
+  Filter,
   AlertCircle,
   Plus,
   FileText,
@@ -67,7 +68,26 @@ export function HRDepartmentModule({
   type HRTab = 'approved' | 'posted' | 'interviews' | 'offerLetters' | 'pipeline' | 'archive';
   const [activeTab, setActiveTab] = useState<HRTab>('approved');
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedDeptFilter, setSelectedDeptFilter] = useState<string>('all');
+  const [selectedPostFilter, setSelectedPostFilter] = useState<string>('all');
   const [openedFolders, setOpenedFolders] = useState<Record<string, boolean>>({});
+
+  // Dynamic lists of unique departments and post titles for filters
+  const availableDepartments = useMemo(() => {
+    const set = new Set<string>();
+    requests.forEach((r) => {
+      if (r.department && r.department.trim()) set.add(r.department.trim());
+    });
+    return Array.from(set).sort();
+  }, [requests]);
+
+  const availablePostTitles = useMemo(() => {
+    const set = new Set<string>();
+    requests.forEach((r) => {
+      if (r.postTitle && r.postTitle.trim()) set.add(r.postTitle.trim());
+    });
+    return Array.from(set).sort();
+  }, [requests]);
 
   // Modals state
   const [postingReq, setPostingReq] = useState<IHiringRequest | null>(null);
@@ -458,16 +478,28 @@ export function HRDepartmentModule({
       !allSanctioned.some((a) => a.requestId === r.requestId)
   );
 
-  // Filter lists by search
+  const matchesDeptAndPost = (r: IHiringRequest) => {
+    if (selectedDeptFilter !== 'all' && r.department?.trim().toLowerCase() !== selectedDeptFilter.trim().toLowerCase()) {
+      return false;
+    }
+    if (selectedPostFilter !== 'all' && r.postTitle?.trim().toLowerCase() !== selectedPostFilter.trim().toLowerCase()) {
+      return false;
+    }
+    return true;
+  };
+
+  // Filter lists by search & dropdown filters
   const filterBySearch = (items: IHiringRequest[]) => {
-    if (!searchQuery.trim()) return items;
-    const q = searchQuery.toLowerCase();
-    return items.filter(
-      (r) =>
+    return items.filter((r) => {
+      if (!matchesDeptAndPost(r)) return false;
+      if (!searchQuery.trim()) return true;
+      const q = searchQuery.toLowerCase();
+      return (
         r.requestId.toLowerCase().includes(q) ||
         r.postTitle.toLowerCase().includes(q) ||
         r.department.toLowerCase().includes(q)
-    );
+      );
+    });
   };
 
   const isReqClosedOrFulfilled = (req: IHiringRequest) => {
@@ -492,6 +524,7 @@ export function HRDepartmentModule({
   const displayedPosted = filterBySearch(filteredPostedJobs);
 
   const displayedArchivedJobs = archivedReqs.filter((r) => {
+    if (!matchesDeptAndPost(r)) return false;
     if (!searchQuery.trim()) return true;
     const q = searchQuery.toLowerCase();
     const matchReq =
@@ -522,6 +555,7 @@ export function HRDepartmentModule({
   };
 
   const displayedInterviewJobs = interviewJobs.filter((r) => {
+    if (!matchesDeptAndPost(r)) return false;
     if (!searchQuery.trim()) return true;
     const q = searchQuery.toLowerCase();
     const matchReq =
@@ -538,6 +572,7 @@ export function HRDepartmentModule({
   });
 
   const displayedShortlistedJobs = shortlistedJobs.filter((r) => {
+    if (!matchesDeptAndPost(r)) return false;
     if (!searchQuery.trim()) return true;
     const q = searchQuery.toLowerCase();
     const matchReq =
@@ -1370,18 +1405,65 @@ export function HRDepartmentModule({
       {/* ============================================================== */}
       {activeTab === 'approved' && (
         <div className="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
-          <div className="p-4 border-b border-slate-100 bg-slate-50/60 flex flex-wrap items-center justify-between gap-4">
-            <div className="relative max-w-sm w-full">
-              <Search className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Search approved jobs..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium"
-              />
+          <div className="p-4 border-b border-slate-100 bg-slate-50/60 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-2.5 flex-1 min-w-[280px]">
+              <div className="relative max-w-xs w-full">
+                <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Search approved jobs..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium"
+                />
+              </div>
+
+              {/* Department Filter */}
+              <div className="flex items-center space-x-1.5">
+                <Filter className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                <select
+                  value={selectedDeptFilter}
+                  onChange={(e) => setSelectedDeptFilter(e.target.value)}
+                  className="text-xs bg-white border border-slate-200 rounded-xl px-3 py-2 font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer max-w-[190px] truncate"
+                  title="Filter by Department"
+                >
+                  <option value="all">All Departments</option>
+                  {availableDepartments.map((dept) => (
+                    <option key={dept} value={dept}>{dept}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Post Title Filter */}
+              <select
+                value={selectedPostFilter}
+                onChange={(e) => setSelectedPostFilter(e.target.value)}
+                className="text-xs bg-white border border-slate-200 rounded-xl px-3 py-2 font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer max-w-[200px] truncate"
+                title="Filter by Post Title"
+              >
+                <option value="all">All Post Titles</option>
+                {availablePostTitles.map((title) => (
+                  <option key={title} value={title}>{title}</option>
+                ))}
+              </select>
+
+              {/* Reset button */}
+              {(selectedDeptFilter !== 'all' || selectedPostFilter !== 'all' || searchQuery.trim()) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedDeptFilter('all');
+                    setSelectedPostFilter('all');
+                    setSearchQuery('');
+                  }}
+                  className="text-[11px] font-bold text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-2.5 py-1.5 rounded-lg transition cursor-pointer"
+                >
+                  ✕ Reset
+                </button>
+              )}
             </div>
-            <span className="text-[11px] text-blue-900 font-semibold bg-blue-50 border border-blue-200 px-3 py-1 rounded-full">
+
+            <span className="text-[11px] text-blue-900 font-semibold bg-blue-50 border border-blue-200 px-3 py-1 rounded-full shrink-0">
               Full clearance verified (Dean Academic & VC Sanctioned) &bull; Ready for Media Ad Posting
             </span>
           </div>
@@ -1472,6 +1554,49 @@ export function HRDepartmentModule({
                   className="w-full pl-9 pr-3 py-1.5 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium"
                 />
               </div>
+
+              {/* Department Filter */}
+              <div className="flex items-center space-x-1.5">
+                <Filter className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                <select
+                  value={selectedDeptFilter}
+                  onChange={(e) => setSelectedDeptFilter(e.target.value)}
+                  className="text-xs bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer max-w-[170px] truncate"
+                  title="Filter by Department"
+                >
+                  <option value="all">All Departments</option>
+                  {availableDepartments.map((dept) => (
+                    <option key={dept} value={dept}>{dept}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Post Title Filter */}
+              <select
+                value={selectedPostFilter}
+                onChange={(e) => setSelectedPostFilter(e.target.value)}
+                className="text-xs bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer max-w-[180px] truncate"
+                title="Filter by Post Title"
+              >
+                <option value="all">All Post Titles</option>
+                {availablePostTitles.map((title) => (
+                  <option key={title} value={title}>{title}</option>
+                ))}
+              </select>
+
+              {/* Reset button */}
+              {(selectedDeptFilter !== 'all' || selectedPostFilter !== 'all') && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedDeptFilter('all');
+                    setSelectedPostFilter('all');
+                  }}
+                  className="text-[11px] font-bold text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-2 py-1 rounded-md transition cursor-pointer"
+                >
+                  ✕ Reset
+                </button>
+              )}
 
               {/* Filter Pills */}
               <div className="flex items-center space-x-1 bg-slate-100 p-1 rounded-lg text-xs font-semibold">
@@ -1850,15 +1975,60 @@ export function HRDepartmentModule({
         <div className="space-y-3">
           {/* Controls Bar */}
           <div className="bg-white border border-slate-200 rounded-xl p-3 shadow-2xs flex flex-wrap items-center justify-between gap-3">
-            <div className="relative max-w-sm w-full">
-              <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Search candidates, panelists, posts..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-3 py-1.5 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 font-medium"
-              />
+            <div className="flex flex-wrap items-center gap-2 flex-1 min-w-[280px]">
+              <div className="relative max-w-xs w-full">
+                <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Search candidates, panelists, posts..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-9 pr-3 py-1.5 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 font-medium"
+                />
+              </div>
+
+              {/* Department Filter */}
+              <div className="flex items-center space-x-1.5">
+                <Filter className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                <select
+                  value={selectedDeptFilter}
+                  onChange={(e) => setSelectedDeptFilter(e.target.value)}
+                  className="text-xs bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer max-w-[170px] truncate"
+                  title="Filter by Department"
+                >
+                  <option value="all">All Departments</option>
+                  {availableDepartments.map((dept) => (
+                    <option key={dept} value={dept}>{dept}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Post Title Filter */}
+              <select
+                value={selectedPostFilter}
+                onChange={(e) => setSelectedPostFilter(e.target.value)}
+                className="text-xs bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer max-w-[180px] truncate"
+                title="Filter by Post Title"
+              >
+                <option value="all">All Post Titles</option>
+                {availablePostTitles.map((title) => (
+                  <option key={title} value={title}>{title}</option>
+                ))}
+              </select>
+
+              {/* Reset button */}
+              {(selectedDeptFilter !== 'all' || selectedPostFilter !== 'all') && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedDeptFilter('all');
+                    setSelectedPostFilter('all');
+                  }}
+                  className="text-[11px] font-bold text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-2 py-1 rounded-md transition cursor-pointer"
+                >
+                  ✕ Reset
+                </button>
+              )}
             </div>
             <div className="flex items-center space-x-2">
               <button
@@ -2146,51 +2316,97 @@ export function HRDepartmentModule({
               )}
             </div>
 
-            {/* Quick Status Filter Pills */}
-            <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100 text-xs">
-              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mr-1">
-                Filter Stage:
-              </span>
-              <button
-                type="button"
-                onClick={() => setOfferStatusFilter('all')}
-                className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition cursor-pointer ${offerStatusFilter === 'all'
-                  ? 'bg-slate-900 text-white shadow-2xs'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                  }`}
-              >
-                All Statuses ({totalShortlistedCandidates})
-              </button>
-              <button
-                type="button"
-                onClick={() => setOfferStatusFilter('Selected')}
-                className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition cursor-pointer ${offerStatusFilter === 'Selected'
-                  ? 'bg-amber-600 text-white shadow-2xs'
-                  : 'bg-amber-50 text-amber-900 hover:bg-amber-100 border border-amber-200'
-                  }`}
-              >
-                ⏳ Awaiting Offer ({countAwaitingOffer})
-              </button>
-              <button
-                type="button"
-                onClick={() => setOfferStatusFilter('Offer Issued')}
-                className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition cursor-pointer ${offerStatusFilter === 'Offer Issued'
-                  ? 'bg-emerald-600 text-white shadow-2xs'
-                  : 'bg-emerald-50 text-emerald-900 hover:bg-emerald-100 border border-emerald-200'
-                  }`}
-              >
-                ✉️ Offer Issued ({countOfferIssued})
-              </button>
-              <button
-                type="button"
-                onClick={() => setOfferStatusFilter('Joined')}
-                className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition cursor-pointer ${offerStatusFilter === 'Joined'
-                  ? 'bg-teal-700 text-white shadow-2xs'
-                  : 'bg-teal-50 text-teal-900 hover:bg-teal-100 border border-teal-200'
-                  }`}
-              >
-                🎓 Joined &amp; Inducted ({countJoined})
-              </button>
+            {/* Quick Status Filter Pills & Department / Post Filters */}
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100 text-xs">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mr-1">
+                  Filter Stage:
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setOfferStatusFilter('all')}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition cursor-pointer ${offerStatusFilter === 'all'
+                    ? 'bg-slate-900 text-white shadow-2xs'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    }`}
+                >
+                  All Statuses ({totalShortlistedCandidates})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setOfferStatusFilter('Selected')}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition cursor-pointer ${offerStatusFilter === 'Selected'
+                    ? 'bg-amber-600 text-white shadow-2xs'
+                    : 'bg-amber-50 text-amber-900 hover:bg-amber-100 border border-amber-200'
+                    }`}
+                >
+                  ⏳ Awaiting Offer ({countAwaitingOffer})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setOfferStatusFilter('Offer Issued')}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition cursor-pointer ${offerStatusFilter === 'Offer Issued'
+                    ? 'bg-emerald-600 text-white shadow-2xs'
+                    : 'bg-emerald-50 text-emerald-900 hover:bg-emerald-100 border border-emerald-200'
+                    }`}
+                >
+                  ✉️ Offer Issued ({countOfferIssued})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setOfferStatusFilter('Joined')}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition cursor-pointer ${offerStatusFilter === 'Joined'
+                    ? 'bg-teal-700 text-white shadow-2xs'
+                    : 'bg-teal-50 text-teal-900 hover:bg-teal-100 border border-teal-200'
+                    }`}
+                >
+                  🎓 Joined &amp; Inducted ({countJoined})
+                </button>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                {/* Department Filter */}
+                <div className="flex items-center space-x-1.5">
+                  <Filter className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                  <select
+                    value={selectedDeptFilter}
+                    onChange={(e) => setSelectedDeptFilter(e.target.value)}
+                    className="text-xs bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1 font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer max-w-[170px] truncate"
+                    title="Filter by Department"
+                  >
+                    <option value="all">All Departments</option>
+                    {availableDepartments.map((dept) => (
+                      <option key={dept} value={dept}>{dept}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Post Title Filter */}
+                <select
+                  value={selectedPostFilter}
+                  onChange={(e) => setSelectedPostFilter(e.target.value)}
+                  className="text-xs bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1 font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer max-w-[180px] truncate"
+                  title="Filter by Post Title"
+                >
+                  <option value="all">All Post Titles</option>
+                  {availablePostTitles.map((title) => (
+                    <option key={title} value={title}>{title}</option>
+                  ))}
+                </select>
+
+                {(selectedDeptFilter !== 'all' || selectedPostFilter !== 'all') && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedDeptFilter('all');
+                      setSelectedPostFilter('all');
+                    }}
+                    className="text-[11px] font-bold text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-2 py-0.5 rounded-md transition cursor-pointer"
+                  >
+                    ✕ Reset
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 
@@ -2591,18 +2807,64 @@ export function HRDepartmentModule({
       {/* ============================================================== */}
       {activeTab === 'pipeline' && (
         <div className="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
-          <div className="p-4 border-b border-slate-100 bg-slate-50/80 flex flex-wrap items-center justify-between gap-4">
-            <div className="relative max-w-sm w-full">
-              <Search className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Search pending department applications..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-500 font-medium"
-              />
+          <div className="p-4 border-b border-slate-100 bg-slate-50/80 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-2.5 flex-1 min-w-[280px]">
+              <div className="relative max-w-xs w-full">
+                <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Search pending department applications..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-500 font-medium"
+                />
+              </div>
+
+              {/* Department Filter */}
+              <div className="flex items-center space-x-1.5">
+                <Filter className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                <select
+                  value={selectedDeptFilter}
+                  onChange={(e) => setSelectedDeptFilter(e.target.value)}
+                  className="text-xs bg-white border border-slate-200 rounded-xl px-3 py-2 font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500 cursor-pointer max-w-[190px] truncate"
+                  title="Filter by Department"
+                >
+                  <option value="all">All Departments</option>
+                  {availableDepartments.map((dept) => (
+                    <option key={dept} value={dept}>{dept}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Post Title Filter */}
+              <select
+                value={selectedPostFilter}
+                onChange={(e) => setSelectedPostFilter(e.target.value)}
+                className="text-xs bg-white border border-slate-200 rounded-xl px-3 py-2 font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500 cursor-pointer max-w-[200px] truncate"
+                title="Filter by Post Title"
+              >
+                <option value="all">All Post Titles</option>
+                {availablePostTitles.map((title) => (
+                  <option key={title} value={title}>{title}</option>
+                ))}
+              </select>
+
+              {(selectedDeptFilter !== 'all' || selectedPostFilter !== 'all' || searchQuery.trim()) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedDeptFilter('all');
+                    setSelectedPostFilter('all');
+                    setSearchQuery('');
+                  }}
+                  className="text-[11px] font-bold text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-2.5 py-1.5 rounded-lg transition cursor-pointer"
+                >
+                  ✕ Reset
+                </button>
+              )}
             </div>
-            <span className="text-[11px] text-slate-700 font-semibold bg-white border border-slate-200 px-3 py-1 rounded-full flex items-center space-x-1.5">
+
+            <span className="text-[11px] text-slate-700 font-semibold bg-white border border-slate-200 px-3 py-1 rounded-full flex items-center space-x-1.5 shrink-0">
               <Clock className="w-3.5 h-3.5 text-slate-500" />
               <span>HR Watchlist: Recruitment actions unlock once sanctioned by Dean Academic & VC/Registrar</span>
             </span>
