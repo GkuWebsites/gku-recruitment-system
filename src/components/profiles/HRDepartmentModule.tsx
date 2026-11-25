@@ -1186,27 +1186,29 @@ export function HRDepartmentModule({
         )}
       </div>
 
-      {/* 2. Simple, Attractive KPI Metric Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+      {/* 2. Interactive Pipeline Navigation Cards (Tabs & KPI Metrics in One) */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         {/* Card 1: Approved */}
         <div
           onClick={() => {
             setActiveTab('approved');
             setSearchQuery('');
           }}
-          className={`bg-white border rounded-xl p-4 transition-all duration-150 cursor-pointer shadow-xs hover:shadow-md ${activeTab === 'approved'
-            ? 'border-blue-500 ring-2 ring-blue-500/15 bg-blue-50/20'
-            : 'border-slate-200/80 hover:border-blue-200'
+          className={`border rounded-xl p-3.5 transition-all duration-150 cursor-pointer shadow-xs ${activeTab === 'approved'
+            ? 'bg-blue-50/50 border-2 border-[#0f2d59] ring-2 ring-blue-500/20 shadow-sm -translate-y-0.5'
+            : 'bg-white border-slate-200/90 hover:border-blue-300 hover:shadow-xs'
             }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Approved</span>
-            <div className="w-7 h-7 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center">
+            <span className={`text-[11px] font-bold uppercase tracking-wider ${activeTab === 'approved' ? 'text-[#0f2d59]' : 'text-slate-500'}`}>
+              Approved
+            </span>
+            <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${activeTab === 'approved' ? 'bg-[#0f2d59] text-white shadow-2xs' : 'bg-blue-50 text-blue-700'}`}>
               <Megaphone className="w-3.5 h-3.5" />
             </div>
           </div>
-          <div className="text-2xl font-black text-slate-900 mt-2">{approvedForPosting.length}</div>
-          <div className="text-[11px] text-slate-400 font-medium mt-0.5">Ready for media posting</div>
+          <div className="text-2xl font-black text-slate-900 mt-1.5">{approvedForPosting.length}</div>
+          <div className="text-[11px] text-slate-400 font-medium truncate mt-0.5">Ready for media</div>
         </div>
 
         {/* Card 2: Active Intake */}
@@ -1215,19 +1217,21 @@ export function HRDepartmentModule({
             setActiveTab('posted');
             setSearchQuery('');
           }}
-          className={`bg-white border rounded-xl p-4 transition-all duration-150 cursor-pointer shadow-xs hover:shadow-md ${activeTab === 'posted'
-            ? 'border-indigo-500 ring-2 ring-indigo-500/15 bg-indigo-50/20'
-            : 'border-slate-200/80 hover:border-indigo-200'
+          className={`border rounded-xl p-3.5 transition-all duration-150 cursor-pointer shadow-xs ${activeTab === 'posted'
+            ? 'bg-indigo-50/50 border-2 border-[#0f2d59] ring-2 ring-indigo-500/20 shadow-sm -translate-y-0.5'
+            : 'bg-white border-slate-200/90 hover:border-indigo-300 hover:shadow-xs'
             }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Active Intake</span>
-            <div className="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-700 flex items-center justify-center">
+            <span className={`text-[11px] font-bold uppercase tracking-wider ${activeTab === 'posted' ? 'text-[#0f2d59]' : 'text-slate-500'}`}>
+              Active Intake
+            </span>
+            <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${activeTab === 'posted' ? 'bg-[#0f2d59] text-white shadow-2xs' : 'bg-indigo-50 text-indigo-700'}`}>
               <Briefcase className="w-3.5 h-3.5" />
             </div>
           </div>
-          <div className="text-2xl font-black text-slate-900 mt-2">{activePostedJobs.length}</div>
-          <div className="text-[11px] text-slate-400 font-medium mt-0.5">Live portal &amp; resumes</div>
+          <div className="text-2xl font-black text-slate-900 mt-1.5">{activePostedJobs.length}</div>
+          <div className="text-[11px] text-slate-400 font-medium truncate mt-0.5">Live portal jobs</div>
         </div>
 
         {/* Card 3: Interviews */}
@@ -1236,19 +1240,21 @@ export function HRDepartmentModule({
             setActiveTab('interviews');
             setSearchQuery('');
           }}
-          className={`bg-white border rounded-xl p-4 transition-all duration-150 cursor-pointer shadow-xs hover:shadow-md ${activeTab === 'interviews'
-            ? 'border-amber-500 ring-2 ring-amber-500/15 bg-amber-50/20'
-            : 'border-slate-200/80 hover:border-amber-200'
+          className={`border rounded-xl p-3.5 transition-all duration-150 cursor-pointer shadow-xs ${activeTab === 'interviews'
+            ? 'bg-amber-50/50 border-2 border-[#0f2d59] ring-2 ring-amber-500/20 shadow-sm -translate-y-0.5'
+            : 'bg-white border-slate-200/90 hover:border-amber-300 hover:shadow-xs'
             }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Interviews</span>
-            <div className="w-7 h-7 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center">
+            <span className={`text-[11px] font-bold uppercase tracking-wider ${activeTab === 'interviews' ? 'text-[#0f2d59]' : 'text-slate-500'}`}>
+              Interviews
+            </span>
+            <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${activeTab === 'interviews' ? 'bg-[#0f2d59] text-white shadow-2xs' : 'bg-amber-50 text-amber-700'}`}>
               <Calendar className="w-3.5 h-3.5" />
             </div>
           </div>
-          <div className="text-2xl font-black text-slate-900 mt-2">{totalInterviewCandidates}</div>
-          <div className="text-[11px] text-slate-400 font-medium mt-0.5">Panel scoring &amp; review</div>
+          <div className="text-2xl font-black text-slate-900 mt-1.5">{totalInterviewCandidates}</div>
+          <div className="text-[11px] text-slate-400 font-medium truncate mt-0.5">Panel scoring</div>
         </div>
 
         {/* Card 4: Shortlisted */}
@@ -1257,40 +1263,67 @@ export function HRDepartmentModule({
             setActiveTab('offerLetters');
             setSearchQuery('');
           }}
-          className={`bg-white border rounded-xl p-4 transition-all duration-150 cursor-pointer shadow-xs hover:shadow-md ${activeTab === 'offerLetters'
-            ? 'border-emerald-500 ring-2 ring-emerald-500/15 bg-emerald-50/20'
-            : 'border-slate-200/80 hover:border-emerald-200'
+          className={`border rounded-xl p-3.5 transition-all duration-150 cursor-pointer shadow-xs ${activeTab === 'offerLetters'
+            ? 'bg-emerald-50/50 border-2 border-[#0f2d59] ring-2 ring-emerald-500/20 shadow-sm -translate-y-0.5'
+            : 'bg-white border-slate-200/90 hover:border-emerald-300 hover:shadow-xs'
             }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Shortlisted</span>
-            <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center">
+            <span className={`text-[11px] font-bold uppercase tracking-wider ${activeTab === 'offerLetters' ? 'text-[#0f2d59]' : 'text-slate-500'}`}>
+              Shortlisted
+            </span>
+            <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${activeTab === 'offerLetters' ? 'bg-[#0f2d59] text-white shadow-2xs' : 'bg-emerald-50 text-emerald-700'}`}>
               <Award className="w-3.5 h-3.5" />
             </div>
           </div>
-          <div className="text-2xl font-black text-slate-900 mt-2">{totalShortlistedCandidates}</div>
-          <div className="text-[11px] text-slate-400 font-medium mt-0.5">Offers &amp; onboarding</div>
+          <div className="text-2xl font-black text-slate-900 mt-1.5">{totalShortlistedCandidates}</div>
+          <div className="text-[11px] text-slate-400 font-medium truncate mt-0.5">Offers &amp; joining</div>
         </div>
 
-        {/* Card 5: Archive */}
+        {/* Card 5: Governance Pipeline */}
+        <div
+          onClick={() => {
+            setActiveTab('pipeline');
+            setSearchQuery('');
+          }}
+          className={`border rounded-xl p-3.5 transition-all duration-150 cursor-pointer shadow-xs ${activeTab === 'pipeline'
+            ? 'bg-slate-100/70 border-2 border-[#0f2d59] ring-2 ring-slate-500/20 shadow-sm -translate-y-0.5'
+            : 'bg-white border-slate-200/90 hover:border-slate-300 hover:shadow-xs'
+            }`}
+        >
+          <div className="flex items-center justify-between">
+            <span className={`text-[11px] font-bold uppercase tracking-wider ${activeTab === 'pipeline' ? 'text-[#0f2d59]' : 'text-slate-500'}`}>
+              Governance
+            </span>
+            <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${activeTab === 'pipeline' ? 'bg-[#0f2d59] text-white shadow-2xs' : 'bg-slate-100 text-slate-700'}`}>
+              <Clock className="w-3.5 h-3.5" />
+            </div>
+          </div>
+          <div className="text-2xl font-black text-slate-900 mt-1.5">{pendingPipeline.length}</div>
+          <div className="text-[11px] text-slate-400 font-medium truncate mt-0.5">Pending sanction</div>
+        </div>
+
+        {/* Card 6: Archive */}
         <div
           onClick={() => {
             setActiveTab('archive');
             setSearchQuery('');
           }}
-          className={`bg-white border rounded-xl p-4 transition-all duration-150 cursor-pointer shadow-xs hover:shadow-md ${activeTab === 'archive'
-            ? 'border-purple-500 ring-2 ring-purple-500/15 bg-purple-50/20'
-            : 'border-slate-200/80 hover:border-purple-200'
+          className={`border rounded-xl p-3.5 transition-all duration-150 cursor-pointer shadow-xs ${activeTab === 'archive'
+            ? 'bg-purple-50/50 border-2 border-[#0f2d59] ring-2 ring-purple-500/20 shadow-sm -translate-y-0.5'
+            : 'bg-white border-slate-200/90 hover:border-purple-300 hover:shadow-xs'
             }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Archive</span>
-            <div className="w-7 h-7 rounded-lg bg-purple-50 text-purple-700 flex items-center justify-center">
+            <span className={`text-[11px] font-bold uppercase tracking-wider ${activeTab === 'archive' ? 'text-[#0f2d59]' : 'text-slate-500'}`}>
+              Archive
+            </span>
+            <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${activeTab === 'archive' ? 'bg-[#0f2d59] text-white shadow-2xs' : 'bg-purple-50 text-purple-700'}`}>
               <FolderCheck className="w-3.5 h-3.5" />
             </div>
           </div>
-          <div className="text-2xl font-black text-slate-900 mt-2">{archivedReqs.length}</div>
-          <div className="text-[11px] text-slate-400 font-medium mt-0.5">Fulfilled records</div>
+          <div className="text-2xl font-black text-slate-900 mt-1.5">{archivedReqs.length}</div>
+          <div className="text-[11px] text-slate-400 font-medium truncate mt-0.5">Fulfilled history</div>
         </div>
       </div>
 
@@ -1318,129 +1351,6 @@ export function HRDepartmentModule({
           </button>
         </div>
       )}
-
-      {/* 3. Simple, Modern Navigation Tabs with Count Badges */}
-      <div className="flex flex-wrap items-center gap-1.5 border-b border-slate-200/80 pb-3">
-        <button
-          onClick={() => {
-            setActiveTab('approved');
-            setSearchQuery('');
-          }}
-          className={`px-3 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-2 cursor-pointer ${activeTab === 'approved'
-            ? 'bg-[#0f2d59] text-white shadow-xs'
-            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-            }`}
-        >
-          <CheckCircle2 className="w-3.5 h-3.5" />
-          <span>1. Approved for Posting</span>
-          <span
-            className={`px-1.5 py-0.2 rounded-md text-[10px] font-extrabold ${activeTab === 'approved' ? 'bg-white/20 text-white' : 'bg-slate-200/80 text-slate-700'
-              }`}
-          >
-            {approvedForPosting.length}
-          </span>
-        </button>
-
-        <button
-          onClick={() => {
-            setActiveTab('posted');
-            setSearchQuery('');
-          }}
-          className={`px-3 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-2 cursor-pointer ${activeTab === 'posted'
-            ? 'bg-[#0f2d59] text-white shadow-xs'
-            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-            }`}
-        >
-          <Megaphone className="w-3.5 h-3.5" />
-          <span>2. Active Posted Jobs</span>
-          <span
-            className={`px-1.5 py-0.2 rounded-md text-[10px] font-extrabold ${activeTab === 'posted' ? 'bg-white/20 text-white' : 'bg-slate-200/80 text-slate-700'
-              }`}
-          >
-            {activePostedJobs.length}
-          </span>
-        </button>
-
-        <button
-          onClick={() => {
-            setActiveTab('interviews');
-            setSearchQuery('');
-          }}
-          className={`px-3 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-2 cursor-pointer ${activeTab === 'interviews'
-            ? 'bg-[#0f2d59] text-white shadow-xs'
-            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-            }`}
-        >
-          <Calendar className="w-3.5 h-3.5" />
-          <span>3. Scheduled Interviews</span>
-          <span
-            className={`px-1.5 py-0.2 rounded-md text-[10px] font-extrabold ${activeTab === 'interviews' ? 'bg-white/20 text-white' : 'bg-slate-200/80 text-slate-700'
-              }`}
-          >
-            {totalInterviewCandidates}
-          </span>
-        </button>
-
-        <button
-          onClick={() => {
-            setActiveTab('offerLetters');
-            setSearchQuery('');
-          }}
-          className={`px-3 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-2 cursor-pointer ${activeTab === 'offerLetters'
-            ? 'bg-[#0f2d59] text-white shadow-xs'
-            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-            }`}
-        >
-          <Award className="w-3.5 h-3.5" />
-          <span>4. Shortlisted &amp; Offers</span>
-          <span
-            className={`px-1.5 py-0.2 rounded-md text-[10px] font-extrabold ${activeTab === 'offerLetters' ? 'bg-white/20 text-white' : 'bg-slate-200/80 text-slate-700'
-              }`}
-          >
-            {totalShortlistedCandidates}
-          </span>
-        </button>
-
-        <button
-          onClick={() => {
-            setActiveTab('pipeline');
-            setSearchQuery('');
-          }}
-          className={`px-3 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-2 cursor-pointer ${activeTab === 'pipeline'
-            ? 'bg-[#0f2d59] text-white shadow-xs'
-            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-            }`}
-        >
-          <Clock className="w-3.5 h-3.5" />
-          <span>5. Governance Pipeline</span>
-          <span
-            className={`px-1.5 py-0.2 rounded-md text-[10px] font-extrabold ${activeTab === 'pipeline' ? 'bg-white/20 text-white' : 'bg-slate-200/80 text-slate-700'
-              }`}
-          >
-            {pendingPipeline.length}
-          </span>
-        </button>
-
-        <button
-          onClick={() => {
-            setActiveTab('archive');
-            setSearchQuery('');
-          }}
-          className={`px-3 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-2 cursor-pointer ${activeTab === 'archive'
-            ? 'bg-[#0f2d59] text-white shadow-xs'
-            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-            }`}
-        >
-          <FolderCheck className="w-3.5 h-3.5" />
-          <span>6. Archives Cabinet</span>
-          <span
-            className={`px-1.5 py-0.2 rounded-md text-[10px] font-extrabold ${activeTab === 'archive' ? 'bg-white/20 text-white' : 'bg-slate-200/80 text-slate-700'
-              }`}
-          >
-            {archivedReqs.length}
-          </span>
-        </button>
-      </div>
 
       {/* ============================================================== */}
       {/* TAB 1: APPROVED FOR HIRING (AWAITING MEDIA POSTING) */}
