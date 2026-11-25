@@ -1140,7 +1140,7 @@ export function HRDepartmentModule({
             className="inline-flex items-center space-x-2 bg-[#0f2d59] hover:bg-[#163f7a] text-white px-5 py-2.5 rounded-xl text-xs font-bold shadow-xs transition cursor-pointer"
           >
             <Plus className="w-4 h-4" />
-            <span>+ Create Requirement</span>
+            <span>Create Requirement</span>
           </button>
         )}
       </div>
@@ -1153,11 +1153,10 @@ export function HRDepartmentModule({
             setActiveTab('approved');
             setSearchQuery('');
           }}
-          className={`bg-white border rounded-2xl p-4.5 transition cursor-pointer shadow-xs hover:shadow-md ${
-            activeTab === 'approved'
-              ? 'border-blue-500 ring-2 ring-blue-100 bg-blue-50/20'
-              : 'border-slate-200 hover:border-slate-300'
-          }`}
+          className={`bg-white border rounded-2xl p-4.5 transition cursor-pointer shadow-xs hover:shadow-md ${activeTab === 'approved'
+            ? 'border-blue-500 ring-2 ring-blue-100 bg-blue-50/20'
+            : 'border-slate-200 hover:border-slate-300'
+            }`}
         >
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-blue-700 uppercase tracking-wider">Approved</span>
@@ -1175,11 +1174,10 @@ export function HRDepartmentModule({
             setActiveTab('posted');
             setSearchQuery('');
           }}
-          className={`bg-white border rounded-2xl p-4.5 transition cursor-pointer shadow-xs hover:shadow-md ${
-            activeTab === 'posted'
-              ? 'border-indigo-500 ring-2 ring-indigo-100 bg-indigo-50/20'
-              : 'border-slate-200 hover:border-slate-300'
-          }`}
+          className={`bg-white border rounded-2xl p-4.5 transition cursor-pointer shadow-xs hover:shadow-md ${activeTab === 'posted'
+            ? 'border-indigo-500 ring-2 ring-indigo-100 bg-indigo-50/20'
+            : 'border-slate-200 hover:border-slate-300'
+            }`}
         >
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-indigo-700 uppercase tracking-wider">Active Intake</span>
@@ -1197,11 +1195,10 @@ export function HRDepartmentModule({
             setActiveTab('interviews');
             setSearchQuery('');
           }}
-          className={`bg-white border rounded-2xl p-4.5 transition cursor-pointer shadow-xs hover:shadow-md ${
-            activeTab === 'interviews'
-              ? 'border-amber-500 ring-2 ring-amber-100 bg-amber-50/20'
-              : 'border-slate-200 hover:border-slate-300'
-          }`}
+          className={`bg-white border rounded-2xl p-4.5 transition cursor-pointer shadow-xs hover:shadow-md ${activeTab === 'interviews'
+            ? 'border-amber-500 ring-2 ring-amber-100 bg-amber-50/20'
+            : 'border-slate-200 hover:border-slate-300'
+            }`}
         >
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-amber-700 uppercase tracking-wider">Interviews</span>
@@ -1219,11 +1216,10 @@ export function HRDepartmentModule({
             setActiveTab('offerLetters');
             setSearchQuery('');
           }}
-          className={`bg-white border rounded-2xl p-4.5 transition cursor-pointer shadow-xs hover:shadow-md ${
-            activeTab === 'offerLetters'
-              ? 'border-emerald-500 ring-2 ring-emerald-100 bg-emerald-50/20'
-              : 'border-slate-200 hover:border-slate-300'
-          }`}
+          className={`bg-white border rounded-2xl p-4.5 transition cursor-pointer shadow-xs hover:shadow-md ${activeTab === 'offerLetters'
+            ? 'border-emerald-500 ring-2 ring-emerald-100 bg-emerald-50/20'
+            : 'border-slate-200 hover:border-slate-300'
+            }`}
         >
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-emerald-700 uppercase tracking-wider">Shortlisted</span>
@@ -1241,11 +1237,10 @@ export function HRDepartmentModule({
             setActiveTab('archive');
             setSearchQuery('');
           }}
-          className={`bg-white border rounded-2xl p-4.5 transition cursor-pointer shadow-xs hover:shadow-md ${
-            activeTab === 'archive'
-              ? 'border-purple-500 ring-2 ring-purple-100 bg-purple-50/20'
-              : 'border-slate-200 hover:border-slate-300'
-          }`}
+          className={`bg-white border rounded-2xl p-4.5 transition cursor-pointer shadow-xs hover:shadow-md ${activeTab === 'archive'
+            ? 'border-purple-500 ring-2 ring-purple-100 bg-purple-50/20'
+            : 'border-slate-200 hover:border-slate-300'
+            }`}
         >
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-purple-700 uppercase tracking-wider">Archive</span>
@@ -1707,17 +1702,6 @@ export function HRDepartmentModule({
                                     </span>
                                   )}
                                 </div>
-                                <div className="text-[11px] text-slate-500 flex items-center space-x-2">
-                                  <span>{cand.email}</span>
-                                  <span>•</span>
-                                  <span>{cand.phone}</span>
-                                  {cand.currentAffiliation && (
-                                    <>
-                                      <span>•</span>
-                                      <span className="text-slate-400">{cand.currentAffiliation}</span>
-                                    </>
-                                  )}
-                                </div>
                                 {cand.interviewDetails?.date && (
                                   <div className="text-[11px] text-slate-600 flex items-center space-x-1.5 pt-0.5">
                                     <span className="font-semibold text-amber-900">🗓️ {cand.interviewDetails.date}</span>
@@ -1795,8 +1779,8 @@ export function HRDepartmentModule({
                                       const existingPanel = cand.interviewDetails?.evaluatorRatings && cand.interviewDetails.evaluatorRatings.length > 0
                                         ? cand.interviewDetails.evaluatorRatings.map((ev, idx) => ({ id: `ev-${idx}`, name: ev.evaluatorName, rating: ev.rating }))
                                         : cand.interviewDetails?.panelMembers && cand.interviewDetails.panelMembers.length > 0
-                                        ? cand.interviewDetails.panelMembers.map((name, idx) => ({ id: `ev-${idx}`, name, rating: 8.0 }))
-                                        : [
+                                          ? cand.interviewDetails.panelMembers.map((name, idx) => ({ id: `ev-${idx}`, name, rating: 8.0 }))
+                                          : [
                                             { id: 'ev-1', name: 'Dr. Harpreet Singh (Dean)', rating: 8.0 },
                                             { id: 'ev-2', name: 'Prof. Balwant Singh (Dean Academic)', rating: 8.0 },
                                             { id: 'ev-3', name: 'Subject Expert Nominee', rating: 8.0 }
@@ -2020,8 +2004,8 @@ export function HRDepartmentModule({
                                     const existingPanel = candidate.interviewDetails?.evaluatorRatings && candidate.interviewDetails.evaluatorRatings.length > 0
                                       ? candidate.interviewDetails.evaluatorRatings.map((ev, idx) => ({ id: `ev-${idx}`, name: ev.evaluatorName, rating: ev.rating }))
                                       : candidate.interviewDetails?.panelMembers && candidate.interviewDetails.panelMembers.length > 0
-                                      ? candidate.interviewDetails.panelMembers.map((name, idx) => ({ id: `ev-${idx}`, name, rating: 8.0 }))
-                                      : [
+                                        ? candidate.interviewDetails.panelMembers.map((name, idx) => ({ id: `ev-${idx}`, name, rating: 8.0 }))
+                                        : [
                                           { id: 'ev-1', name: 'Dr. Harpreet Singh (Dean)', rating: 8.0 },
                                           { id: 'ev-2', name: 'Prof. Balwant Singh (Dean Academic)', rating: 8.0 },
                                           { id: 'ev-3', name: 'Subject Expert Nominee', rating: 8.0 }
@@ -2118,11 +2102,10 @@ export function HRDepartmentModule({
                   <button
                     type="button"
                     onClick={() => setOfferLetterViewMode('grouped')}
-                    className={`px-3 py-1.5 rounded-lg transition cursor-pointer flex items-center space-x-1.5 ${
-                      offerLetterViewMode === 'grouped'
-                        ? 'bg-white text-emerald-950 shadow-xs font-bold'
-                        : 'text-slate-600 hover:text-slate-900'
-                    }`}
+                    className={`px-3 py-1.5 rounded-lg transition cursor-pointer flex items-center space-x-1.5 ${offerLetterViewMode === 'grouped'
+                      ? 'bg-white text-emerald-950 shadow-xs font-bold'
+                      : 'text-slate-600 hover:text-slate-900'
+                      }`}
                   >
                     <Folder className="w-3.5 h-3.5 text-emerald-700" />
                     <span>By Requisition ({displayedShortlistedJobs.length})</span>
@@ -2131,11 +2114,10 @@ export function HRDepartmentModule({
                   <button
                     type="button"
                     onClick={() => setOfferLetterViewMode('table')}
-                    className={`px-3 py-1.5 rounded-lg transition cursor-pointer flex items-center space-x-1.5 ${
-                      offerLetterViewMode === 'table'
-                        ? 'bg-white text-emerald-950 shadow-xs font-bold'
-                        : 'text-slate-600 hover:text-slate-900'
-                    }`}
+                    className={`px-3 py-1.5 rounded-lg transition cursor-pointer flex items-center space-x-1.5 ${offerLetterViewMode === 'table'
+                      ? 'bg-white text-emerald-950 shadow-xs font-bold'
+                      : 'text-slate-600 hover:text-slate-900'
+                      }`}
                   >
                     <Users className="w-3.5 h-3.5 text-emerald-700" />
                     <span>Master Candidates List ({allShortlistedCandidatesList.length})</span>
@@ -2172,44 +2154,40 @@ export function HRDepartmentModule({
               <button
                 type="button"
                 onClick={() => setOfferStatusFilter('all')}
-                className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition cursor-pointer ${
-                  offerStatusFilter === 'all'
-                    ? 'bg-slate-900 text-white shadow-2xs'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                }`}
+                className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition cursor-pointer ${offerStatusFilter === 'all'
+                  ? 'bg-slate-900 text-white shadow-2xs'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
               >
                 All Statuses ({totalShortlistedCandidates})
               </button>
               <button
                 type="button"
                 onClick={() => setOfferStatusFilter('Selected')}
-                className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition cursor-pointer ${
-                  offerStatusFilter === 'Selected'
-                    ? 'bg-amber-600 text-white shadow-2xs'
-                    : 'bg-amber-50 text-amber-900 hover:bg-amber-100 border border-amber-200'
-                }`}
+                className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition cursor-pointer ${offerStatusFilter === 'Selected'
+                  ? 'bg-amber-600 text-white shadow-2xs'
+                  : 'bg-amber-50 text-amber-900 hover:bg-amber-100 border border-amber-200'
+                  }`}
               >
                 ⏳ Awaiting Offer ({countAwaitingOffer})
               </button>
               <button
                 type="button"
                 onClick={() => setOfferStatusFilter('Offer Issued')}
-                className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition cursor-pointer ${
-                  offerStatusFilter === 'Offer Issued'
-                    ? 'bg-emerald-600 text-white shadow-2xs'
-                    : 'bg-emerald-50 text-emerald-900 hover:bg-emerald-100 border border-emerald-200'
-                }`}
+                className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition cursor-pointer ${offerStatusFilter === 'Offer Issued'
+                  ? 'bg-emerald-600 text-white shadow-2xs'
+                  : 'bg-emerald-50 text-emerald-900 hover:bg-emerald-100 border border-emerald-200'
+                  }`}
               >
                 ✉️ Offer Issued ({countOfferIssued})
               </button>
               <button
                 type="button"
                 onClick={() => setOfferStatusFilter('Joined')}
-                className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition cursor-pointer ${
-                  offerStatusFilter === 'Joined'
-                    ? 'bg-teal-700 text-white shadow-2xs'
-                    : 'bg-teal-50 text-teal-900 hover:bg-teal-100 border border-teal-200'
-                }`}
+                className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition cursor-pointer ${offerStatusFilter === 'Joined'
+                  ? 'bg-teal-700 text-white shadow-2xs'
+                  : 'bg-teal-50 text-teal-900 hover:bg-teal-100 border border-teal-200'
+                  }`}
               >
                 🎓 Joined &amp; Inducted ({countJoined})
               </button>
@@ -3880,9 +3858,8 @@ export function HRDepartmentModule({
 
                 <div className="space-y-1.5">
                   {/* Item 1: Statutory Degrees */}
-                  <label className={`flex items-center justify-between p-2.5 rounded-lg border cursor-pointer select-none transition ${
-                    docDegreesVerified ? 'bg-emerald-50/70 border-emerald-300 text-emerald-950 font-semibold' : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
-                  }`}>
+                  <label className={`flex items-center justify-between p-2.5 rounded-lg border cursor-pointer select-none transition ${docDegreesVerified ? 'bg-emerald-50/70 border-emerald-300 text-emerald-950 font-semibold' : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
+                    }`}>
                     <div className="flex items-center space-x-2.5 min-w-0">
                       <input
                         type="checkbox"
@@ -3893,18 +3870,16 @@ export function HRDepartmentModule({
                       <span className="font-semibold text-xs truncate">Academic Degrees &amp; Ph.D. Certificates</span>
                     </div>
                     <div className="flex items-center space-x-2 shrink-0">
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
-                        docDegreesVerified ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-500'
-                      }`}>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${docDegreesVerified ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-500'
+                        }`}>
                         {docDegreesVerified ? 'Verified ✓' : 'Pending'}
                       </span>
                     </div>
                   </label>
 
                   {/* Item 2: Government ID & Address */}
-                  <label className={`flex items-center justify-between p-2.5 rounded-lg border cursor-pointer select-none transition ${
-                    docIdentityProof ? 'bg-emerald-50/70 border-emerald-300 text-emerald-950 font-semibold' : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
-                  }`}>
+                  <label className={`flex items-center justify-between p-2.5 rounded-lg border cursor-pointer select-none transition ${docIdentityProof ? 'bg-emerald-50/70 border-emerald-300 text-emerald-950 font-semibold' : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
+                    }`}>
                     <div className="flex items-center space-x-2.5 min-w-0">
                       <input
                         type="checkbox"
@@ -3915,18 +3890,16 @@ export function HRDepartmentModule({
                       <span className="font-semibold text-xs truncate">Government Photo ID (Aadhaar / Passport)</span>
                     </div>
                     <div className="flex items-center space-x-2 shrink-0">
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
-                        docIdentityProof ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-500'
-                      }`}>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${docIdentityProof ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-500'
+                        }`}>
                         {docIdentityProof ? 'Verified ✓' : 'Pending'}
                       </span>
                     </div>
                   </label>
 
                   {/* Item 3: Relieving & Experience */}
-                  <label className={`flex items-center justify-between p-2.5 rounded-lg border cursor-pointer select-none transition ${
-                    docExperienceCertificates ? 'bg-emerald-50/70 border-emerald-300 text-emerald-950 font-semibold' : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
-                  }`}>
+                  <label className={`flex items-center justify-between p-2.5 rounded-lg border cursor-pointer select-none transition ${docExperienceCertificates ? 'bg-emerald-50/70 border-emerald-300 text-emerald-950 font-semibold' : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
+                    }`}>
                     <div className="flex items-center space-x-2.5 min-w-0">
                       <input
                         type="checkbox"
@@ -3937,18 +3910,16 @@ export function HRDepartmentModule({
                       <span className="font-semibold text-xs truncate">Experience Certificates &amp; Relieving Order</span>
                     </div>
                     <div className="flex items-center space-x-2 shrink-0">
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
-                        docExperienceCertificates ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-500'
-                      }`}>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${docExperienceCertificates ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-500'
+                        }`}>
                         {docExperienceCertificates ? 'Verified ✓' : 'Pending'}
                       </span>
                     </div>
                   </label>
 
                   {/* Item 4: Medical Fitness */}
-                  <label className={`flex items-center justify-between p-2.5 rounded-lg border cursor-pointer select-none transition ${
-                    docMedicalFitness ? 'bg-emerald-50/70 border-emerald-300 text-emerald-950 font-semibold' : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
-                  }`}>
+                  <label className={`flex items-center justify-between p-2.5 rounded-lg border cursor-pointer select-none transition ${docMedicalFitness ? 'bg-emerald-50/70 border-emerald-300 text-emerald-950 font-semibold' : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
+                    }`}>
                     <div className="flex items-center space-x-2.5 min-w-0">
                       <input
                         type="checkbox"
@@ -3959,18 +3930,16 @@ export function HRDepartmentModule({
                       <span className="font-semibold text-xs truncate">Medical Fitness Certificate</span>
                     </div>
                     <div className="flex items-center space-x-2 shrink-0">
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
-                        docMedicalFitness ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-500'
-                      }`}>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${docMedicalFitness ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-500'
+                        }`}>
                         {docMedicalFitness ? 'Verified ✓' : 'Pending'}
                       </span>
                     </div>
                   </label>
 
                   {/* Item 5: Police & Character Verification */}
-                  <label className={`flex items-center justify-between p-2.5 rounded-lg border cursor-pointer select-none transition ${
-                    docPoliceVerification ? 'bg-emerald-50/70 border-emerald-300 text-emerald-950 font-semibold' : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
-                  }`}>
+                  <label className={`flex items-center justify-between p-2.5 rounded-lg border cursor-pointer select-none transition ${docPoliceVerification ? 'bg-emerald-50/70 border-emerald-300 text-emerald-950 font-semibold' : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
+                    }`}>
                     <div className="flex items-center space-x-2.5 min-w-0">
                       <input
                         type="checkbox"
@@ -3981,9 +3950,8 @@ export function HRDepartmentModule({
                       <span className="font-semibold text-xs truncate">Character &amp; Police Verification Clearance</span>
                     </div>
                     <div className="flex items-center space-x-2 shrink-0">
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
-                        docPoliceVerification ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-500'
-                      }`}>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${docPoliceVerification ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-500'
+                        }`}>
                         {docPoliceVerification ? 'Verified ✓' : 'Pending'}
                       </span>
                     </div>
