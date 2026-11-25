@@ -72,7 +72,7 @@ export function HRDepartmentModule({
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDeptFilter, setSelectedDeptFilter] = useState<string>('all');
   const [selectedPostFilter, setSelectedPostFilter] = useState<string>('all');
-  const [approvedViewMode, setApprovedViewMode] = useState<'cards' | 'table'>('cards');
+  const [approvedViewMode, setApprovedViewMode] = useState<'cards' | 'table'>('table');
   const [openedFolders, setOpenedFolders] = useState<Record<string, boolean>>({});
 
   // Dynamic lists of unique departments and post titles for filters
@@ -1154,26 +1154,23 @@ export function HRDepartmentModule({
   }
 
   return (
-    <div className="space-y-6">
-      {/* 1. Executive Top Header Banner */}
-      <div className="bg-white border border-slate-200/90 rounded-2xl p-6 shadow-xs flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center space-x-4">
-          <div className="w-13 h-13 rounded-2xl bg-gradient-to-br from-[#0f2d59] via-blue-700 to-indigo-800 flex items-center justify-center text-white shadow-md">
-            <Users className="w-6 h-6" />
+    <div className="space-y-5">
+      {/* 1. Header Banner - Simple, Modern, Institutional */}
+      <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-xs flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center space-x-3.5">
+          <div className="w-11 h-11 rounded-xl bg-blue-50 border border-blue-200/70 flex items-center justify-center text-[#0f2d59] shadow-2xs">
+            <Users className="w-5 h-5" />
           </div>
           <div>
             <div className="flex items-center space-x-2">
-              <span className="text-[10px] uppercase tracking-wider font-extrabold text-blue-700 bg-blue-50 border border-blue-200/80 px-2 py-0.5 rounded-md">
-                Central HR Directorate
+              <span className="text-[10px] uppercase tracking-wider font-extrabold text-blue-700 bg-blue-50 border border-blue-200/70 px-2 py-0.5 rounded-md">
+                HR Directorate
               </span>
-              <span className="text-[10px] text-slate-400 font-medium">• Guru Kashi University</span>
+              <span className="text-[11px] text-slate-400 font-medium">• Guru Kashi University</span>
             </div>
-            <h1 className="text-xl font-extrabold text-slate-900 tracking-tight mt-1">
-              HR Talent Acquisition &amp; Recruitment Pipeline
+            <h1 className="text-lg font-bold text-slate-900 tracking-tight mt-0.5">
+              Talent Acquisition &amp; Recruitment Pipeline
             </h1>
-            <p className="text-xs text-slate-500 mt-0.5 font-medium">
-              Stage-by-stage recruitment: Post to media &rarr; Intake resumes &rarr; Coordinate interviews &amp; Score &rarr; Shortlist &amp; Issue offers &rarr; Induction.
-            </p>
           </div>
         </div>
 
@@ -1181,7 +1178,7 @@ export function HRDepartmentModule({
           <button
             type="button"
             onClick={onOpenNewModal}
-            className="inline-flex items-center space-x-2 bg-gradient-to-r from-[#0f2d59] to-[#1a4b8c] hover:from-[#163f7a] hover:to-[#225ca8] text-white px-5 py-2.5 rounded-xl text-xs font-bold shadow-md hover:shadow-lg transition cursor-pointer"
+            className="inline-flex items-center space-x-2 bg-[#0f2d59] hover:bg-[#163f7a] text-white px-4.5 py-2.5 rounded-xl text-xs font-bold shadow-xs hover:shadow transition cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>Create Requirement</span>
@@ -1189,48 +1186,48 @@ export function HRDepartmentModule({
         )}
       </div>
 
-      {/* 2. Modern Executive Metric Cards Grid (Interactive KPI Boxes) */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
-        {/* Card 1: Approved for Media */}
+      {/* 2. Simple, Attractive KPI Metric Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+        {/* Card 1: Approved */}
         <div
           onClick={() => {
             setActiveTab('approved');
             setSearchQuery('');
           }}
-          className={`border rounded-2xl p-4.5 transition-all duration-200 cursor-pointer ${activeTab === 'approved'
-            ? 'bg-gradient-to-br from-blue-50/90 via-white to-white border-blue-500 ring-2 ring-blue-500/20 shadow-md -translate-y-0.5'
-            : 'bg-white border-slate-200/90 hover:border-blue-300 hover:shadow-sm'
+          className={`bg-white border rounded-xl p-4 transition-all duration-150 cursor-pointer shadow-xs hover:shadow-md ${activeTab === 'approved'
+            ? 'border-blue-500 ring-2 ring-blue-500/15 bg-blue-50/20'
+            : 'border-slate-200/80 hover:border-blue-200'
             }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-blue-700 uppercase tracking-wider">Approved</span>
-            <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center shadow-2xs">
-              <Megaphone className="w-4 h-4" />
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Approved</span>
+            <div className="w-7 h-7 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center">
+              <Megaphone className="w-3.5 h-3.5" />
             </div>
           </div>
-          <div className="text-3xl font-black text-slate-900 mt-2">{approvedForPosting.length}</div>
-          <div className="text-[11px] text-slate-500 mt-0.5 font-medium">Awaiting Media Posting</div>
+          <div className="text-2xl font-black text-slate-900 mt-2">{approvedForPosting.length}</div>
+          <div className="text-[11px] text-slate-400 font-medium mt-0.5">Ready for media posting</div>
         </div>
 
-        {/* Card 2: Active Posted Jobs */}
+        {/* Card 2: Active Intake */}
         <div
           onClick={() => {
             setActiveTab('posted');
             setSearchQuery('');
           }}
-          className={`border rounded-2xl p-4.5 transition-all duration-200 cursor-pointer ${activeTab === 'posted'
-            ? 'bg-gradient-to-br from-indigo-50/90 via-white to-white border-indigo-500 ring-2 ring-indigo-500/20 shadow-md -translate-y-0.5'
-            : 'bg-white border-slate-200/90 hover:border-indigo-300 hover:shadow-sm'
+          className={`bg-white border rounded-xl p-4 transition-all duration-150 cursor-pointer shadow-xs hover:shadow-md ${activeTab === 'posted'
+            ? 'border-indigo-500 ring-2 ring-indigo-500/15 bg-indigo-50/20'
+            : 'border-slate-200/80 hover:border-indigo-200'
             }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-indigo-700 uppercase tracking-wider">Active Intake</span>
-            <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-700 flex items-center justify-center shadow-2xs">
-              <Briefcase className="w-4 h-4" />
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Active Intake</span>
+            <div className="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-700 flex items-center justify-center">
+              <Briefcase className="w-3.5 h-3.5" />
             </div>
           </div>
-          <div className="text-3xl font-black text-slate-900 mt-2">{activePostedJobs.length}</div>
-          <div className="text-[11px] text-slate-500 mt-0.5 font-medium">Live Portal &amp; Resumes</div>
+          <div className="text-2xl font-black text-slate-900 mt-2">{activePostedJobs.length}</div>
+          <div className="text-[11px] text-slate-400 font-medium mt-0.5">Live portal &amp; resumes</div>
         </div>
 
         {/* Card 3: Interviews */}
@@ -1239,61 +1236,61 @@ export function HRDepartmentModule({
             setActiveTab('interviews');
             setSearchQuery('');
           }}
-          className={`border rounded-2xl p-4.5 transition-all duration-200 cursor-pointer ${activeTab === 'interviews'
-            ? 'bg-gradient-to-br from-amber-50/90 via-white to-white border-amber-500 ring-2 ring-amber-500/20 shadow-md -translate-y-0.5'
-            : 'bg-white border-slate-200/90 hover:border-amber-300 hover:shadow-sm'
+          className={`bg-white border rounded-xl p-4 transition-all duration-150 cursor-pointer shadow-xs hover:shadow-md ${activeTab === 'interviews'
+            ? 'border-amber-500 ring-2 ring-amber-500/15 bg-amber-50/20'
+            : 'border-slate-200/80 hover:border-amber-200'
             }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-amber-700 uppercase tracking-wider">Interviews</span>
-            <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center shadow-2xs">
-              <Calendar className="w-4 h-4" />
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Interviews</span>
+            <div className="w-7 h-7 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center">
+              <Calendar className="w-3.5 h-3.5" />
             </div>
           </div>
-          <div className="text-3xl font-black text-slate-900 mt-2">{totalInterviewCandidates}</div>
-          <div className="text-[11px] text-slate-500 mt-0.5 font-medium">Panel Scoring &amp; Review</div>
+          <div className="text-2xl font-black text-slate-900 mt-2">{totalInterviewCandidates}</div>
+          <div className="text-[11px] text-slate-400 font-medium mt-0.5">Panel scoring &amp; review</div>
         </div>
 
-        {/* Card 4: Shortlisted & Offers */}
+        {/* Card 4: Shortlisted */}
         <div
           onClick={() => {
             setActiveTab('offerLetters');
             setSearchQuery('');
           }}
-          className={`border rounded-2xl p-4.5 transition-all duration-200 cursor-pointer ${activeTab === 'offerLetters'
-            ? 'bg-gradient-to-br from-emerald-50/90 via-white to-white border-emerald-500 ring-2 ring-emerald-500/20 shadow-md -translate-y-0.5'
-            : 'bg-white border-slate-200/90 hover:border-emerald-300 hover:shadow-sm'
+          className={`bg-white border rounded-xl p-4 transition-all duration-150 cursor-pointer shadow-xs hover:shadow-md ${activeTab === 'offerLetters'
+            ? 'border-emerald-500 ring-2 ring-emerald-500/15 bg-emerald-50/20'
+            : 'border-slate-200/80 hover:border-emerald-200'
             }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-emerald-700 uppercase tracking-wider">Shortlisted</span>
-            <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center shadow-2xs">
-              <Award className="w-4 h-4" />
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Shortlisted</span>
+            <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center">
+              <Award className="w-3.5 h-3.5" />
             </div>
           </div>
-          <div className="text-3xl font-black text-slate-900 mt-2">{totalShortlistedCandidates}</div>
-          <div className="text-[11px] text-slate-500 mt-0.5 font-medium">Offers &amp; Onboarding</div>
+          <div className="text-2xl font-black text-slate-900 mt-2">{totalShortlistedCandidates}</div>
+          <div className="text-[11px] text-slate-400 font-medium mt-0.5">Offers &amp; onboarding</div>
         </div>
 
-        {/* Card 5: Archive Cabinet */}
+        {/* Card 5: Archive */}
         <div
           onClick={() => {
             setActiveTab('archive');
             setSearchQuery('');
           }}
-          className={`border rounded-2xl p-4.5 transition-all duration-200 cursor-pointer ${activeTab === 'archive'
-            ? 'bg-gradient-to-br from-purple-50/90 via-white to-white border-purple-500 ring-2 ring-purple-500/20 shadow-md -translate-y-0.5'
-            : 'bg-white border-slate-200/90 hover:border-purple-300 hover:shadow-sm'
+          className={`bg-white border rounded-xl p-4 transition-all duration-150 cursor-pointer shadow-xs hover:shadow-md ${activeTab === 'archive'
+            ? 'border-purple-500 ring-2 ring-purple-500/15 bg-purple-50/20'
+            : 'border-slate-200/80 hover:border-purple-200'
             }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-purple-700 uppercase tracking-wider">Archive</span>
-            <div className="w-8 h-8 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center shadow-2xs">
-              <FolderCheck className="w-4 h-4" />
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Archive</span>
+            <div className="w-7 h-7 rounded-lg bg-purple-50 text-purple-700 flex items-center justify-center">
+              <FolderCheck className="w-3.5 h-3.5" />
             </div>
           </div>
-          <div className="text-3xl font-black text-slate-900 mt-2">{archivedReqs.length}</div>
-          <div className="text-[11px] text-slate-500 mt-0.5 font-medium">Fulfilled &amp; History</div>
+          <div className="text-2xl font-black text-slate-900 mt-2">{archivedReqs.length}</div>
+          <div className="text-[11px] text-slate-400 font-medium mt-0.5">Fulfilled records</div>
         </div>
       </div>
 
@@ -1322,20 +1319,26 @@ export function HRDepartmentModule({
         </div>
       )}
 
-      {/* 5 Distinct Pipeline Tabs - Modern Floating Segmented Control */}
-      <div className="bg-slate-100/90 p-1.5 rounded-2xl flex flex-wrap items-center gap-1.5 border border-slate-200/80 shadow-inner">
+      {/* 3. Simple, Modern Navigation Tabs with Count Badges */}
+      <div className="flex flex-wrap items-center gap-1.5 border-b border-slate-200/80 pb-3">
         <button
           onClick={() => {
             setActiveTab('approved');
             setSearchQuery('');
           }}
-          className={`py-2 px-3.5 rounded-xl transition-all duration-150 flex items-center space-x-2 text-xs cursor-pointer ${activeTab === 'approved'
-            ? 'bg-white text-blue-950 font-extrabold shadow-sm border border-slate-200/80'
-            : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 font-medium'
+          className={`px-3 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-2 cursor-pointer ${activeTab === 'approved'
+            ? 'bg-[#0f2d59] text-white shadow-xs'
+            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
             }`}
         >
-          <CheckCircle2 className={`w-4 h-4 ${activeTab === 'approved' ? 'text-blue-600' : 'text-slate-400'}`} />
-          <span>1. Approved for Posting ({approvedForPosting.length})</span>
+          <CheckCircle2 className="w-3.5 h-3.5" />
+          <span>1. Approved for Posting</span>
+          <span
+            className={`px-1.5 py-0.2 rounded-md text-[10px] font-extrabold ${activeTab === 'approved' ? 'bg-white/20 text-white' : 'bg-slate-200/80 text-slate-700'
+              }`}
+          >
+            {approvedForPosting.length}
+          </span>
         </button>
 
         <button
@@ -1343,13 +1346,19 @@ export function HRDepartmentModule({
             setActiveTab('posted');
             setSearchQuery('');
           }}
-          className={`py-2 px-3.5 rounded-xl transition-all duration-150 flex items-center space-x-2 text-xs cursor-pointer ${activeTab === 'posted'
-            ? 'bg-white text-indigo-950 font-extrabold shadow-sm border border-slate-200/80'
-            : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 font-medium'
+          className={`px-3 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-2 cursor-pointer ${activeTab === 'posted'
+            ? 'bg-[#0f2d59] text-white shadow-xs'
+            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
             }`}
         >
-          <Megaphone className={`w-4 h-4 ${activeTab === 'posted' ? 'text-indigo-600' : 'text-slate-400'}`} />
-          <span>2. Active Posted Jobs ({activePostedJobs.length})</span>
+          <Megaphone className="w-3.5 h-3.5" />
+          <span>2. Active Posted Jobs</span>
+          <span
+            className={`px-1.5 py-0.2 rounded-md text-[10px] font-extrabold ${activeTab === 'posted' ? 'bg-white/20 text-white' : 'bg-slate-200/80 text-slate-700'
+              }`}
+          >
+            {activePostedJobs.length}
+          </span>
         </button>
 
         <button
@@ -1357,13 +1366,19 @@ export function HRDepartmentModule({
             setActiveTab('interviews');
             setSearchQuery('');
           }}
-          className={`py-2 px-3.5 rounded-xl transition-all duration-150 flex items-center space-x-2 text-xs cursor-pointer ${activeTab === 'interviews'
-            ? 'bg-white text-amber-950 font-extrabold shadow-sm border border-slate-200/80'
-            : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 font-medium'
+          className={`px-3 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-2 cursor-pointer ${activeTab === 'interviews'
+            ? 'bg-[#0f2d59] text-white shadow-xs'
+            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
             }`}
         >
-          <Calendar className={`w-4 h-4 ${activeTab === 'interviews' ? 'text-amber-600' : 'text-slate-400'}`} />
-          <span>3. Scheduled Interviews ({totalInterviewCandidates})</span>
+          <Calendar className="w-3.5 h-3.5" />
+          <span>3. Scheduled Interviews</span>
+          <span
+            className={`px-1.5 py-0.2 rounded-md text-[10px] font-extrabold ${activeTab === 'interviews' ? 'bg-white/20 text-white' : 'bg-slate-200/80 text-slate-700'
+              }`}
+          >
+            {totalInterviewCandidates}
+          </span>
         </button>
 
         <button
@@ -1371,13 +1386,19 @@ export function HRDepartmentModule({
             setActiveTab('offerLetters');
             setSearchQuery('');
           }}
-          className={`py-2 px-3.5 rounded-xl transition-all duration-150 flex items-center space-x-2 text-xs cursor-pointer ${activeTab === 'offerLetters'
-            ? 'bg-white text-emerald-950 font-extrabold shadow-sm border border-slate-200/80'
-            : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 font-medium'
+          className={`px-3 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-2 cursor-pointer ${activeTab === 'offerLetters'
+            ? 'bg-[#0f2d59] text-white shadow-xs'
+            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
             }`}
         >
-          <Award className={`w-4 h-4 ${activeTab === 'offerLetters' ? 'text-emerald-600' : 'text-slate-400'}`} />
-          <span>4. Shortlisted &amp; Offers ({totalShortlistedCandidates})</span>
+          <Award className="w-3.5 h-3.5" />
+          <span>4. Shortlisted &amp; Offers</span>
+          <span
+            className={`px-1.5 py-0.2 rounded-md text-[10px] font-extrabold ${activeTab === 'offerLetters' ? 'bg-white/20 text-white' : 'bg-slate-200/80 text-slate-700'
+              }`}
+          >
+            {totalShortlistedCandidates}
+          </span>
         </button>
 
         <button
@@ -1385,13 +1406,19 @@ export function HRDepartmentModule({
             setActiveTab('pipeline');
             setSearchQuery('');
           }}
-          className={`py-2 px-3.5 rounded-xl transition-all duration-150 flex items-center space-x-2 text-xs cursor-pointer ${activeTab === 'pipeline'
-            ? 'bg-white text-slate-900 font-extrabold shadow-sm border border-slate-200/80'
-            : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 font-medium'
+          className={`px-3 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-2 cursor-pointer ${activeTab === 'pipeline'
+            ? 'bg-[#0f2d59] text-white shadow-xs'
+            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
             }`}
         >
-          <Clock className={`w-4 h-4 ${activeTab === 'pipeline' ? 'text-slate-700' : 'text-slate-400'}`} />
-          <span>5. Governance Pipeline ({pendingPipeline.length})</span>
+          <Clock className="w-3.5 h-3.5" />
+          <span>5. Governance Pipeline</span>
+          <span
+            className={`px-1.5 py-0.2 rounded-md text-[10px] font-extrabold ${activeTab === 'pipeline' ? 'bg-white/20 text-white' : 'bg-slate-200/80 text-slate-700'
+              }`}
+          >
+            {pendingPipeline.length}
+          </span>
         </button>
 
         <button
@@ -1399,13 +1426,19 @@ export function HRDepartmentModule({
             setActiveTab('archive');
             setSearchQuery('');
           }}
-          className={`py-2 px-3.5 rounded-xl transition-all duration-150 flex items-center space-x-2 text-xs cursor-pointer ${activeTab === 'archive'
-            ? 'bg-white text-purple-950 font-extrabold shadow-sm border border-slate-200/80'
-            : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 font-medium'
+          className={`px-3 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-2 cursor-pointer ${activeTab === 'archive'
+            ? 'bg-[#0f2d59] text-white shadow-xs'
+            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
             }`}
         >
-          <FolderCheck className={`w-4 h-4 ${activeTab === 'archive' ? 'text-purple-600' : 'text-slate-400'}`} />
-          <span>6. Archives Cabinet ({archivedReqs.length})</span>
+          <FolderCheck className="w-3.5 h-3.5" />
+          <span>6. Archives Cabinet</span>
+          <span
+            className={`px-1.5 py-0.2 rounded-md text-[10px] font-extrabold ${activeTab === 'archive' ? 'bg-white/20 text-white' : 'bg-slate-200/80 text-slate-700'
+              }`}
+          >
+            {archivedReqs.length}
+          </span>
         </button>
       </div>
 
@@ -1478,8 +1511,20 @@ export function HRDepartmentModule({
                 Full clearance verified (Dean Academic &amp; VC Sanctioned) &bull; Ready for Media Ad Posting
               </span>
 
-              {/* View Mode Toggle: Cards vs Table */}
+              {/* View Mode Toggle: Card Rows (Table) vs Grid Cards */}
               <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200/70">
+                <button
+                  type="button"
+                  onClick={() => setApprovedViewMode('table')}
+                  title="Card Rows View"
+                  className={`p-1.5 rounded-lg transition flex items-center space-x-1.5 text-xs cursor-pointer ${approvedViewMode === 'table'
+                    ? 'bg-white text-blue-900 font-bold shadow-2xs'
+                    : 'text-slate-500 hover:text-slate-800'
+                    }`}
+                >
+                  <List className="w-3.5 h-3.5" />
+                  <span className="text-[11px]">List</span>
+                </button>
                 <button
                   type="button"
                   onClick={() => setApprovedViewMode('cards')}
@@ -1490,38 +1535,121 @@ export function HRDepartmentModule({
                     }`}
                 >
                   <LayoutGrid className="w-3.5 h-3.5" />
-                  <span className="text-[11px]">Cards</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setApprovedViewMode('table')}
-                  title="List Table View"
-                  className={`p-1.5 rounded-lg transition flex items-center space-x-1.5 text-xs cursor-pointer ${approvedViewMode === 'table'
-                    ? 'bg-white text-blue-900 font-bold shadow-2xs'
-                    : 'text-slate-500 hover:text-slate-800'
-                    }`}
-                >
-                  <List className="w-3.5 h-3.5" />
-                  <span className="text-[11px]">Table</span>
+                  <span className="text-[11px]">Grid</span>
                 </button>
               </div>
             </div>
           </div>
 
-          {/* View Mode 1: Modern Interactive Cards Grid */}
-          {approvedViewMode === 'cards' ? (
+          {/* View Mode 1 (DEFAULT): Card Rows with Shadow (Proper Cards for each Requisition) */}
+          {approvedViewMode === 'table' ? (
             displayedApproved.length === 0 ? (
-              <div className="bg-white border border-slate-200/90 rounded-2xl p-12 text-center text-slate-400">
+              <div className="bg-white border border-slate-200/90 rounded-2xl p-12 text-center text-slate-400 shadow-xs">
+                <Megaphone className="w-10 h-10 mx-auto text-slate-300 mb-2" />
+                <p className="font-semibold text-slate-600">No approved jobs currently awaiting posting.</p>
+                <p className="text-xs text-slate-400 mt-1">Once VC sanctions a requisition, it appears here ready to post to media.</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {/* Column Headers for Clean Alignment */}
+                <div className="hidden lg:grid grid-cols-12 gap-4 px-5 py-1 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                  <div className="col-span-2">Requisition ID</div>
+                  <div className="col-span-4">Post &amp; Department</div>
+                  <div className="col-span-2">Positions &amp; Budget</div>
+                  <div className="col-span-2">Governance Clearances</div>
+                  <div className="col-span-2 text-right">Action</div>
+                </div>
+
+                {/* List of Individual Card Rows */}
+                {displayedApproved.map((req) => (
+                  <div
+                    key={req.requestId}
+                    className="bg-white border border-slate-200/90 hover:border-blue-400 rounded-xl p-4 sm:p-5 shadow-xs hover:shadow-md transition-all duration-150 flex flex-col lg:grid lg:grid-cols-12 gap-3.5 items-start lg:items-center group"
+                  >
+                    {/* Col 1: Requisition ID */}
+                    <div className="col-span-2 flex items-center space-x-2">
+                      <span className="font-mono text-xs font-extrabold text-blue-900 bg-blue-50 border border-blue-200/80 px-2.5 py-1 rounded-lg shadow-2xs">
+                        {req.requestId}
+                      </span>
+                    </div>
+
+                    {/* Col 2: Post Title & Department */}
+                    <div className="col-span-4">
+                      <div className="font-bold text-slate-900 text-sm leading-snug group-hover:text-blue-950 transition">
+                        {req.postTitle}
+                      </div>
+                      <div className="flex flex-wrap items-center gap-1.5 mt-1 text-slate-500 text-[11px]">
+                        <span className="font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md">
+                          {req.department}
+                        </span>
+                        <span>&bull;</span>
+                        <span>{req.employmentType} ({req.postLevel})</span>
+                      </div>
+                    </div>
+
+                    {/* Col 3: Positions & Budget */}
+                    <div className="col-span-2">
+                      <div className="font-bold text-slate-800 text-xs">
+                        {req.numberOfPositions} Open Position{req.numberOfPositions > 1 ? 's' : ''}
+                      </div>
+                      <div className="text-slate-500 text-[11px] font-medium mt-0.5 truncate" title={req.tentativeBudget}>
+                        {req.tentativeBudget}
+                      </div>
+                    </div>
+
+                    {/* Col 4: Clearances & Status */}
+                    <div className="col-span-2 space-y-1">
+                      <div className="inline-flex items-center space-x-1.5 text-emerald-800 bg-emerald-50 border border-emerald-200/70 px-2.5 py-0.5 rounded-lg text-[11px] font-semibold">
+                        <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                        <span className="truncate">Sanctioned by VC &amp; Academic</span>
+                      </div>
+                      <div>
+                        <span className="inline-block px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-amber-50 text-amber-900 border border-amber-200">
+                          Awaiting Media Posting
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Col 5: Actions */}
+                    <div className="col-span-2 flex items-center justify-end space-x-2 w-full lg:w-auto">
+                      <button
+                        type="button"
+                        onClick={() => setJobDetailsReq(req)}
+                        className="text-xs font-semibold text-slate-600 hover:text-slate-900 px-2.5 py-2 rounded-lg hover:bg-slate-100 transition cursor-pointer"
+                      >
+                        Details
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setPostingReq(req);
+                          setSelectedPlatforms(['LinkedIn Jobs', 'Naukri.com', 'University Careers Website']);
+                          setPostingRemarks('');
+                        }}
+                        className="inline-flex items-center space-x-1.5 px-3.5 py-2 bg-[#0f2d59] hover:bg-[#163f7a] text-white rounded-xl text-xs font-bold shadow-xs hover:shadow transition cursor-pointer"
+                      >
+                        <Megaphone className="w-3.5 h-3.5" />
+                        <span>Post Job &rarr;</span>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )
+          ) : (
+            /* View Mode 2: Grid Cards */
+            displayedApproved.length === 0 ? (
+              <div className="bg-white border border-slate-200/90 rounded-2xl p-12 text-center text-slate-400 shadow-xs">
                 <Megaphone className="w-10 h-10 mx-auto text-slate-300 mb-2" />
                 <p className="font-semibold text-slate-600">No approved jobs currently awaiting media posting.</p>
                 <p className="text-xs text-slate-400 mt-1">Once VC sanctions a requisition, it appears here ready to publish to job boards.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4.5">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {displayedApproved.map((req) => (
                   <div
                     key={req.requestId}
-                    className="bg-white border border-slate-200/90 hover:border-blue-300 rounded-2xl p-5 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between group"
+                    className="bg-white border border-slate-200/90 hover:border-blue-400 rounded-xl p-5 shadow-xs hover:shadow-md transition-all duration-150 flex flex-col justify-between group"
                   >
                     <div>
                       {/* Card Top: Department & ID Badge */}
@@ -1536,7 +1664,7 @@ export function HRDepartmentModule({
 
                       {/* Card Title & Cadre */}
                       <div className="mt-3">
-                        <h3 className="font-bold text-slate-900 text-sm group-hover:text-blue-900 transition line-clamp-2 leading-snug">
+                        <h3 className="font-bold text-slate-900 text-sm group-hover:text-blue-950 transition line-clamp-2 leading-snug">
                           {req.postTitle}
                         </h3>
                         <div className="text-slate-500 text-[11px] font-medium mt-1 flex items-center space-x-1.5">
@@ -1585,7 +1713,7 @@ export function HRDepartmentModule({
                           setSelectedPlatforms(['LinkedIn Jobs', 'Naukri.com', 'University Careers Website']);
                           setPostingRemarks('');
                         }}
-                        className="flex-1 inline-flex items-center justify-center space-x-1.5 px-4 py-2 bg-gradient-to-r from-blue-700 to-indigo-800 hover:from-blue-800 hover:to-indigo-900 text-white rounded-xl text-xs font-bold shadow-xs hover:shadow transition cursor-pointer"
+                        className="flex-1 inline-flex items-center justify-center space-x-1.5 px-4 py-2 bg-[#0f2d59] hover:bg-[#163f7a] text-white rounded-xl text-xs font-bold shadow-xs hover:shadow transition cursor-pointer"
                       >
                         <Megaphone className="w-3.5 h-3.5" />
                         <span>Post Job to Media &rarr;</span>
@@ -1595,78 +1723,6 @@ export function HRDepartmentModule({
                 ))}
               </div>
             )
-          ) : (
-            /* View Mode 2: Polished Modern Table View */
-            <div className="bg-white border border-slate-200/90 rounded-2xl shadow-xs overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
-                  <thead className="bg-slate-50/90 text-slate-600 font-bold border-b border-slate-200/80">
-                    <tr>
-                      <th className="py-3.5 px-6 whitespace-nowrap">Requisition ID</th>
-                      <th className="py-3.5 px-6">Department &amp; Post Title</th>
-                      <th className="py-3.5 px-6 whitespace-nowrap">Positions &amp; Budget</th>
-                      <th className="py-3.5 px-6 whitespace-nowrap">Governance Clearances</th>
-                      <th className="py-3.5 px-6 whitespace-nowrap">Media Ad Status</th>
-                      <th className="py-3.5 px-6 text-right whitespace-nowrap">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {displayedApproved.length === 0 ? (
-                      <tr>
-                        <td colSpan={6} className="py-12 text-center text-slate-400">
-                          No approved jobs currently awaiting posting. Once VC sanctions a requisition, it appears here to post.
-                        </td>
-                      </tr>
-                    ) : (
-                      displayedApproved.map((req) => (
-                        <tr key={req.requestId} className="hover:bg-slate-50/70 transition">
-                          <td className="py-4 px-6 font-mono font-bold text-blue-900 whitespace-nowrap">
-                            <span className="bg-blue-50 border border-blue-200/80 px-2.5 py-1 rounded-md text-xs">
-                              {req.requestId}
-                            </span>
-                          </td>
-                          <td className="py-4 px-6">
-                            <div className="font-bold text-slate-900 text-sm">{req.postTitle}</div>
-                            <div className="text-slate-500 text-[11px] mt-0.5">
-                              {req.department} &bull; {req.employmentType} ({req.postLevel})
-                            </div>
-                          </td>
-                          <td className="py-4 px-6 whitespace-nowrap">
-                            <div className="font-bold text-slate-800">{req.numberOfPositions} Position(s)</div>
-                            <div className="text-slate-500 text-[11px]">{req.tentativeBudget}</div>
-                          </td>
-                          <td className="py-4 px-6 whitespace-nowrap">
-                            <div className="flex items-center space-x-1.5 text-emerald-700 font-semibold text-[11px]">
-                              <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                              <span>Sanctioned by VC &amp; Academic</span>
-                            </div>
-                          </td>
-                          <td className="py-4 px-6 whitespace-nowrap">
-                            <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap bg-amber-50 text-amber-900 border border-amber-200">
-                              Awaiting Media Posting
-                            </span>
-                          </td>
-                          <td className="py-4 px-6 text-right whitespace-nowrap">
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setPostingReq(req);
-                                setSelectedPlatforms(['LinkedIn Jobs', 'Naukri.com', 'University Careers Website']);
-                                setPostingRemarks('');
-                              }}
-                              className="inline-flex items-center space-x-1.5 px-4 py-2 bg-gradient-to-r from-blue-700 to-indigo-800 hover:from-blue-800 hover:to-indigo-900 text-white rounded-xl text-xs font-bold shadow-xs transition cursor-pointer"
-                            >
-                              <Megaphone className="w-3.5 h-3.5" />
-                              <span>Post Job to Media &rarr;</span>
-                            </button>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
           )}
         </div>
       )}
@@ -2941,8 +2997,8 @@ export function HRDepartmentModule({
       {/* TAB 5: PENDING GOVERNANCE PIPELINE (WATCHLIST) */}
       {/* ============================================================== */}
       {activeTab === 'pipeline' && (
-        <div className="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
-          <div className="p-4 border-b border-slate-100 bg-slate-50/80 flex flex-wrap items-center justify-between gap-3">
+        <div className="space-y-4">
+          <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-xs flex flex-wrap items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-2.5 flex-1 min-w-[280px]">
               <div className="relative max-w-xs w-full">
                 <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
@@ -2951,7 +3007,7 @@ export function HRDepartmentModule({
                   placeholder="Search pending department applications..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-500 font-medium"
+                  className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50/70 hover:bg-white focus:bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-500 font-medium transition"
                 />
               </div>
 
@@ -2961,7 +3017,7 @@ export function HRDepartmentModule({
                 <select
                   value={selectedDeptFilter}
                   onChange={(e) => setSelectedDeptFilter(e.target.value)}
-                  className="text-xs bg-white border border-slate-200 rounded-xl px-3 py-2 font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500 cursor-pointer max-w-[190px] truncate"
+                  className="text-xs bg-slate-50/70 hover:bg-white focus:bg-white border border-slate-200 rounded-xl px-3 py-2 font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500 cursor-pointer max-w-[190px] truncate transition"
                   title="Filter by Department"
                 >
                   <option value="all">All Departments</option>
@@ -2975,7 +3031,7 @@ export function HRDepartmentModule({
               <select
                 value={selectedPostFilter}
                 onChange={(e) => setSelectedPostFilter(e.target.value)}
-                className="text-xs bg-white border border-slate-200 rounded-xl px-3 py-2 font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500 cursor-pointer max-w-[200px] truncate"
+                className="text-xs bg-slate-50/70 hover:bg-white focus:bg-white border border-slate-200 rounded-xl px-3 py-2 font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500 cursor-pointer max-w-[200px] truncate transition"
                 title="Filter by Post Title"
               >
                 <option value="all">All Post Titles</option>
@@ -3001,80 +3057,97 @@ export function HRDepartmentModule({
 
             <span className="text-[11px] text-slate-700 font-semibold bg-white border border-slate-200 px-3 py-1 rounded-full flex items-center space-x-1.5 shrink-0">
               <Clock className="w-3.5 h-3.5 text-slate-500" />
-              <span>HR Watchlist: Recruitment actions unlock once sanctioned by Dean Academic & VC/Registrar</span>
+              <span>HR Watchlist: Recruitment actions unlock once sanctioned by Dean Academic &amp; VC/Registrar</span>
             </span>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50/90 text-slate-600 font-bold border-b border-slate-200">
-                <tr>
-                  <th className="py-3.5 px-6">Requisition ID</th>
-                  <th className="py-3.5 px-6">Department & Post</th>
-                  <th className="py-3.5 px-6">Submitted By (Dean)</th>
-                  <th className="py-3.5 px-6 whitespace-nowrap">Positions</th>
-                  <th className="py-3.5 px-6 whitespace-nowrap">Current Approval Stage</th>
-                  <th className="py-3.5 px-6 text-right whitespace-nowrap">Review Details</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {displayedPending.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} className="py-12 text-center text-slate-400">
-                      No department requisitions currently pending governance clearance.
-                    </td>
-                  </tr>
-                ) : (
-                  displayedPending.map((req) => (
-                    <tr key={req.requestId} className="hover:bg-slate-50/70 transition">
-                      <td className="py-4 px-6 font-mono font-bold text-slate-900">
-                        {req.requestId}
-                      </td>
-                      <td className="py-4 px-6">
-                        <div className="font-bold text-slate-900 text-sm">{req.postTitle}</div>
-                        <div className="text-slate-500 text-[11px] mt-0.5">
-                          {req.department} • {req.employmentType} ({req.postLevel})
-                        </div>
-                      </td>
-                      <td className="py-4 px-6 text-slate-700">
-                        <div className="font-semibold text-slate-900">{req.creator?.name || 'Department Dean'}</div>
-                        <div className="text-slate-400 text-[11px]">{req.creator?.email || ''}</div>
-                      </td>
-                      <td className="py-4 px-6 font-bold text-slate-800 whitespace-nowrap">
-                        {req.numberOfPositions} Position(s)
-                      </td>
-                      <td className="py-4 px-6 whitespace-nowrap">
-                        <span
-                          className={`inline-block px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap border ${req.status === 'Approved by Dean Academic'
-                            ? 'bg-purple-50 text-purple-900 border-purple-200'
-                            : req.status === 'Returned for Clarification'
-                              ? 'bg-rose-50 text-rose-800 border-rose-200'
-                              : 'bg-amber-50 text-amber-900 border-amber-200'
-                            }`}
-                        >
-                          {req.status}
-                        </span>
-                      </td>
-                      <td className="py-4 px-6 text-right space-x-2">
-                        <button
-                          onClick={() => setTimelineReq(req)}
-                          className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition"
-                        >
-                          🕒 View Timeline
-                        </button>
-                        <button
-                          onClick={() => setJobDetailsReq(req)}
-                          className="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-xs font-bold transition"
-                        >
-                          📄 View Job Details
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+          {displayedPending.length === 0 ? (
+            <div className="bg-white border border-slate-200/90 rounded-2xl p-12 text-center text-slate-400 shadow-xs">
+              <Clock className="w-10 h-10 mx-auto text-slate-300 mb-2" />
+              <p className="font-semibold text-slate-600">No department requisitions currently pending governance clearance.</p>
+              <p className="text-xs text-slate-400 mt-1">Requisitions submitted by Department Deans for review will show up here.</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {/* Column Headers for Clean Alignment */}
+              <div className="hidden lg:grid grid-cols-12 gap-4 px-5 py-1 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                <div className="col-span-2">Requisition ID</div>
+                <div className="col-span-4">Post &amp; Department</div>
+                <div className="col-span-2">Submitted By (Dean)</div>
+                <div className="col-span-2">Stage &amp; Positions</div>
+                <div className="col-span-2 text-right">Review Details</div>
+              </div>
+
+              {/* List of Card Rows */}
+              {displayedPending.map((req) => (
+                <div
+                  key={req.requestId}
+                  className="bg-white border border-slate-200/90 hover:border-slate-300 rounded-xl p-4 sm:p-5 shadow-xs hover:shadow-md transition-all duration-150 flex flex-col lg:grid lg:grid-cols-12 gap-3.5 items-start lg:items-center group"
+                >
+                  <div className="col-span-2 flex items-center space-x-2">
+                    <span className="font-mono text-xs font-bold text-slate-800 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-lg">
+                      {req.requestId}
+                    </span>
+                  </div>
+
+                  <div className="col-span-4">
+                    <div className="font-bold text-slate-900 text-sm leading-snug">
+                      {req.postTitle}
+                    </div>
+                    <div className="flex flex-wrap items-center gap-1.5 mt-1 text-slate-500 text-[11px]">
+                      <span className="font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md">
+                        {req.department}
+                      </span>
+                      <span>&bull;</span>
+                      <span>{req.employmentType} ({req.postLevel})</span>
+                    </div>
+                  </div>
+
+                  <div className="col-span-2">
+                    <div className="font-semibold text-slate-900 text-xs">
+                      {req.creator?.name || 'Department Dean'}
+                    </div>
+                    <div className="text-slate-400 text-[11px] truncate">
+                      {req.creator?.email || ''}
+                    </div>
+                  </div>
+
+                  <div className="col-span-2 space-y-1">
+                    <span
+                      className={`inline-block px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border ${req.status === 'Approved by Dean Academic'
+                        ? 'bg-purple-50 text-purple-900 border-purple-200'
+                        : req.status === 'Returned for Clarification'
+                          ? 'bg-rose-50 text-rose-800 border-rose-200'
+                          : 'bg-amber-50 text-amber-900 border-amber-200'
+                        }`}
+                    >
+                      {req.status}
+                    </span>
+                    <div className="text-slate-600 font-bold text-xs">
+                      {req.numberOfPositions} Open Position{req.numberOfPositions > 1 ? 's' : ''}
+                    </div>
+                  </div>
+
+                  <div className="col-span-2 flex items-center justify-end space-x-2 w-full lg:w-auto">
+                    <button
+                      type="button"
+                      onClick={() => setTimelineReq(req)}
+                      className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition cursor-pointer"
+                    >
+                      Timeline
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setJobDetailsReq(req)}
+                      className="px-2.5 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-xs font-semibold transition cursor-pointer"
+                    >
+                      Details
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
