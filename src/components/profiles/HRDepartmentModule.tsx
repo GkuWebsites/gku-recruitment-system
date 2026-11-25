@@ -14,6 +14,8 @@ import {
   Clock,
   Search,
   Filter,
+  LayoutGrid,
+  List,
   AlertCircle,
   Plus,
   FileText,
@@ -70,6 +72,7 @@ export function HRDepartmentModule({
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDeptFilter, setSelectedDeptFilter] = useState<string>('all');
   const [selectedPostFilter, setSelectedPostFilter] = useState<string>('all');
+  const [approvedViewMode, setApprovedViewMode] = useState<'cards' | 'table'>('cards');
   const [openedFolders, setOpenedFolders] = useState<Record<string, boolean>>({});
 
   // Dynamic lists of unique departments and post titles for filters
@@ -1152,18 +1155,24 @@ export function HRDepartmentModule({
 
   return (
     <div className="space-y-6">
-      {/* 1. Clean Top Header Banner */}
+      {/* 1. Executive Top Header Banner */}
       <div className="bg-white border border-slate-200/90 rounded-2xl p-6 shadow-xs flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center space-x-4">
-          <div className="w-12 h-12 rounded-2xl bg-linear-to-br from-blue-600 to-indigo-800 flex items-center justify-center text-white shadow-xs">
+          <div className="w-13 h-13 rounded-2xl bg-gradient-to-br from-[#0f2d59] via-blue-700 to-indigo-800 flex items-center justify-center text-white shadow-md">
             <Users className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-slate-900 tracking-tight">
-              HR Talent Acquisition & Recruitment Pipeline
+            <div className="flex items-center space-x-2">
+              <span className="text-[10px] uppercase tracking-wider font-extrabold text-blue-700 bg-blue-50 border border-blue-200/80 px-2 py-0.5 rounded-md">
+                Central HR Directorate
+              </span>
+              <span className="text-[10px] text-slate-400 font-medium">• Guru Kashi University</span>
+            </div>
+            <h1 className="text-xl font-extrabold text-slate-900 tracking-tight mt-1">
+              HR Talent Acquisition &amp; Recruitment Pipeline
             </h1>
-            <p className="text-xs text-slate-500 mt-1 font-medium">
-              Stage-by-stage recruitment: Post to media &rarr; Intake resumes &rarr; Coordinate interviews & Score &rarr; Shortlist & Issue offers &rarr; Induction.
+            <p className="text-xs text-slate-500 mt-0.5 font-medium">
+              Stage-by-stage recruitment: Post to media &rarr; Intake resumes &rarr; Coordinate interviews &amp; Score &rarr; Shortlist &amp; Issue offers &rarr; Induction.
             </p>
           </div>
         </div>
@@ -1172,7 +1181,7 @@ export function HRDepartmentModule({
           <button
             type="button"
             onClick={onOpenNewModal}
-            className="inline-flex items-center space-x-2 bg-[#0f2d59] hover:bg-[#163f7a] text-white px-5 py-2.5 rounded-xl text-xs font-bold shadow-xs transition cursor-pointer"
+            className="inline-flex items-center space-x-2 bg-gradient-to-r from-[#0f2d59] to-[#1a4b8c] hover:from-[#163f7a] hover:to-[#225ca8] text-white px-5 py-2.5 rounded-xl text-xs font-bold shadow-md hover:shadow-lg transition cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>Create Requirement</span>
@@ -1188,18 +1197,18 @@ export function HRDepartmentModule({
             setActiveTab('approved');
             setSearchQuery('');
           }}
-          className={`bg-white border rounded-2xl p-4.5 transition cursor-pointer shadow-xs hover:shadow-md ${activeTab === 'approved'
-            ? 'border-blue-500 ring-2 ring-blue-100 bg-blue-50/20'
-            : 'border-slate-200 hover:border-slate-300'
+          className={`border rounded-2xl p-4.5 transition-all duration-200 cursor-pointer ${activeTab === 'approved'
+            ? 'bg-gradient-to-br from-blue-50/90 via-white to-white border-blue-500 ring-2 ring-blue-500/20 shadow-md -translate-y-0.5'
+            : 'bg-white border-slate-200/90 hover:border-blue-300 hover:shadow-sm'
             }`}
         >
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-blue-700 uppercase tracking-wider">Approved</span>
-            <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center shadow-2xs">
               <Megaphone className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-2xl font-extrabold text-slate-900 mt-2">{approvedForPosting.length}</div>
+          <div className="text-3xl font-black text-slate-900 mt-2">{approvedForPosting.length}</div>
           <div className="text-[11px] text-slate-500 mt-0.5 font-medium">Awaiting Media Posting</div>
         </div>
 
@@ -1209,18 +1218,18 @@ export function HRDepartmentModule({
             setActiveTab('posted');
             setSearchQuery('');
           }}
-          className={`bg-white border rounded-2xl p-4.5 transition cursor-pointer shadow-xs hover:shadow-md ${activeTab === 'posted'
-            ? 'border-indigo-500 ring-2 ring-indigo-100 bg-indigo-50/20'
-            : 'border-slate-200 hover:border-slate-300'
+          className={`border rounded-2xl p-4.5 transition-all duration-200 cursor-pointer ${activeTab === 'posted'
+            ? 'bg-gradient-to-br from-indigo-50/90 via-white to-white border-indigo-500 ring-2 ring-indigo-500/20 shadow-md -translate-y-0.5'
+            : 'bg-white border-slate-200/90 hover:border-indigo-300 hover:shadow-sm'
             }`}
         >
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-indigo-700 uppercase tracking-wider">Active Intake</span>
-            <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-700 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-700 flex items-center justify-center shadow-2xs">
               <Briefcase className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-2xl font-extrabold text-slate-900 mt-2">{activePostedJobs.length}</div>
+          <div className="text-3xl font-black text-slate-900 mt-2">{activePostedJobs.length}</div>
           <div className="text-[11px] text-slate-500 mt-0.5 font-medium">Live Portal &amp; Resumes</div>
         </div>
 
@@ -1230,18 +1239,18 @@ export function HRDepartmentModule({
             setActiveTab('interviews');
             setSearchQuery('');
           }}
-          className={`bg-white border rounded-2xl p-4.5 transition cursor-pointer shadow-xs hover:shadow-md ${activeTab === 'interviews'
-            ? 'border-amber-500 ring-2 ring-amber-100 bg-amber-50/20'
-            : 'border-slate-200 hover:border-slate-300'
+          className={`border rounded-2xl p-4.5 transition-all duration-200 cursor-pointer ${activeTab === 'interviews'
+            ? 'bg-gradient-to-br from-amber-50/90 via-white to-white border-amber-500 ring-2 ring-amber-500/20 shadow-md -translate-y-0.5'
+            : 'bg-white border-slate-200/90 hover:border-amber-300 hover:shadow-sm'
             }`}
         >
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-amber-700 uppercase tracking-wider">Interviews</span>
-            <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center shadow-2xs">
               <Calendar className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-2xl font-extrabold text-slate-900 mt-2">{totalInterviewCandidates}</div>
+          <div className="text-3xl font-black text-slate-900 mt-2">{totalInterviewCandidates}</div>
           <div className="text-[11px] text-slate-500 mt-0.5 font-medium">Panel Scoring &amp; Review</div>
         </div>
 
@@ -1251,18 +1260,18 @@ export function HRDepartmentModule({
             setActiveTab('offerLetters');
             setSearchQuery('');
           }}
-          className={`bg-white border rounded-2xl p-4.5 transition cursor-pointer shadow-xs hover:shadow-md ${activeTab === 'offerLetters'
-            ? 'border-emerald-500 ring-2 ring-emerald-100 bg-emerald-50/20'
-            : 'border-slate-200 hover:border-slate-300'
+          className={`border rounded-2xl p-4.5 transition-all duration-200 cursor-pointer ${activeTab === 'offerLetters'
+            ? 'bg-gradient-to-br from-emerald-50/90 via-white to-white border-emerald-500 ring-2 ring-emerald-500/20 shadow-md -translate-y-0.5'
+            : 'bg-white border-slate-200/90 hover:border-emerald-300 hover:shadow-sm'
             }`}
         >
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-emerald-700 uppercase tracking-wider">Shortlisted</span>
-            <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center shadow-2xs">
               <Award className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-2xl font-extrabold text-slate-900 mt-2">{totalShortlistedCandidates}</div>
+          <div className="text-3xl font-black text-slate-900 mt-2">{totalShortlistedCandidates}</div>
           <div className="text-[11px] text-slate-500 mt-0.5 font-medium">Offers &amp; Onboarding</div>
         </div>
 
@@ -1272,18 +1281,18 @@ export function HRDepartmentModule({
             setActiveTab('archive');
             setSearchQuery('');
           }}
-          className={`bg-white border rounded-2xl p-4.5 transition cursor-pointer shadow-xs hover:shadow-md ${activeTab === 'archive'
-            ? 'border-purple-500 ring-2 ring-purple-100 bg-purple-50/20'
-            : 'border-slate-200 hover:border-slate-300'
+          className={`border rounded-2xl p-4.5 transition-all duration-200 cursor-pointer ${activeTab === 'archive'
+            ? 'bg-gradient-to-br from-purple-50/90 via-white to-white border-purple-500 ring-2 ring-purple-500/20 shadow-md -translate-y-0.5'
+            : 'bg-white border-slate-200/90 hover:border-purple-300 hover:shadow-sm'
             }`}
         >
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-purple-700 uppercase tracking-wider">Archive</span>
-            <div className="w-8 h-8 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center shadow-2xs">
               <FolderCheck className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-2xl font-extrabold text-slate-900 mt-2">{archivedReqs.length}</div>
+          <div className="text-3xl font-black text-slate-900 mt-2">{archivedReqs.length}</div>
           <div className="text-[11px] text-slate-500 mt-0.5 font-medium">Fulfilled &amp; History</div>
         </div>
       </div>
@@ -1295,7 +1304,7 @@ export function HRDepartmentModule({
             <Check className="w-4 h-4 text-emerald-600 shrink-0" />
             <span>{statusMsg}</span>
           </div>
-          <button onClick={() => setStatusMsg('')} className="text-emerald-600 font-bold hover:text-emerald-800">
+          <button onClick={() => setStatusMsg('')} className="text-emerald-600 font-bold hover:text-emerald-800 cursor-pointer">
             ✕
           </button>
         </div>
@@ -1307,22 +1316,22 @@ export function HRDepartmentModule({
             <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
             <span>{errorMsg}</span>
           </div>
-          <button onClick={() => setErrorMsg('')} className="text-rose-600 font-bold hover:text-rose-800">
+          <button onClick={() => setErrorMsg('')} className="text-rose-600 font-bold hover:text-rose-800 cursor-pointer">
             ✕
           </button>
         </div>
       )}
 
-      {/* 5 Distinct Pipeline Tabs */}
-      <div className="flex flex-wrap items-center border-b border-slate-200 text-xs font-bold gap-1 sm:gap-2">
+      {/* 5 Distinct Pipeline Tabs - Modern Floating Segmented Control */}
+      <div className="bg-slate-100/90 p-1.5 rounded-2xl flex flex-wrap items-center gap-1.5 border border-slate-200/80 shadow-inner">
         <button
           onClick={() => {
             setActiveTab('approved');
             setSearchQuery('');
           }}
-          className={`py-3.5 px-4 border-b-2 transition flex items-center space-x-2 ${activeTab === 'approved'
-            ? 'border-blue-600 text-blue-900 font-extrabold'
-            : 'border-transparent text-slate-500 hover:text-slate-800'
+          className={`py-2 px-3.5 rounded-xl transition-all duration-150 flex items-center space-x-2 text-xs cursor-pointer ${activeTab === 'approved'
+            ? 'bg-white text-blue-950 font-extrabold shadow-sm border border-slate-200/80'
+            : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 font-medium'
             }`}
         >
           <CheckCircle2 className={`w-4 h-4 ${activeTab === 'approved' ? 'text-blue-600' : 'text-slate-400'}`} />
@@ -1334,9 +1343,9 @@ export function HRDepartmentModule({
             setActiveTab('posted');
             setSearchQuery('');
           }}
-          className={`py-3.5 px-4 border-b-2 transition flex items-center space-x-2 ${activeTab === 'posted'
-            ? 'border-indigo-600 text-indigo-900 font-extrabold'
-            : 'border-transparent text-slate-500 hover:text-slate-800'
+          className={`py-2 px-3.5 rounded-xl transition-all duration-150 flex items-center space-x-2 text-xs cursor-pointer ${activeTab === 'posted'
+            ? 'bg-white text-indigo-950 font-extrabold shadow-sm border border-slate-200/80'
+            : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 font-medium'
             }`}
         >
           <Megaphone className={`w-4 h-4 ${activeTab === 'posted' ? 'text-indigo-600' : 'text-slate-400'}`} />
@@ -1348,9 +1357,9 @@ export function HRDepartmentModule({
             setActiveTab('interviews');
             setSearchQuery('');
           }}
-          className={`py-3.5 px-4 border-b-2 transition flex items-center space-x-2 ${activeTab === 'interviews'
-            ? 'border-amber-600 text-amber-900 font-extrabold'
-            : 'border-transparent text-slate-500 hover:text-slate-800'
+          className={`py-2 px-3.5 rounded-xl transition-all duration-150 flex items-center space-x-2 text-xs cursor-pointer ${activeTab === 'interviews'
+            ? 'bg-white text-amber-950 font-extrabold shadow-sm border border-slate-200/80'
+            : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 font-medium'
             }`}
         >
           <Calendar className={`w-4 h-4 ${activeTab === 'interviews' ? 'text-amber-600' : 'text-slate-400'}`} />
@@ -1362,13 +1371,13 @@ export function HRDepartmentModule({
             setActiveTab('offerLetters');
             setSearchQuery('');
           }}
-          className={`py-3.5 px-4 border-b-2 transition flex items-center space-x-2 ${activeTab === 'offerLetters'
-            ? 'border-emerald-600 text-emerald-900 font-extrabold'
-            : 'border-transparent text-slate-500 hover:text-slate-800'
+          className={`py-2 px-3.5 rounded-xl transition-all duration-150 flex items-center space-x-2 text-xs cursor-pointer ${activeTab === 'offerLetters'
+            ? 'bg-white text-emerald-950 font-extrabold shadow-sm border border-slate-200/80'
+            : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 font-medium'
             }`}
         >
           <Award className={`w-4 h-4 ${activeTab === 'offerLetters' ? 'text-emerald-600' : 'text-slate-400'}`} />
-          <span>4. Shortlisted & Offer Letters ({totalShortlistedCandidates})</span>
+          <span>4. Shortlisted &amp; Offers ({totalShortlistedCandidates})</span>
         </button>
 
         <button
@@ -1376,12 +1385,12 @@ export function HRDepartmentModule({
             setActiveTab('pipeline');
             setSearchQuery('');
           }}
-          className={`py-3.5 px-4 border-b-2 transition flex items-center space-x-2 ${activeTab === 'pipeline'
-            ? 'border-slate-600 text-slate-900 font-extrabold'
-            : 'border-transparent text-slate-500 hover:text-slate-800'
+          className={`py-2 px-3.5 rounded-xl transition-all duration-150 flex items-center space-x-2 text-xs cursor-pointer ${activeTab === 'pipeline'
+            ? 'bg-white text-slate-900 font-extrabold shadow-sm border border-slate-200/80'
+            : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 font-medium'
             }`}
         >
-          <Clock className={`w-4 h-4 ${activeTab === 'pipeline' ? 'text-slate-600' : 'text-slate-400'}`} />
+          <Clock className={`w-4 h-4 ${activeTab === 'pipeline' ? 'text-slate-700' : 'text-slate-400'}`} />
           <span>5. Governance Pipeline ({pendingPipeline.length})</span>
         </button>
 
@@ -1390,9 +1399,9 @@ export function HRDepartmentModule({
             setActiveTab('archive');
             setSearchQuery('');
           }}
-          className={`py-3.5 px-4 border-b-2 transition flex items-center space-x-2 ${activeTab === 'archive'
-            ? 'border-purple-600 text-purple-900 font-extrabold'
-            : 'border-transparent text-slate-500 hover:text-slate-800'
+          className={`py-2 px-3.5 rounded-xl transition-all duration-150 flex items-center space-x-2 text-xs cursor-pointer ${activeTab === 'archive'
+            ? 'bg-white text-purple-950 font-extrabold shadow-sm border border-slate-200/80'
+            : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 font-medium'
             }`}
         >
           <FolderCheck className={`w-4 h-4 ${activeTab === 'archive' ? 'text-purple-600' : 'text-slate-400'}`} />
@@ -1404,8 +1413,9 @@ export function HRDepartmentModule({
       {/* TAB 1: APPROVED FOR HIRING (AWAITING MEDIA POSTING) */}
       {/* ============================================================== */}
       {activeTab === 'approved' && (
-        <div className="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
-          <div className="p-4 border-b border-slate-100 bg-slate-50/60 flex flex-wrap items-center justify-between gap-3">
+        <div className="space-y-4">
+          {/* Controls Bar with Search, Filters, and View Switcher */}
+          <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-xs flex flex-wrap items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-2.5 flex-1 min-w-[280px]">
               <div className="relative max-w-xs w-full">
                 <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
@@ -1414,7 +1424,7 @@ export function HRDepartmentModule({
                   placeholder="Search approved jobs..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium"
+                  className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50/70 hover:bg-white focus:bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium transition"
                 />
               </div>
 
@@ -1424,7 +1434,7 @@ export function HRDepartmentModule({
                 <select
                   value={selectedDeptFilter}
                   onChange={(e) => setSelectedDeptFilter(e.target.value)}
-                  className="text-xs bg-white border border-slate-200 rounded-xl px-3 py-2 font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer max-w-[190px] truncate"
+                  className="text-xs bg-slate-50/70 hover:bg-white focus:bg-white border border-slate-200 rounded-xl px-3 py-2 font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer max-w-[190px] truncate transition"
                   title="Filter by Department"
                 >
                   <option value="all">All Departments</option>
@@ -1438,7 +1448,7 @@ export function HRDepartmentModule({
               <select
                 value={selectedPostFilter}
                 onChange={(e) => setSelectedPostFilter(e.target.value)}
-                className="text-xs bg-white border border-slate-200 rounded-xl px-3 py-2 font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer max-w-[200px] truncate"
+                className="text-xs bg-slate-50/70 hover:bg-white focus:bg-white border border-slate-200 rounded-xl px-3 py-2 font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer max-w-[200px] truncate transition"
                 title="Filter by Post Title"
               >
                 <option value="all">All Post Titles</option>
@@ -1463,76 +1473,201 @@ export function HRDepartmentModule({
               )}
             </div>
 
-            <span className="text-[11px] text-blue-900 font-semibold bg-blue-50 border border-blue-200 px-3 py-1 rounded-full shrink-0">
-              Full clearance verified (Dean Academic & VC Sanctioned) &bull; Ready for Media Ad Posting
-            </span>
+            <div className="flex items-center space-x-3 shrink-0">
+              <span className="hidden xl:inline-flex text-[11px] text-blue-900 font-semibold bg-blue-50 border border-blue-200/80 px-3 py-1 rounded-full">
+                Full clearance verified (Dean Academic &amp; VC Sanctioned) &bull; Ready for Media Ad Posting
+              </span>
+
+              {/* View Mode Toggle: Cards vs Table */}
+              <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200/70">
+                <button
+                  type="button"
+                  onClick={() => setApprovedViewMode('cards')}
+                  title="Grid Cards View"
+                  className={`p-1.5 rounded-lg transition flex items-center space-x-1.5 text-xs cursor-pointer ${approvedViewMode === 'cards'
+                    ? 'bg-white text-blue-900 font-bold shadow-2xs'
+                    : 'text-slate-500 hover:text-slate-800'
+                    }`}
+                >
+                  <LayoutGrid className="w-3.5 h-3.5" />
+                  <span className="text-[11px]">Cards</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setApprovedViewMode('table')}
+                  title="List Table View"
+                  className={`p-1.5 rounded-lg transition flex items-center space-x-1.5 text-xs cursor-pointer ${approvedViewMode === 'table'
+                    ? 'bg-white text-blue-900 font-bold shadow-2xs'
+                    : 'text-slate-500 hover:text-slate-800'
+                    }`}
+                >
+                  <List className="w-3.5 h-3.5" />
+                  <span className="text-[11px]">Table</span>
+                </button>
+              </div>
+            </div>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50/90 text-slate-600 font-bold border-b border-slate-200">
-                <tr>
-                  <th className="py-3.5 px-6 whitespace-nowrap">Requisition ID</th>
-                  <th className="py-3.5 px-6">Department & Post Title</th>
-                  <th className="py-3.5 px-6 whitespace-nowrap">Positions & Budget</th>
-                  <th className="py-3.5 px-6 whitespace-nowrap">Governance Clearances</th>
-                  <th className="py-3.5 px-6 whitespace-nowrap">Media Ad Status</th>
-                  <th className="py-3.5 px-6 text-right whitespace-nowrap">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {displayedApproved.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} className="py-12 text-center text-slate-400">
-                      No approved jobs currently awaiting posting. Once VC sanctions a requisition, it appears here to post.
-                    </td>
-                  </tr>
-                ) : (
-                  displayedApproved.map((req) => (
-                    <tr key={req.requestId} className="hover:bg-slate-50/70 transition">
-                      <td className="py-4 px-6 font-mono font-bold text-blue-900 whitespace-nowrap">
-                        {req.requestId}
-                      </td>
-                      <td className="py-4 px-6">
-                        <div className="font-bold text-slate-900 text-sm">{req.postTitle}</div>
-                        <div className="text-slate-500 text-[11px] mt-0.5">
-                          {req.department} • {req.employmentType} ({req.postLevel})
-                        </div>
-                      </td>
-                      <td className="py-4 px-6 whitespace-nowrap">
-                        <div className="font-bold text-slate-800">{req.numberOfPositions} Position(s)</div>
-                        <div className="text-slate-500 text-[11px]">{req.tentativeBudget}</div>
-                      </td>
-                      <td className="py-4 px-6 whitespace-nowrap">
-                        <div className="flex items-center space-x-1.5 text-emerald-700 font-semibold text-[11px]">
-                          <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                          <span>Sanctioned by VC & Academic</span>
-                        </div>
-                      </td>
-                      <td className="py-4 px-6 whitespace-nowrap">
-                        <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap bg-amber-50 text-amber-900 border border-amber-200">
-                          Awaiting Media Posting
+          {/* View Mode 1: Modern Interactive Cards Grid */}
+          {approvedViewMode === 'cards' ? (
+            displayedApproved.length === 0 ? (
+              <div className="bg-white border border-slate-200/90 rounded-2xl p-12 text-center text-slate-400">
+                <Megaphone className="w-10 h-10 mx-auto text-slate-300 mb-2" />
+                <p className="font-semibold text-slate-600">No approved jobs currently awaiting media posting.</p>
+                <p className="text-xs text-slate-400 mt-1">Once VC sanctions a requisition, it appears here ready to publish to job boards.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4.5">
+                {displayedApproved.map((req) => (
+                  <div
+                    key={req.requestId}
+                    className="bg-white border border-slate-200/90 hover:border-blue-300 rounded-2xl p-5 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between group"
+                  >
+                    <div>
+                      {/* Card Top: Department & ID Badge */}
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-[11px] font-bold text-slate-700 bg-slate-100 px-2.5 py-1 rounded-lg truncate max-w-[190px]" title={req.department}>
+                          {req.department}
                         </span>
-                      </td>
-                      <td className="py-4 px-6 text-right whitespace-nowrap">
-                        <button
-                          onClick={() => {
-                            setPostingReq(req);
-                            setSelectedPlatforms(['LinkedIn Jobs', 'Naukri.com', 'University Careers Website']);
-                            setPostingRemarks('');
-                          }}
-                          className="inline-flex items-center space-x-1.5 px-3.5 py-1.5 bg-blue-700 hover:bg-blue-800 text-white rounded-lg text-xs font-bold shadow-xs transition"
-                        >
-                          <Megaphone className="w-3.5 h-3.5" />
-                          <span>Post Job to Media &rarr;</span>
-                        </button>
-                      </td>
+                        <span className="font-mono text-[11px] font-extrabold text-blue-900 bg-blue-50 border border-blue-200/80 px-2.5 py-0.5 rounded-md shrink-0">
+                          {req.requestId}
+                        </span>
+                      </div>
+
+                      {/* Card Title & Cadre */}
+                      <div className="mt-3">
+                        <h3 className="font-bold text-slate-900 text-sm group-hover:text-blue-900 transition line-clamp-2 leading-snug">
+                          {req.postTitle}
+                        </h3>
+                        <div className="text-slate-500 text-[11px] font-medium mt-1 flex items-center space-x-1.5">
+                          <span>{req.employmentType}</span>
+                          <span>&bull;</span>
+                          <span>{req.postLevel}</span>
+                        </div>
+                      </div>
+
+                      {/* Metrics Chips */}
+                      <div className="mt-4 grid grid-cols-2 gap-2">
+                        <div className="bg-slate-50/80 border border-slate-100 rounded-xl p-2.5">
+                          <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Positions</span>
+                          <span className="text-xs font-extrabold text-slate-800 mt-0.5 block">
+                            {req.numberOfPositions} Open Post{req.numberOfPositions > 1 ? 's' : ''}
+                          </span>
+                        </div>
+                        <div className="bg-slate-50/80 border border-slate-100 rounded-xl p-2.5">
+                          <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Sanctioned CTC</span>
+                          <span className="text-xs font-extrabold text-slate-800 mt-0.5 block truncate" title={req.tentativeBudget}>
+                            {req.tentativeBudget}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Clearance Badge */}
+                      <div className="mt-3.5 flex items-center space-x-1.5 text-emerald-800 bg-emerald-50/80 border border-emerald-200/70 px-2.5 py-1.5 rounded-xl text-[11px] font-semibold">
+                        <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                        <span className="truncate">Sanctioned by VC &amp; Academic Dean</span>
+                      </div>
+                    </div>
+
+                    {/* Card Action Button */}
+                    <div className="mt-4 pt-3.5 border-t border-slate-100 flex items-center justify-between gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setJobDetailsReq(req)}
+                        className="text-[11px] font-bold text-slate-600 hover:text-blue-700 py-2 px-2.5 rounded-lg hover:bg-slate-50 transition cursor-pointer"
+                      >
+                        Details
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setPostingReq(req);
+                          setSelectedPlatforms(['LinkedIn Jobs', 'Naukri.com', 'University Careers Website']);
+                          setPostingRemarks('');
+                        }}
+                        className="flex-1 inline-flex items-center justify-center space-x-1.5 px-4 py-2 bg-gradient-to-r from-blue-700 to-indigo-800 hover:from-blue-800 hover:to-indigo-900 text-white rounded-xl text-xs font-bold shadow-xs hover:shadow transition cursor-pointer"
+                      >
+                        <Megaphone className="w-3.5 h-3.5" />
+                        <span>Post Job to Media &rarr;</span>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )
+          ) : (
+            /* View Mode 2: Polished Modern Table View */
+            <div className="bg-white border border-slate-200/90 rounded-2xl shadow-xs overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-slate-50/90 text-slate-600 font-bold border-b border-slate-200/80">
+                    <tr>
+                      <th className="py-3.5 px-6 whitespace-nowrap">Requisition ID</th>
+                      <th className="py-3.5 px-6">Department &amp; Post Title</th>
+                      <th className="py-3.5 px-6 whitespace-nowrap">Positions &amp; Budget</th>
+                      <th className="py-3.5 px-6 whitespace-nowrap">Governance Clearances</th>
+                      <th className="py-3.5 px-6 whitespace-nowrap">Media Ad Status</th>
+                      <th className="py-3.5 px-6 text-right whitespace-nowrap">Action</th>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {displayedApproved.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="py-12 text-center text-slate-400">
+                          No approved jobs currently awaiting posting. Once VC sanctions a requisition, it appears here to post.
+                        </td>
+                      </tr>
+                    ) : (
+                      displayedApproved.map((req) => (
+                        <tr key={req.requestId} className="hover:bg-slate-50/70 transition">
+                          <td className="py-4 px-6 font-mono font-bold text-blue-900 whitespace-nowrap">
+                            <span className="bg-blue-50 border border-blue-200/80 px-2.5 py-1 rounded-md text-xs">
+                              {req.requestId}
+                            </span>
+                          </td>
+                          <td className="py-4 px-6">
+                            <div className="font-bold text-slate-900 text-sm">{req.postTitle}</div>
+                            <div className="text-slate-500 text-[11px] mt-0.5">
+                              {req.department} &bull; {req.employmentType} ({req.postLevel})
+                            </div>
+                          </td>
+                          <td className="py-4 px-6 whitespace-nowrap">
+                            <div className="font-bold text-slate-800">{req.numberOfPositions} Position(s)</div>
+                            <div className="text-slate-500 text-[11px]">{req.tentativeBudget}</div>
+                          </td>
+                          <td className="py-4 px-6 whitespace-nowrap">
+                            <div className="flex items-center space-x-1.5 text-emerald-700 font-semibold text-[11px]">
+                              <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                              <span>Sanctioned by VC &amp; Academic</span>
+                            </div>
+                          </td>
+                          <td className="py-4 px-6 whitespace-nowrap">
+                            <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap bg-amber-50 text-amber-900 border border-amber-200">
+                              Awaiting Media Posting
+                            </span>
+                          </td>
+                          <td className="py-4 px-6 text-right whitespace-nowrap">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setPostingReq(req);
+                                setSelectedPlatforms(['LinkedIn Jobs', 'Naukri.com', 'University Careers Website']);
+                                setPostingRemarks('');
+                              }}
+                              className="inline-flex items-center space-x-1.5 px-4 py-2 bg-gradient-to-r from-blue-700 to-indigo-800 hover:from-blue-800 hover:to-indigo-900 text-white rounded-xl text-xs font-bold shadow-xs transition cursor-pointer"
+                            >
+                              <Megaphone className="w-3.5 h-3.5" />
+                              <span>Post Job to Media &rarr;</span>
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
