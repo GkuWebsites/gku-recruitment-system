@@ -110,6 +110,30 @@ if ($action === 'setup_cron') {
     exit;
 }
 
+if ($action === 'run_backup') {
+    $backupScriptPath = "{$homeDir}/mongodb/backup.sh";
+    $backupDir = "{$homeDir}/mongodb/backups";
+    if (file_exists($backupScriptPath) && function_exists('shell_exec')) {
+        @shell_exec("bash " . escapeshellarg($backupScriptPath) . " 2>&1");
+    }
+    $backups = is_dir($backupDir) ? glob("{$backupDir}/*.tar.gz") : [];
+    $details = [];
+    foreach ($backups as $b) {
+        $details[] = [
+            'file' => basename($b),
+            'size_bytes' => filesize($b),
+            'date' => date('Y-m-d H:i:s', filemtime($b))
+        ];
+    }
+    echo json_encode([
+        'status' => 'success',
+        'backups_count' => count($details),
+        'backups' => $details,
+        'timestamp' => date('Y-m-d H:i:s')
+    ]);
+    exit;
+}
+
 if ($action === 'clean') {
     // Completely wipe old .next folder and tmp/restart.txt
     if (is_dir("{$appDir}/.next")) {
