@@ -8,6 +8,13 @@ export interface SmtpConfig {
   senderName?: string;
 }
 
+export interface OfferEmailAttachment {
+  filename: string;
+  content?: string | Buffer;
+  path?: string;
+  contentType?: string;
+}
+
 export interface OfferEmailPayload {
   candidateName: string;
   candidateEmail: string;
@@ -23,6 +30,7 @@ export interface OfferEmailPayload {
   senderEmail: string;
   replyTo?: string;
   ccList?: string[];
+  attachments?: OfferEmailAttachment[];
   smtpConfig: SmtpConfig;
 }
 
@@ -231,6 +239,10 @@ export async function sendOfferLetterEmail(payload: OfferEmailPayload): Promise<
 
     if (Array.isArray(payload.ccList) && payload.ccList.length > 0) {
       mailOptions.cc = payload.ccList.join(', ');
+    }
+
+    if (Array.isArray(payload.attachments) && payload.attachments.length > 0) {
+      mailOptions.attachments = payload.attachments;
     }
 
     const info = await transporter.sendMail(mailOptions);

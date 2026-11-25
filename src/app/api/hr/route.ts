@@ -355,6 +355,11 @@ export async function POST(req: NextRequest) {
         actorName,
         // Email Dispatch Parameters
         sendOfferEmail,
+        attachOfferLetterPdf,
+        pdfAttachmentBase64,
+        pdfAttachmentFileName,
+        letterMode,
+        uploadedOfferFileName,
         selectedDesk,
         senderEmail,
         senderName,
@@ -366,6 +371,14 @@ export async function POST(req: NextRequest) {
       const candidateIndex = request.candidates.findIndex((c) => c.id === candidateId);
       if (candidateIndex === -1) {
         return NextResponse.json({ success: false, error: 'Candidate not found' }, { status: 404 });
+      }
+
+      // Validate institutional email domain for custom sender
+      if (sendOfferEmail && senderEmail && !senderEmail.toLowerCase().endsWith('@gku.ac.in')) {
+        return NextResponse.json(
+          { success: false, error: 'Invalid sender domain. Only official institutional email addresses (@gku.ac.in) are permitted.' },
+          { status: 400 }
+        );
       }
 
       const candidate = request.candidates[candidateIndex];
@@ -383,17 +396,20 @@ export async function POST(req: NextRequest) {
       };
 
       const finalRef = offerLetterRef || `GKU/EST/OFFER/${new Date().getFullYear()}/${Math.floor(1000 + Math.random() * 9000)}`;
+      const finalLetterFile = letterMode === 'upload' && uploadedOfferFileName
+        ? uploadedOfferFileName
+        : (offerLetterFile || `Appointment_Offer_${candidate.fullName.replace(/\s+/g, '_')}_Formal.pdf`);
 
       // Execute Email Dispatch if requested
       let emailResult: { success: boolean; messageId?: string; error?: string } = { success: false };
-      let effectiveSenderEmail = senderEmail || '';
+      let effectiveSenderEmail = senderEmail || 'hr@gku.ac.in';
       let effectiveSenderName = senderName || actorName || 'Directorate of HR & Faculty Affairs';
 
       if (sendOfferEmail && candidate.email) {
         let smtpConfig: any = null;
 
-        if (selectedDesk === 'personal') {
-          // Look up user's configured personal mailbox
+        if (selectedDesk === 'custom' || selectedDesk === 'personal') {
+          // Look up user's configured personal mailbox or fallback to central
           const searchEmail = (currentUserEmail || senderEmail || '').toLowerCase().trim();
           const user = await UserProfileModel.findOne({ email: searchEmail });
           if (user && user.mailSettings && user.mailSettings.smtpPass) {
@@ -407,9 +423,11 @@ export async function POST(req: NextRequest) {
             effectiveSenderEmail = user.email;
             effectiveSenderName = user.mailSettings.senderName || user.name;
           }
-        } else {
-          // Look up central mail desks (hr or hrm)
-          const deskKey = selectedDesk === 'hrm' ? 'hrm' : 'hr';
+        }
+
+        // If no personal smtp found or using central desks, fall back to central HR/HRM
+        if (!smtpConfig) {
+          const deskKey = selectedDesk === 'central_hrm' ? 'hrm' : 'hr';
           const settings = await SystemSettingsModel.findOne({ key: 'global_settings' });
           if (settings && settings.centralMailDesks && settings.centralMailDesks[deskKey]?.smtpPass) {
             const desk = settings.centralMailDesks[deskKey];
@@ -420,9 +438,22 @@ export async function POST(req: NextRequest) {
               pass: desk.smtpPass,
               senderName: desk.deskName
             };
-            effectiveSenderEmail = desk.email;
-            effectiveSenderName = desk.deskName;
+            if (selectedDesk !== 'custom') {
+              effectiveSenderEmail = desk.email;
+              effectiveSenderName = desk.deskName;
+            }
           }
+        }
+
+        // Prepare email attachments if attachOfferLetterPdf is enabled
+        const attachments: any[] = [];
+        if (attachOfferLetterPdf && pdfAttachmentBase64) {
+          const cleanBase64 = pdfAttachmentBase64.replace(/^data:[^;]+;base64,/, '');
+          attachments.push({
+            filename: pdfAttachmentFileName || finalLetterFile,
+            content: Buffer.from(cleanBase64, 'base64'),
+            contentType: 'application/pdf'
+          });
         }
 
         if (smtpConfig && smtpConfig.pass) {
@@ -439,6 +470,7 @@ export async function POST(req: NextRequest) {
             senderEmail: effectiveSenderEmail,
             replyTo: replyToEmail || effectiveSenderEmail,
             ccList: Array.isArray(ccList) ? ccList : [],
+            attachments: attachments.length > 0 ? attachments : undefined,
             smtpConfig
           });
         }
@@ -453,7 +485,7 @@ export async function POST(req: NextRequest) {
         probationPeriod: probationPeriod || '1 Year',
         joiningDeadline: joiningDeadline || '2026-12-31',
         offerRemarks: offerRemarks || '',
-        offerLetterFile: offerLetterFile || 'Formal_Appointment_Offer.pdf',
+        offerLetterFile: finalLetterFile,
         signedOfferLetterCopy: signedOfferLetterCopy || '',
         documentVerification: prevDocs,
         inductionCompleted: false,
