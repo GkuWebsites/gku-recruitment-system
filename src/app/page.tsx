@@ -394,8 +394,21 @@ export default function HomePage() {
             requests={requests}
             onSelectRequest={(r) => setSelectedRequest(r)}
             onRefresh={fetchRequests}
+            onOpenNewModal={() => setIsNewModalOpen(true)}
           />
         </main>
+
+        <NewRequestModal
+          isOpen={isNewModalOpen}
+          onClose={() => setIsNewModalOpen(false)}
+          onSuccess={() => {
+            setIsNewModalOpen(false);
+            fetchRequests();
+          }}
+          creatorName={currentUser.name}
+          creatorEmail={currentUser.email}
+          userRole="HR Department"
+        />
 
         {selectedRequest && (
           <RequestDetailModal

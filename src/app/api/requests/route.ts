@@ -73,10 +73,24 @@ export async function POST(req: NextRequest) {
     await connectToDatabase();
     const body = await req.json();
 
-    // Auto-generate request ID
-    const count = await HiringRequestModel.countDocuments();
-    const year = new Date().getFullYear();
-    const requestId = `REQ-${year}-${String(count + 1).padStart(3, '0')}`;
+    // Auto-generate request ID following GKUJD0001 pattern
+    const existingGku = await HiringRequestModel.find({ requestId: /^GKUJD\d+/i }).select('requestId').lean();
+    let maxNum = 0;
+    for (const doc of existingGku) {
+      const match = doc.requestId.match(/^GKUJD(\d+)/i);
+      if (match) {
+        const num = parseInt(match[1], 10);
+        if (!isNaN(num) && num > maxNum) {
+          maxNum = num;
+        }
+      }
+    }
+    let nextNum = maxNum > 0 ? maxNum + 1 : 1;
+    let requestId = `GKUJD${String(nextNum).padStart(4, '0')}`;
+    while (await HiringRequestModel.exists({ requestId })) {
+      nextNum++;
+      requestId = `GKUJD${String(nextNum).padStart(4, '0')}`;
+    }
 
     const timestamp = new Date().toISOString();
 
@@ -87,6 +101,11 @@ export async function POST(req: NextRequest) {
     let vcRegistrarApproval: any = undefined;
     let auditAction = 'Requisition Created';
     let auditDetails = `Hiring requisition submitted for ${body.numberOfPositions} position(s) of ${body.postTitle}`;
+
+    const authorities: string[] = Array.isArray(body.authorities) && body.authorities.length > 0
+      ? body.authorities
+      : ['Vice-Chancellor (VC)', 'Registrar'];
+    const authorityStr = authorities.join(' & ');
 
     if (routing === 'direct_hr_order') {
       status = 'In Process (HR - Recruitment)';
@@ -99,23 +118,23 @@ export async function POST(req: NextRequest) {
       };
       vcRegistrarApproval = {
         decision: 'Approved',
-        remarks: 'Direct Institutional Requirement sanctioned under Executive Authority.',
+        remarks: 'Direct Recruitment requirement created & sanctioned under HR Directorate Authority (VC/Registrar approval bypassed).',
         decidedBy: body.creatorName || 'Director of HR & Recruitment',
         decidedAt: timestamp
       };
-      auditAction = 'Direct Executive Requisition Created';
-      auditDetails = `Direct requisition created & sanctioned under Executive Authority for ${body.numberOfPositions} position(s) of ${body.postTitle}. Ready for posting & candidate intake.`;
+      auditAction = 'Direct Recruitment Created';
+      auditDetails = `Direct requisition created & published under HR Directorate Authority without seeking VC/Registrar approval for ${body.numberOfPositions} position(s) of ${body.postTitle}. Active in pipeline.`;
     } else if (routing === 'route_vc') {
       status = 'Under Review (VC / Registrar)';
       currentStage = 3;
       deanAcademicApproval = {
         decision: 'Approved',
-        remarks: 'Forwarded directly by HR Directorate for VC / Registrar Executive Sanction.',
+        remarks: `Forwarded directly by HR Directorate for formal ${authorityStr} Executive Sanction.`,
         decidedBy: body.creatorName || 'Director of HR & Recruitment',
         decidedAt: timestamp
       };
-      auditAction = 'Requisition Created - Routed to VC / Registrar';
-      auditDetails = `Hiring requisition created by HR and forwarded directly to VC & Registrar for formal sanction.`;
+      auditAction = `Requisition Created - Routed to ${authorityStr}`;
+      auditDetails = `Hiring requisition created by HR Directorate and submitted for formal executive approval to: ${authorityStr}.`;
     }
 
     const creatorRole = body.creatorRole || (routing === 'direct_hr_order' || routing === 'route_vc' ? 'HR Department' : 'Department / Dean');

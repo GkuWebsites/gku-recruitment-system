@@ -57,9 +57,11 @@ export function NewRequestModal({
   const [justification, setJustification] = useState('');
   const [qualifications, setQualifications] = useState('');
   const [experience, setExperience] = useState('2 - 5 Years');
-  const [approvalRouting, setApprovalRouting] = useState<'direct_hr_order' | 'route_vc' | 'standard_academic'>(
-    isHR ? 'direct_hr_order' : 'standard_academic'
-  );
+  const [hrWorkflowMode, setHrWorkflowMode] = useState<'direct' | 'request_approval'>('direct');
+  const [targetAuthorities, setTargetAuthorities] = useState<{ vc: boolean; registrar: boolean }>({
+    vc: true,
+    registrar: true
+  });
   const [jobDescriptionFileName, setJobDescriptionFileName] = useState('');
   const [jobDescriptionFileSize, setJobDescriptionFileSize] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -155,6 +157,18 @@ export function NewRequestModal({
         ? postTitle.trim()
         : `${designationLevel} (${postTitle.trim()})`;
 
+      const authoritiesList: string[] = [];
+      if (isHR && hrWorkflowMode === 'request_approval') {
+        if (targetAuthorities.vc) authoritiesList.push('Vice-Chancellor (VC)');
+        if (targetAuthorities.registrar) authoritiesList.push('Registrar');
+      }
+
+      const effectiveRouting = isHR
+        ? hrWorkflowMode === 'direct'
+          ? 'direct_hr_order'
+          : 'route_vc'
+        : 'standard_academic';
+
       const res = await fetch('/api/requests', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -170,14 +184,15 @@ export function NewRequestModal({
           requiredQualifications: qualifications.trim(),
           experienceRequired: experience.trim(),
           jobDescriptionFile: jobDescriptionFileName || undefined,
-          approvalRouting,
+          approvalRouting: effectiveRouting,
+          authorities: authoritiesList,
           creatorName: defaultCreatorName,
           creatorEmail: defaultCreatorEmail,
           creatorRole: isHR ? 'HR Department' : 'Department / Dean',
           initialComment: isHR
-            ? approvalRouting === 'direct_hr_order'
-              ? 'Sanctioned under Executive Direct Order by HR Directorate.'
-              : 'Direct institutional requirement raised by HR Directorate.'
+            ? hrWorkflowMode === 'direct'
+              ? 'Sanctioned under Direct Recruitment Protocol by HR Directorate (Self-Sanctioned).'
+              : `Created by HR Directorate and submitted for executive approval to ${authoritiesList.join(' & ')}.`
             : 'Submitted by Department Dean for Academic Workload Scrutiny.'
         })
       });
@@ -196,17 +211,23 @@ export function NewRequestModal({
     }
   };
 
-  let submitBtnLabel = 'Submit to Dean Academic';
-  let routingSubtext = 'Dispatched directly to Dean Academic desk.';
-  if (approvalRouting === 'direct_hr_order') {
-    submitBtnLabel = isSubmitting ? 'Creating Requisition...' : 'Create & Direct Sanction';
-    routingSubtext = 'Immediate executive sanction: skips approvals and initiates recruitment immediately.';
-  } else if (approvalRouting === 'route_vc') {
-    submitBtnLabel = isSubmitting ? 'Submitting to VC...' : 'Submit to VC / Registrar';
-    routingSubtext = 'Dispatched directly to Vice Chancellor & Registrar executive desk.';
-  } else {
-    submitBtnLabel = isSubmitting ? 'Submitting...' : 'Submit for Academic Review';
-    routingSubtext = 'Dispatched to Dean Academic for workload & compliance review.';
+  const authoritiesList: string[] = [];
+  if (isHR && hrWorkflowMode === 'request_approval') {
+    if (targetAuthorities.vc) authoritiesList.push('VC');
+    if (targetAuthorities.registrar) authoritiesList.push('Registrar');
+  }
+
+  let submitBtnLabel = 'Submit for Academic Review';
+  let routingSubtext = 'Dispatched to Dean Academic for workload & compliance review.';
+  if (isHR) {
+    if (hrWorkflowMode === 'direct') {
+      submitBtnLabel = isSubmitting ? 'Publishing Direct Job...' : 'Direct Publish Job Requirement';
+      routingSubtext = '⚡ Direct Recruitment: No approval required. Immediately active in HR Recruitment Pipeline.';
+    } else {
+      const authLabel = authoritiesList.join(' & ') || 'VC / Registrar';
+      submitBtnLabel = isSubmitting ? 'Submitting for Sanction...' : `Request Approval from ${authLabel}`;
+      routingSubtext = `🏛️ Dispatched to ${authLabel} desk for executive approval before posting.`;
+    }
   }
 
   return (
@@ -219,9 +240,14 @@ export function NewRequestModal({
               <Building2 className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-slate-900 leading-tight">
-                {isHR ? 'Create Hiring Requirement & Requisition' : 'New Faculty Requisition'}
-              </h2>
+              <div className="flex items-center space-x-2">
+                <h2 className="text-base font-bold text-slate-900 leading-tight">
+                  {isHR ? 'Create Job Requirement & Requisition' : 'New Faculty Requisition'}
+                </h2>
+                <span className="text-[10px] font-mono font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+                  Pattern: GKUJD0001
+                </span>
+              </div>
               <p className="text-xs text-slate-500 mt-0.5">
                 {isHR ? 'Directorate of HR & Faculty Affairs' : 'Department Dean Requisition Desk'}
               </p>
@@ -245,120 +271,135 @@ export function NewRequestModal({
 
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="p-6 flex-1 overflow-y-auto space-y-4 text-xs">
-          {/* Section 0: Approval Routing & Executive Sanction (For HR or when configurable) */}
-          <div className="bg-white p-4 rounded-xl border border-slate-200 space-y-2.5">
-            <div className="border-b border-slate-100 pb-2 flex items-center justify-between">
-              <span className="font-bold text-slate-800 uppercase tracking-wider text-[11px] flex items-center space-x-1.5">
-                <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
-                <span>Approval Workflow &amp; Sanction Authority</span>
-              </span>
-              <span className="text-[10px] text-slate-400 font-semibold">Select routing option</span>
+          {/* Section 0: Approval Routing & Executive Sanction */}
+          {isHR ? (
+            <div className="bg-slate-50/80 p-4 rounded-xl border border-slate-200 space-y-3">
+              <div className="border-b border-slate-200/60 pb-2 flex items-center justify-between">
+                <span className="font-bold text-slate-800 uppercase tracking-wider text-[11px] flex items-center space-x-1.5">
+                  <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                  <span>HR Recruitment Approval Workflow</span>
+                </span>
+                <span className="text-[10px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full">
+                  HR Directorate Mode
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* Option 1: Direct Recruitment (No Approval Required) */}
+                <div
+                  onClick={() => setHrWorkflowMode('direct')}
+                  className={`p-3.5 rounded-xl border cursor-pointer transition select-none flex flex-col justify-between ${
+                    hrWorkflowMode === 'direct'
+                      ? 'bg-emerald-50/90 border-emerald-500 ring-2 ring-emerald-500/20'
+                      : 'bg-white border-slate-200 hover:border-slate-300'
+                  }`}
+                >
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="font-bold text-slate-900 text-xs flex items-center space-x-1.5">
+                        <Zap className="w-4 h-4 text-emerald-600 fill-emerald-600" />
+                        <span>Direct Recruitment</span>
+                      </span>
+                      <input
+                        type="radio"
+                        name="hrWorkflow"
+                        checked={hrWorkflowMode === 'direct'}
+                        onChange={() => setHrWorkflowMode('direct')}
+                        className="text-emerald-600 cursor-pointer"
+                      />
+                    </div>
+                    <p className="text-[11px] text-slate-600 leading-relaxed mt-1">
+                      Directly create and publish this requirement without seeking approval. Bypasses VC / Registrar review and moves straight to HR Active Pipeline for posting.
+                    </p>
+                  </div>
+                  <div className="mt-3 pt-2 border-t border-slate-200/60 flex items-center justify-between">
+                    <span className="text-[10px] font-bold text-emerald-800 bg-emerald-100/80 px-2 py-0.5 rounded border border-emerald-300">
+                      ✓ No Approval Required
+                    </span>
+                    <span className="text-[10px] text-slate-500 font-semibold">Immediate Active</span>
+                  </div>
+                </div>
+
+                {/* Option 2: Request Approval (Configurable Authority) */}
+                <div
+                  onClick={() => setHrWorkflowMode('request_approval')}
+                  className={`p-3.5 rounded-xl border cursor-pointer transition select-none flex flex-col justify-between ${
+                    hrWorkflowMode === 'request_approval'
+                      ? 'bg-purple-50/90 border-purple-500 ring-2 ring-purple-500/20'
+                      : 'bg-white border-slate-200 hover:border-slate-300'
+                  }`}
+                >
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="font-bold text-slate-900 text-xs flex items-center space-x-1.5">
+                        <Building2 className="w-4 h-4 text-purple-600" />
+                        <span>Request Approval</span>
+                      </span>
+                      <input
+                        type="radio"
+                        name="hrWorkflow"
+                        checked={hrWorkflowMode === 'request_approval'}
+                        onChange={() => setHrWorkflowMode('request_approval')}
+                        className="text-purple-600 cursor-pointer"
+                      />
+                    </div>
+                    <p className="text-[11px] text-slate-600 leading-relaxed mt-1">
+                      Request formal approval from university leadership before proceeding with recruitment. Select authority:
+                    </p>
+                  </div>
+
+                  {/* Authority Checkboxes */}
+                  <div className="mt-2.5 pt-2 border-t border-slate-200/60 space-y-1.5">
+                    <div className="text-[10px] font-bold text-slate-600 uppercase tracking-wide">
+                      Select Approval Authority:
+                    </div>
+                    <div className="flex items-center space-x-4">
+                      <label
+                        onClick={(e) => e.stopPropagation()}
+                        className="flex items-center space-x-1.5 text-xs font-semibold text-slate-800 cursor-pointer"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={targetAuthorities.vc}
+                          onChange={(e) => {
+                            setTargetAuthorities((prev) => ({
+                              ...prev,
+                              vc: e.target.checked || !prev.registrar
+                            }));
+                          }}
+                          className="rounded border-slate-300 text-purple-600 focus:ring-purple-500 cursor-pointer w-4 h-4"
+                        />
+                        <span>Vice-Chancellor (VC)</span>
+                      </label>
+
+                      <label
+                        onClick={(e) => e.stopPropagation()}
+                        className="flex items-center space-x-1.5 text-xs font-semibold text-slate-800 cursor-pointer"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={targetAuthorities.registrar}
+                          onChange={(e) => {
+                            setTargetAuthorities((prev) => ({
+                              ...prev,
+                              registrar: e.target.checked || !prev.vc
+                            }));
+                          }}
+                          className="rounded border-slate-300 text-purple-600 focus:ring-purple-500 cursor-pointer w-4 h-4"
+                        />
+                        <span>Registrar</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-              {/* Option 1: Direct HR Order */}
-              <label
-                onClick={() => setApprovalRouting('direct_hr_order')}
-                className={`p-3 rounded-xl border cursor-pointer select-none transition flex flex-col justify-between ${
-                  approvalRouting === 'direct_hr_order'
-                    ? 'bg-blue-50/70 border-blue-400 ring-2 ring-blue-500/20'
-                    : 'bg-slate-50 border-slate-200 hover:border-slate-300'
-                }`}
-              >
-                <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="font-bold text-slate-900 text-xs flex items-center space-x-1">
-                      <Zap className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-                      <span>Direct HR Order</span>
-                    </span>
-                    <input
-                      type="radio"
-                      name="approvalRouting"
-                      checked={approvalRouting === 'direct_hr_order'}
-                      onChange={() => setApprovalRouting('direct_hr_order')}
-                      className="text-blue-600 cursor-pointer"
-                    />
-                  </div>
-                  <p className="text-[10px] text-slate-500 leading-relaxed">
-                    Direct executive order. Sanctioned immediately; HR can post jobs and intake candidates right away.
-                  </p>
-                </div>
-                <div className="mt-2 pt-2 border-t border-slate-200/60">
-                  <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                    Direct Approved (Stage 4)
-                  </span>
-                </div>
-              </label>
-
-              {/* Option 2: Route to VC / Registrar */}
-              <label
-                onClick={() => setApprovalRouting('route_vc')}
-                className={`p-3 rounded-xl border cursor-pointer select-none transition flex flex-col justify-between ${
-                  approvalRouting === 'route_vc'
-                    ? 'bg-purple-50/70 border-purple-400 ring-2 ring-purple-500/20'
-                    : 'bg-slate-50 border-slate-200 hover:border-slate-300'
-                }`}
-              >
-                <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="font-bold text-slate-900 text-xs flex items-center space-x-1">
-                      <Building2 className="w-3.5 h-3.5 text-purple-600" />
-                      <span>Route to VC / Reg.</span>
-                    </span>
-                    <input
-                      type="radio"
-                      name="approvalRouting"
-                      checked={approvalRouting === 'route_vc'}
-                      onChange={() => setApprovalRouting('route_vc')}
-                      className="text-purple-600 cursor-pointer"
-                    />
-                  </div>
-                  <p className="text-[10px] text-slate-500 leading-relaxed">
-                    Bypasses academic review and sends directly to VC &amp; Registrar desk for formal sanction.
-                  </p>
-                </div>
-                <div className="mt-2 pt-2 border-t border-slate-200/60">
-                  <span className="text-[10px] font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200">
-                    Pending VC Sanction (Stage 3)
-                  </span>
-                </div>
-              </label>
-
-              {/* Option 3: Standard Academic Workflow */}
-              <label
-                onClick={() => setApprovalRouting('standard_academic')}
-                className={`p-3 rounded-xl border cursor-pointer select-none transition flex flex-col justify-between ${
-                  approvalRouting === 'standard_academic'
-                    ? 'bg-slate-100 border-slate-400 ring-2 ring-slate-400/20'
-                    : 'bg-slate-50 border-slate-200 hover:border-slate-300'
-                }`}
-              >
-                <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="font-bold text-slate-900 text-xs flex items-center space-x-1">
-                      <GraduationCap className="w-3.5 h-3.5 text-slate-600" />
-                      <span>Academic Review</span>
-                    </span>
-                    <input
-                      type="radio"
-                      name="approvalRouting"
-                      checked={approvalRouting === 'standard_academic'}
-                      onChange={() => setApprovalRouting('standard_academic')}
-                      className="text-slate-600 cursor-pointer"
-                    />
-                  </div>
-                  <p className="text-[10px] text-slate-500 leading-relaxed">
-                    Standard route to Dean Academic for workload &amp; ratio review before reaching VC.
-                  </p>
-                </div>
-                <div className="mt-2 pt-2 border-t border-slate-200/60">
-                  <span className="text-[10px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
-                    Dean Academic (Stage 1)
-                  </span>
-                </div>
-              </label>
+          ) : (
+            <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl text-xs text-blue-900 flex items-center space-x-2">
+              <GraduationCap className="w-4 h-4 text-blue-600 shrink-0" />
+              <span>Standard Academic Workflow: Requisition will be submitted to Dean Academic for workload &amp; ratio scrutiny before reaching the VC/Registrar desk.</span>
             </div>
-          </div>
+          )}
 
           {/* Card 1: Cadre & Position Overview */}
           <div className="bg-slate-50/70 p-4 rounded-xl border border-slate-200/80 space-y-3">

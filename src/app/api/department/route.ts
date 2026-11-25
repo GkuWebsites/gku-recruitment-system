@@ -71,9 +71,24 @@ export async function POST(req: NextRequest) {
     }
 
     // Action 2: Raise new requisition by Dean / Director / HOD
-    const count = await HiringRequestModel.countDocuments();
-    const year = new Date().getFullYear();
-    const requestId = `REQ-${year}-${String(count + 1).padStart(3, '0')}`;
+    // Auto-generate request ID following GKUJD0001 pattern
+    const existingGku = await HiringRequestModel.find({ requestId: /^GKUJD\d+/i }).select('requestId').lean();
+    let maxNum = 0;
+    for (const doc of existingGku) {
+      const match = doc.requestId.match(/^GKUJD(\d+)/i);
+      if (match) {
+        const num = parseInt(match[1], 10);
+        if (!isNaN(num) && num > maxNum) {
+          maxNum = num;
+        }
+      }
+    }
+    let nextNum = maxNum > 0 ? maxNum + 1 : 1;
+    let requestId = `GKUJD${String(nextNum).padStart(4, '0')}`;
+    while (await HiringRequestModel.exists({ requestId })) {
+      nextNum++;
+      requestId = `GKUJD${String(nextNum).padStart(4, '0')}`;
+    }
     const timestamp = new Date().toISOString();
 
     const newRequest = new HiringRequestModel({
