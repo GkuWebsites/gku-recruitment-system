@@ -26,7 +26,8 @@ import {
   RotateCcw,
   Paperclip,
   CheckCircle2,
-  FileCheck
+  FileCheck,
+  Plus
 } from 'lucide-react';
 
 interface OfferLetterWorkbenchProps {
@@ -91,6 +92,23 @@ export function OfferLetterWorkbench({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Editable Letter Content Sections
+  const [letterOfficeTitle, setLetterOfficeTitle] = useState(
+    'OFFICE OF THE REGISTRAR • DIRECTORATE OF HUMAN RESOURCES & FACULTY AFFAIRS'
+  );
+  const [letterUniversitySub, setLetterUniversitySub] = useState(
+    'Sardulgarh Road, Talwandi Sabo, Bathinda, Punjab - 151302, India'
+  );
+  const [letterDate, setLetterDate] = useState(
+    new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })
+  );
+  const [letterRecipientPrefix, setLetterRecipientPrefix] = useState('To,');
+  const [letterRecipientName, setLetterRecipientName] = useState(candidate.fullName);
+  const [letterRecipientAffiliation, setLetterRecipientAffiliation] = useState(
+    candidate.currentAffiliation || ''
+  );
+  const [letterRecipientContact, setLetterRecipientContact] = useState(
+    `Email: ${candidate.email} | Mobile: ${candidate.phone}`
+  );
   const [letterSubject, setLetterSubject] = useState(
     `Subject: Formal Offer of Appointment for the Post of ${request.postTitle} in the Department of ${request.department}.`
   );
@@ -125,8 +143,99 @@ export function OfferLetterWorkbench({
   const [letterSignatoryName, setLetterSignatoryName] = useState('Registrar / Authorized Officer');
   const [letterSignatoryTitle, setLetterSignatoryTitle] = useState('Guru Kashi University, Talwandi Sabo');
 
+  // Deletion and Custom Clause Management
+  const [deletedSections, setDeletedSections] = useState<string[]>([]);
+  const isDeleted = (key: string) => deletedSections.includes(key);
+
+  const deleteSection = (key: string) => {
+    setDeletedSections((prev) => (prev.includes(key) ? prev : [...prev, key]));
+    setStatusMessage('Section removed from offer letter.');
+    setTimeout(() => setStatusMessage(''), 2000);
+  };
+
+  const restoreSection = (key: string) => {
+    setDeletedSections((prev) => prev.filter((k) => k !== key));
+    setStatusMessage('Section restored.');
+    setTimeout(() => setStatusMessage(''), 2000);
+  };
+
+  const restoreAllSections = () => {
+    setDeletedSections([]);
+    setStatusMessage('All sections restored.');
+    setTimeout(() => setStatusMessage(''), 2000);
+  };
+
+  interface CustomClause {
+    id: string;
+    title: string;
+    content: string;
+  }
+  const [customClauses, setCustomClauses] = useState<CustomClause[]>([]);
+
+  const handleAddCustomClause = () => {
+    const newId = `clause_${Date.now()}`;
+    const nextNum = 7 + customClauses.length;
+    setCustomClauses((prev) => [
+      ...prev,
+      {
+        id: newId,
+        title: `${nextNum}. Special Condition / Covenant`,
+        content: 'Specify any relocation, research grant, accommodation, or special departmental terms here.'
+      }
+    ]);
+    setStatusMessage('New clause added. You can edit its title and text directly.');
+    setTimeout(() => setStatusMessage(''), 2500);
+  };
+
+  const handleUpdateCustomClause = (id: string, field: 'title' | 'content', value: string) => {
+    setCustomClauses((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, [field]: value } : c))
+    );
+  };
+
+  const handleDeleteCustomClause = (id: string) => {
+    setCustomClauses((prev) => prev.filter((c) => c.id !== id));
+    setStatusMessage('Clause deleted.');
+    setTimeout(() => setStatusMessage(''), 2000);
+  };
+
+  // Section labels for easy restoration
+  const sectionLabels: Record<string, string> = {
+    topRecipient: 'Recipient Details',
+    subject: 'Subject Line',
+    salutation: 'Salutation',
+    intro: 'Preamble / Selection Comm. Intro',
+    pay: '1. Scale of Pay & Emoluments',
+    probation: '2. Probation & Confirmation',
+    posting: '3. Place of Posting',
+    conduct: '4. Service Conditions & Conduct',
+    special: '5. Special Terms & Prerequisites',
+    acceptance: '6. Acceptance & Joining Deadline',
+    copyTo: 'Copy Forwarded To List'
+  };
+
+  // Save and Exit Inline Edit Mode ("blow button to update of save")
+  const handleSaveAndExitEditMode = () => {
+    setIsEditMode(false);
+    setDraftSaved(true);
+    setStatusMessage('✓ Offer Letter updated & saved successfully!');
+    setTimeout(() => {
+      setDraftSaved(false);
+      setStatusMessage('');
+    }, 3000);
+  };
+
   // Reset to default template
   const handleResetTemplate = () => {
+    setDeletedSections([]);
+    setCustomClauses([]);
+    setLetterOfficeTitle('OFFICE OF THE REGISTRAR • DIRECTORATE OF HUMAN RESOURCES & FACULTY AFFAIRS');
+    setLetterUniversitySub('Sardulgarh Road, Talwandi Sabo, Bathinda, Punjab - 151302, India');
+    setLetterDate(new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' }));
+    setLetterRecipientPrefix('To,');
+    setLetterRecipientName(candidate.fullName);
+    setLetterRecipientAffiliation(candidate.currentAffiliation || '');
+    setLetterRecipientContact(`Email: ${candidate.email} | Mobile: ${candidate.phone}`);
     setLetterSubject(`Subject: Formal Offer of Appointment for the Post of ${designation} in the Department of ${department}.`);
     setLetterSalutation(`Dear ${candidate.fullName},`);
     setLetterIntro(`On the recommendations of the Statutory Selection Committee and subsequent administrative sanction accorded by the Competent Authority (Vice-Chancellor) under the provisions of the Guru Kashi University Act & Statutes, we have the pleasure in offering you the appointment to the substantive post of ${designation} in the ${department} at Guru Kashi University.`);
@@ -136,6 +245,9 @@ export function OfferLetterWorkbench({
     setLetterClauseConduct(`Your employment will be governed by the Guru Kashi University Act, Statutes, Ordinances, and UGC Regulations. You will be required to devote your full time to teaching, curriculum development, research publications in Scopus/WoS indexed journals, student mentoring, and statutory accreditation duties.`);
     setLetterClauseSpecial('Appointment is subject to submission of original educational certificates, relieving certificate from the previous employer, character verification, and medical fitness. Faculty is expected to engage in teaching, high-impact research publications, and NAAC/UGC regulatory accreditations.');
     setLetterClauseAcceptance(`Please signify your formal acceptance of this offer by signing and returning the duplicate copy within the deadline of ${new Date(joiningDeadline).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })}. You are expected to assume duties on or before ${new Date(expectedJoiningDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })}.`);
+    setLetterCopyTo('1. Secretary to the Vice-Chancellor for kind appraisal of VC\n2. Dean Academic Affairs & Director IQAC\n3. Finance Officer / Accounts Branch\n4. Personal File of the Candidate');
+    setLetterSignatoryName('Registrar / Authorized Officer');
+    setLetterSignatoryTitle('Guru Kashi University, Talwandi Sabo');
     setStatusMessage('Template reset to university standard format.');
     setTimeout(() => setStatusMessage(''), 2500);
   };
@@ -813,201 +925,516 @@ export function OfferLetterWorkbench({
                 <div className="text-[11px] text-slate-700 font-medium space-y-0.5">
                   <p>(Established by Punjab Act No. 37 of 2011 &amp; Recognised by UGC under Section 2(f) of the UGC Act 1956)</p>
                   <p className="font-bold text-slate-900">NAAC Grade &ldquo;A++&rdquo; Accredited University &bull; Member of AIU</p>
-                  <p className="text-slate-600">Sardulgarh Road, Talwandi Sabo, Bathinda, Punjab - 151302, India</p>
+                  {isEditMode ? (
+                    <div className="flex items-center justify-center space-x-1.5 mt-1">
+                      <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wide">Campus Address:</span>
+                      <input
+                        type="text"
+                        value={letterUniversitySub}
+                        onChange={(e) => setLetterUniversitySub(e.target.value)}
+                        className="w-full max-w-md text-center text-[11px] p-1 bg-amber-50/70 border border-amber-300 rounded font-normal text-slate-800 outline-none"
+                      />
+                    </div>
+                  ) : (
+                    <p className="text-slate-600">{letterUniversitySub}</p>
+                  )}
                 </div>
                 <div className="pt-1.5 text-xs font-bold text-slate-800 tracking-wider uppercase border-t border-slate-200 mt-2">
-                  OFFICE OF THE REGISTRAR &bull; DIRECTORATE OF HUMAN RESOURCES &amp; FACULTY AFFAIRS
+                  {isEditMode ? (
+                    <div className="flex items-center justify-center space-x-1.5">
+                      <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wide">Directorate / Office:</span>
+                      <input
+                        type="text"
+                        value={letterOfficeTitle}
+                        onChange={(e) => setLetterOfficeTitle(e.target.value)}
+                        className="w-full max-w-lg text-center font-bold text-xs p-1 bg-amber-50/70 border border-amber-300 rounded text-slate-900 outline-none"
+                      />
+                    </div>
+                  ) : (
+                    letterOfficeTitle
+                  )}
                 </div>
               </div>
 
               {/* Ref No & Date */}
               <div className="flex justify-between items-center text-xs font-semibold text-slate-800 pt-1">
-                <div>
-                  <span className="font-bold">Ref. No.: </span>
-                  <span className="font-mono font-bold text-slate-900">{offerLetterRef}</span>
+                <div className="flex items-center space-x-1">
+                  <span className="font-bold text-slate-900">Ref. No.: </span>
+                  {isEditMode ? (
+                    <input
+                      type="text"
+                      value={offerLetterRef}
+                      onChange={(e) => setOfferLetterRef(e.target.value)}
+                      className="font-mono font-bold text-xs p-1 bg-amber-50/70 border border-amber-300 rounded text-slate-900 w-56 outline-none"
+                    />
+                  ) : (
+                    <span className="font-mono font-bold text-slate-900">{offerLetterRef}</span>
+                  )}
                 </div>
-                <div>
-                  <span className="font-bold">Date: </span>
-                  <span>{todayFormatted}</span>
+                <div className="flex items-center space-x-1">
+                  <span className="font-bold text-slate-900">Date: </span>
+                  {isEditMode ? (
+                    <input
+                      type="text"
+                      value={letterDate}
+                      onChange={(e) => setLetterDate(e.target.value)}
+                      className="font-bold text-xs p-1 bg-amber-50/70 border border-amber-300 rounded text-slate-900 w-40 text-right outline-none"
+                    />
+                  ) : (
+                    <span>{letterDate}</span>
+                  )}
                 </div>
               </div>
 
               {/* Recipient Block */}
-              <div className="text-xs space-y-0.5 text-slate-800 pt-1">
-                <div className="font-bold text-slate-950 text-sm">To,</div>
-                <div className="font-bold text-slate-900 text-sm">{candidate.fullName}</div>
-                {candidate.currentAffiliation && <div>{candidate.currentAffiliation}</div>}
-                <div>Email: {candidate.email} | Mobile: {candidate.phone}</div>
-              </div>
+              {!isDeleted('topRecipient') && (
+                <div className="text-xs space-y-1 text-slate-800 pt-1">
+                  {isEditMode ? (
+                    <div className="space-y-1.5 bg-amber-50/60 p-2.5 border border-amber-300 rounded-xl">
+                      <div className="flex items-center justify-between pb-1 border-b border-amber-200">
+                        <span className="text-[11px] font-bold text-amber-900 uppercase tracking-wide">Candidate / Recipient Header</span>
+                        <button
+                          type="button"
+                          onClick={() => deleteSection('topRecipient')}
+                          className="text-[10px] font-bold text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-2 py-0.5 rounded flex items-center space-x-1 cursor-pointer"
+                          title="Delete this section"
+                        >
+                          <Trash2 className="w-2.5 h-2.5" />
+                          <span>Delete Section</span>
+                        </button>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-xs">
+                        <div>
+                          <label className="text-[10px] text-slate-500 font-bold block">Salutation Line</label>
+                          <input
+                            type="text"
+                            value={letterRecipientPrefix}
+                            onChange={(e) => setLetterRecipientPrefix(e.target.value)}
+                            className="p-1 bg-white border border-amber-300 rounded w-full font-bold text-xs outline-none"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-[10px] text-slate-500 font-bold block">Candidate Full Name</label>
+                          <input
+                            type="text"
+                            value={letterRecipientName}
+                            onChange={(e) => setLetterRecipientName(e.target.value)}
+                            className="p-1 bg-white border border-amber-300 rounded w-full font-bold text-xs outline-none"
+                          />
+                        </div>
+                        <div className="sm:col-span-2">
+                          <label className="text-[10px] text-slate-500 font-bold block">Affiliation / Address Line</label>
+                          <input
+                            type="text"
+                            value={letterRecipientAffiliation}
+                            onChange={(e) => setLetterRecipientAffiliation(e.target.value)}
+                            className="p-1 bg-white border border-amber-300 rounded w-full text-xs outline-none"
+                            placeholder="e.g. Punjab Agricultural University (PAU), Ludhiana"
+                          />
+                        </div>
+                        <div className="sm:col-span-2">
+                          <label className="text-[10px] text-slate-500 font-bold block">Contact Details (Email &amp; Phone)</label>
+                          <input
+                            type="text"
+                            value={letterRecipientContact}
+                            onChange={(e) => setLetterRecipientContact(e.target.value)}
+                            className="p-1 bg-white border border-amber-300 rounded w-full text-xs outline-none"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="font-bold text-slate-950 text-sm">{letterRecipientPrefix}</div>
+                      <div className="font-bold text-slate-900 text-sm">{letterRecipientName}</div>
+                      {letterRecipientAffiliation && <div>{letterRecipientAffiliation}</div>}
+                      <div>{letterRecipientContact}</div>
+                    </>
+                  )}
+                </div>
+              )}
 
               {/* Subject Line */}
-              <div className="py-2 border-y border-slate-200 text-center font-bold text-xs sm:text-sm text-slate-950 uppercase tracking-wide bg-slate-50/50">
-                {isEditMode ? (
-                  <input
-                    type="text"
-                    value={letterSubject}
-                    onChange={(e) => setLetterSubject(e.target.value)}
-                    className="w-full text-center font-bold p-1 bg-white border border-amber-300 rounded text-xs sm:text-sm outline-none"
-                  />
-                ) : (
-                  letterSubject
-                )}
-              </div>
+              {!isDeleted('subject') && (
+                <div className="py-2 border-y border-slate-200 text-center font-bold text-xs sm:text-sm text-slate-950 uppercase tracking-wide bg-slate-50/50">
+                  {isEditMode ? (
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between pb-1">
+                        <span className="text-[10px] font-bold text-amber-900">SUBJECT CLAUSE</span>
+                        <button
+                          type="button"
+                          onClick={() => deleteSection('subject')}
+                          className="text-[10px] font-bold text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-2 py-0.5 rounded flex items-center space-x-1 cursor-pointer"
+                        >
+                          <Trash2 className="w-2.5 h-2.5" />
+                          <span>Delete</span>
+                        </button>
+                      </div>
+                      <input
+                        type="text"
+                        value={letterSubject}
+                        onChange={(e) => setLetterSubject(e.target.value)}
+                        className="w-full text-center font-bold p-1 bg-white border border-amber-300 rounded text-xs sm:text-sm outline-none"
+                      />
+                    </div>
+                  ) : (
+                    letterSubject
+                  )}
+                </div>
+              )}
 
               {/* Salutation */}
-              <div className="text-xs font-bold text-slate-900">
-                {isEditMode ? (
-                  <input
-                    type="text"
-                    value={letterSalutation}
-                    onChange={(e) => setLetterSalutation(e.target.value)}
-                    className="font-bold p-1 bg-white border border-amber-300 rounded w-full outline-none text-xs"
-                  />
-                ) : (
-                  letterSalutation
-                )}
-              </div>
+              {!isDeleted('salutation') && (
+                <div className="text-xs font-bold text-slate-900">
+                  {isEditMode ? (
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="text"
+                        value={letterSalutation}
+                        onChange={(e) => setLetterSalutation(e.target.value)}
+                        className="font-bold p-1 bg-white border border-amber-300 rounded flex-1 outline-none text-xs"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => deleteSection('salutation')}
+                        className="text-[10px] font-bold text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-2 py-1 rounded flex items-center space-x-1 cursor-pointer shrink-0"
+                      >
+                        <Trash2 className="w-2.5 h-2.5" />
+                        <span>Delete</span>
+                      </button>
+                    </div>
+                  ) : (
+                    letterSalutation
+                  )}
+                </div>
+              )}
 
               {/* Body Paragraphs */}
               <div className="text-xs text-slate-800 space-y-3 leading-relaxed text-justify">
                 {/* Intro */}
-                <div>
-                  {isEditMode ? (
-                    <textarea
-                      rows={3}
-                      value={letterIntro}
-                      onChange={(e) => setLetterIntro(e.target.value)}
-                      className="w-full p-2 bg-white border border-amber-300 rounded text-xs outline-none"
-                    />
-                  ) : (
-                    <p>{letterIntro}</p>
-                  )}
-                </div>
+                {!isDeleted('intro') && (
+                  <div className="relative group">
+                    {isEditMode ? (
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between pb-1">
+                          <span className="text-[10px] font-bold text-amber-900">PREAMBLE &amp; SELECTION COMMITTEE SANCTION</span>
+                          <button
+                            type="button"
+                            onClick={() => deleteSection('intro')}
+                            className="text-[10px] font-bold text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-2 py-0.5 rounded flex items-center space-x-1 cursor-pointer"
+                          >
+                            <Trash2 className="w-2.5 h-2.5" />
+                            <span>Delete Section</span>
+                          </button>
+                        </div>
+                        <textarea
+                          rows={3}
+                          value={letterIntro}
+                          onChange={(e) => setLetterIntro(e.target.value)}
+                          className="w-full p-2 bg-white border border-amber-300 rounded text-xs outline-none"
+                        />
+                      </div>
+                    ) : (
+                      <p>{letterIntro}</p>
+                    )}
+                  </div>
+                )}
 
                 {/* 1. Scale of Pay */}
-                <div>
-                  <strong className="text-slate-900">1. Scale of Pay &amp; Emoluments: </strong>
-                  {isEditMode ? (
-                    <textarea
-                      rows={2}
-                      value={letterClausePay}
-                      onChange={(e) => setLetterClausePay(e.target.value)}
-                      className="w-full p-2 bg-white border border-amber-300 rounded text-xs outline-none mt-1"
-                    />
-                  ) : (
-                    <span>{letterClausePay}</span>
-                  )}
-                </div>
+                {!isDeleted('pay') && (
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <strong className="text-slate-900">1. Scale of Pay &amp; Emoluments: </strong>
+                      {isEditMode && (
+                        <button
+                          type="button"
+                          onClick={() => deleteSection('pay')}
+                          className="text-[10px] font-bold text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-2 py-0.5 rounded flex items-center space-x-1 cursor-pointer"
+                        >
+                          <Trash2 className="w-2.5 h-2.5" />
+                          <span>Delete Section</span>
+                        </button>
+                      )}
+                    </div>
+                    {isEditMode ? (
+                      <textarea
+                        rows={2}
+                        value={letterClausePay}
+                        onChange={(e) => setLetterClausePay(e.target.value)}
+                        className="w-full p-2 bg-white border border-amber-300 rounded text-xs outline-none mt-1"
+                      />
+                    ) : (
+                      <span>{letterClausePay}</span>
+                    )}
+                  </div>
+                )}
 
                 {/* 2. Probation */}
-                <div>
-                  <strong className="text-slate-900">2. Probation &amp; Confirmation: </strong>
-                  {isEditMode ? (
-                    <textarea
-                      rows={2}
-                      value={letterClauseProbation}
-                      onChange={(e) => setLetterClauseProbation(e.target.value)}
-                      className="w-full p-2 bg-white border border-amber-300 rounded text-xs outline-none mt-1"
-                    />
-                  ) : (
-                    <span>{letterClauseProbation}</span>
-                  )}
-                </div>
+                {!isDeleted('probation') && (
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <strong className="text-slate-900">2. Probation &amp; Confirmation: </strong>
+                      {isEditMode && (
+                        <button
+                          type="button"
+                          onClick={() => deleteSection('probation')}
+                          className="text-[10px] font-bold text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-2 py-0.5 rounded flex items-center space-x-1 cursor-pointer"
+                        >
+                          <Trash2 className="w-2.5 h-2.5" />
+                          <span>Delete Section</span>
+                        </button>
+                      )}
+                    </div>
+                    {isEditMode ? (
+                      <textarea
+                        rows={2}
+                        value={letterClauseProbation}
+                        onChange={(e) => setLetterClauseProbation(e.target.value)}
+                        className="w-full p-2 bg-white border border-amber-300 rounded text-xs outline-none mt-1"
+                      />
+                    ) : (
+                      <span>{letterClauseProbation}</span>
+                    )}
+                  </div>
+                )}
 
                 {/* 3. Posting */}
-                <div>
-                  <strong className="text-slate-900">3. Place of Posting &amp; Reporting: </strong>
-                  {isEditMode ? (
-                    <textarea
-                      rows={2}
-                      value={letterClausePosting}
-                      onChange={(e) => setLetterClausePosting(e.target.value)}
-                      className="w-full p-2 bg-white border border-amber-300 rounded text-xs outline-none mt-1"
-                    />
-                  ) : (
-                    <span>{letterClausePosting}</span>
-                  )}
-                </div>
+                {!isDeleted('posting') && (
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <strong className="text-slate-900">3. Place of Posting &amp; Reporting: </strong>
+                      {isEditMode && (
+                        <button
+                          type="button"
+                          onClick={() => deleteSection('posting')}
+                          className="text-[10px] font-bold text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-2 py-0.5 rounded flex items-center space-x-1 cursor-pointer"
+                        >
+                          <Trash2 className="w-2.5 h-2.5" />
+                          <span>Delete Section</span>
+                        </button>
+                      )}
+                    </div>
+                    {isEditMode ? (
+                      <textarea
+                        rows={2}
+                        value={letterClausePosting}
+                        onChange={(e) => setLetterClausePosting(e.target.value)}
+                        className="w-full p-2 bg-white border border-amber-300 rounded text-xs outline-none mt-1"
+                      />
+                    ) : (
+                      <span>{letterClausePosting}</span>
+                    )}
+                  </div>
+                )}
 
                 {/* 4. Conduct */}
-                <div>
-                  <strong className="text-slate-900">4. Service Conditions &amp; Code of Conduct: </strong>
-                  {isEditMode ? (
-                    <textarea
-                      rows={3}
-                      value={letterClauseConduct}
-                      onChange={(e) => setLetterClauseConduct(e.target.value)}
-                      className="w-full p-2 bg-white border border-amber-300 rounded text-xs outline-none mt-1"
-                    />
-                  ) : (
-                    <span>{letterClauseConduct}</span>
-                  )}
-                </div>
+                {!isDeleted('conduct') && (
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <strong className="text-slate-900">4. Service Conditions &amp; Code of Conduct: </strong>
+                      {isEditMode && (
+                        <button
+                          type="button"
+                          onClick={() => deleteSection('conduct')}
+                          className="text-[10px] font-bold text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-2 py-0.5 rounded flex items-center space-x-1 cursor-pointer"
+                        >
+                          <Trash2 className="w-2.5 h-2.5" />
+                          <span>Delete Section</span>
+                        </button>
+                      )}
+                    </div>
+                    {isEditMode ? (
+                      <textarea
+                        rows={3}
+                        value={letterClauseConduct}
+                        onChange={(e) => setLetterClauseConduct(e.target.value)}
+                        className="w-full p-2 bg-white border border-amber-300 rounded text-xs outline-none mt-1"
+                      />
+                    ) : (
+                      <span>{letterClauseConduct}</span>
+                    )}
+                  </div>
+                )}
 
                 {/* 5. Special Clauses */}
-                <div>
-                  <strong className="text-slate-900">5. Terms, Conditions &amp; Pre-requisites: </strong>
-                  {isEditMode ? (
-                    <textarea
-                      rows={3}
-                      value={letterClauseSpecial}
-                      onChange={(e) => setLetterClauseSpecial(e.target.value)}
-                      className="w-full p-2 bg-white border border-amber-300 rounded text-xs outline-none mt-1"
-                    />
-                  ) : (
-                    <span>{letterClauseSpecial}</span>
-                  )}
-                </div>
+                {!isDeleted('special') && (
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <strong className="text-slate-900">5. Terms, Conditions &amp; Pre-requisites: </strong>
+                      {isEditMode && (
+                        <button
+                          type="button"
+                          onClick={() => deleteSection('special')}
+                          className="text-[10px] font-bold text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-2 py-0.5 rounded flex items-center space-x-1 cursor-pointer"
+                        >
+                          <Trash2 className="w-2.5 h-2.5" />
+                          <span>Delete Section</span>
+                        </button>
+                      )}
+                    </div>
+                    {isEditMode ? (
+                      <textarea
+                        rows={3}
+                        value={letterClauseSpecial}
+                        onChange={(e) => setLetterClauseSpecial(e.target.value)}
+                        className="w-full p-2 bg-white border border-amber-300 rounded text-xs outline-none mt-1"
+                      />
+                    ) : (
+                      <span>{letterClauseSpecial}</span>
+                    )}
+                  </div>
+                )}
 
                 {/* 6. Acceptance */}
-                <div>
-                  <strong className="text-slate-900">6. Acceptance &amp; Date of Joining: </strong>
-                  {isEditMode ? (
-                    <textarea
-                      rows={2}
-                      value={letterClauseAcceptance}
-                      onChange={(e) => setLetterClauseAcceptance(e.target.value)}
-                      className="w-full p-2 bg-white border border-amber-300 rounded text-xs outline-none mt-1"
-                    />
-                  ) : (
-                    <span>{letterClauseAcceptance}</span>
-                  )}
-                </div>
+                {!isDeleted('acceptance') && (
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <strong className="text-slate-900">6. Acceptance &amp; Date of Joining: </strong>
+                      {isEditMode && (
+                        <button
+                          type="button"
+                          onClick={() => deleteSection('acceptance')}
+                          className="text-[10px] font-bold text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-2 py-0.5 rounded flex items-center space-x-1 cursor-pointer"
+                        >
+                          <Trash2 className="w-2.5 h-2.5" />
+                          <span>Delete Section</span>
+                        </button>
+                      )}
+                    </div>
+                    {isEditMode ? (
+                      <textarea
+                        rows={2}
+                        value={letterClauseAcceptance}
+                        onChange={(e) => setLetterClauseAcceptance(e.target.value)}
+                        className="w-full p-2 bg-white border border-amber-300 rounded text-xs outline-none mt-1"
+                      />
+                    ) : (
+                      <span>{letterClauseAcceptance}</span>
+                    )}
+                  </div>
+                )}
+
+                {/* User-Added Custom Clauses */}
+                {customClauses.map((clause) => (
+                  <div key={clause.id} className="p-2.5 bg-blue-50/50 border border-blue-200 rounded-xl space-y-1">
+                    <div className="flex items-center justify-between">
+                      {isEditMode ? (
+                        <input
+                          type="text"
+                          value={clause.title}
+                          onChange={(e) => handleUpdateCustomClause(clause.id, 'title', e.target.value)}
+                          className="font-bold text-xs p-1 bg-white border border-blue-300 rounded flex-1 mr-2 outline-none"
+                        />
+                      ) : (
+                        <strong className="text-slate-900">{clause.title}: </strong>
+                      )}
+                      {isEditMode && (
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteCustomClause(clause.id)}
+                          className="text-[10px] font-bold text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-2 py-0.5 rounded flex items-center space-x-1 cursor-pointer shrink-0"
+                        >
+                          <Trash2 className="w-2.5 h-2.5" />
+                          <span>Delete</span>
+                        </button>
+                      )}
+                    </div>
+                    {isEditMode ? (
+                      <textarea
+                        rows={2}
+                        value={clause.content}
+                        onChange={(e) => handleUpdateCustomClause(clause.id, 'content', e.target.value)}
+                        className="w-full p-2 bg-white border border-blue-300 rounded text-xs outline-none"
+                      />
+                    ) : (
+                      <span>{clause.content}</span>
+                    )}
+                  </div>
+                ))}
               </div>
+
+              {/* Deleted Sections Restoration Drawer */}
+              {isEditMode && deletedSections.length > 0 && (
+                <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs space-y-1.5 print:hidden">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-rose-900 flex items-center space-x-1.5">
+                      <AlertCircle className="w-3.5 h-3.5 text-rose-600" />
+                      <span>Deleted Sections ({deletedSections.length}):</span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={restoreAllSections}
+                      className="text-[11px] font-bold text-rose-700 hover:underline cursor-pointer"
+                    >
+                      Restore All Sections
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {deletedSections.map((secId) => (
+                      <button
+                        key={secId}
+                        type="button"
+                        onClick={() => restoreSection(secId)}
+                        className="px-2 py-1 bg-white border border-rose-300 hover:bg-rose-100 text-rose-800 text-[11px] font-medium rounded-lg flex items-center space-x-1 cursor-pointer transition shadow-2xs"
+                      >
+                        <span>+ Restore {sectionLabels[secId] || secId}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Closing Signatures & Copy To */}
               <div className="pt-6 flex justify-between items-end text-xs">
-                <div>
-                  <p className="font-semibold text-slate-700">Copy forwarded for information to:</p>
-                  {isEditMode ? (
-                    <textarea
-                      rows={4}
-                      value={letterCopyTo}
-                      onChange={(e) => setLetterCopyTo(e.target.value)}
-                      className="w-64 p-1.5 bg-white border border-amber-300 rounded text-[11px] outline-none mt-1"
-                    />
-                  ) : (
-                    <div className="text-[11px] text-slate-500 whitespace-pre-line mt-1">
-                      {letterCopyTo}
+                {!isDeleted('copyTo') ? (
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="font-semibold text-slate-700">Copy forwarded for information to:</p>
+                      {isEditMode && (
+                        <button
+                          type="button"
+                          onClick={() => deleteSection('copyTo')}
+                          className="text-[10px] font-bold text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-1.5 py-0.5 rounded flex items-center space-x-1 ml-2 cursor-pointer"
+                        >
+                          <Trash2 className="w-2.5 h-2.5" />
+                          <span>Delete</span>
+                        </button>
+                      )}
                     </div>
-                  )}
-                </div>
+                    {isEditMode ? (
+                      <textarea
+                        rows={4}
+                        value={letterCopyTo}
+                        onChange={(e) => setLetterCopyTo(e.target.value)}
+                        className="w-64 p-1.5 bg-white border border-amber-300 rounded text-[11px] outline-none mt-1"
+                      />
+                    ) : (
+                      <div className="text-[11px] text-slate-500 whitespace-pre-line mt-1">
+                        {letterCopyTo}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div></div>
+                )}
 
                 <div className="text-right space-y-1">
                   <div className="h-10"></div>
                   {isEditMode ? (
                     <div className="space-y-1 text-right">
+                      <label className="text-[10px] text-slate-400 font-bold block">Signatory Name</label>
                       <input
                         type="text"
                         value={letterSignatoryName}
                         onChange={(e) => setLetterSignatoryName(e.target.value)}
-                        className="font-bold text-right p-1 bg-white border border-amber-300 rounded text-xs outline-none w-48"
+                        className="font-bold text-right p-1 bg-white border border-amber-300 rounded text-xs outline-none w-52"
                       />
+                      <label className="text-[10px] text-slate-400 font-bold block mt-1">Designation &amp; Campus</label>
                       <input
                         type="text"
                         value={letterSignatoryTitle}
                         onChange={(e) => setLetterSignatoryTitle(e.target.value)}
-                        className="text-right p-1 bg-white border border-amber-300 rounded text-[11px] outline-none w-48 text-slate-500"
+                        className="text-right p-1 bg-white border border-amber-300 rounded text-[11px] outline-none w-52 text-slate-500"
                       />
                     </div>
                   ) : (
@@ -1018,6 +1445,51 @@ export function OfferLetterWorkbench({
                   )}
                 </div>
               </div>
+
+              {/* Prominent Below/Bottom Button to Update or Save ("blow button to update of save") */}
+              {isEditMode && (
+                <div className="mt-8 pt-5 border-t-2 border-dashed border-amber-300 bg-linear-to-r from-amber-50 to-orange-50 p-4 sm:p-5 rounded-2xl flex flex-wrap items-center justify-between gap-3 shadow-md print:hidden">
+                  <div className="flex items-center space-x-2 text-xs font-semibold text-amber-900">
+                    <Edit3 className="w-4 h-4 text-amber-600 shrink-0" />
+                    <div>
+                      <p className="font-bold text-sm">Active Editing Session</p>
+                      <p className="text-[11px] text-amber-800 font-normal">
+                        Click &ldquo;Save &amp; Update Letter&rdquo; below to confirm your customized clauses and exit edit mode.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={handleAddCustomClause}
+                      className="px-3.5 py-2 bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 rounded-xl text-xs font-bold transition flex items-center space-x-1.5 cursor-pointer shadow-2xs"
+                    >
+                      <Plus className="w-3.5 h-3.5 text-blue-600" />
+                      <span>+ Add Clause</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleResetTemplate}
+                      className="px-3 py-2 bg-white hover:bg-slate-100 text-slate-600 border border-slate-300 rounded-xl text-xs font-bold transition flex items-center space-x-1 cursor-pointer"
+                      title="Reset all clauses to standard template"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" />
+                      <span>Reset</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleSaveAndExitEditMode}
+                      className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black transition flex items-center space-x-2 cursor-pointer shadow-md hover:shadow-lg active:scale-95"
+                    >
+                      <Check className="w-4 h-4" />
+                      <span>Save &amp; Update Letter</span>
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             /* MODE 2: UPLOADED PRE-SIGNED PDF PREVIEW */
