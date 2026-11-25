@@ -212,16 +212,35 @@ export function HRDepartmentModule({
     }
   };
 
-  // Available media platforms for job advertisement
-  const AVAILABLE_PLATFORMS = [
-    { id: 'LinkedIn Jobs', label: 'LinkedIn Jobs', icon: '💼', tag: 'Global Portal' },
-    { id: 'Indeed', label: 'Indeed', icon: '🔍', tag: 'Job Search Engine' },
-    { id: 'Naukri.com', label: 'Naukri.com', icon: '🌐', tag: 'India #1 Portal' },
-    { id: 'University Careers Website', label: 'University Careers Website', icon: '🏛️', tag: 'Official Website' },
-    { id: 'Newspaper (Times Ascent)', label: 'Newspaper (Times Ascent)', icon: '📰', tag: 'National Daily' },
-    { id: 'Newspaper (The Tribune)', label: 'Newspaper (The Tribune)', icon: '🗞️', tag: 'Regional Daily' },
-    { id: 'University News (AIU Publication)', label: 'University News (AIU Publication)', icon: '📚', tag: 'Academic Journal' }
+  // Media platforms for job advertisement (clean list, includes social & professional)
+  const DEFAULT_PLATFORMS = [
+    'LinkedIn Jobs',
+    'Naukri.com',
+    'Indeed',
+    'Instagram',
+    'Facebook',
+    'University Careers Website',
+    'Newspaper (Times Ascent)',
+    'Newspaper (The Tribune)',
+    'University News (AIU Publication)',
   ];
+
+  const [availablePlatforms, setAvailablePlatforms] = useState<string[]>(DEFAULT_PLATFORMS);
+  const [customChannelInput, setCustomChannelInput] = useState('');
+  const [showAddChannel, setShowAddChannel] = useState(false);
+
+  const handleAddCustomChannel = () => {
+    const trimmed = customChannelInput.trim();
+    if (!trimmed) return;
+    if (!availablePlatforms.includes(trimmed)) {
+      setAvailablePlatforms((prev) => [...prev, trimmed]);
+    }
+    if (!selectedPlatforms.includes(trimmed)) {
+      setSelectedPlatforms((prev) => [...prev, trimmed]);
+    }
+    setCustomChannelInput('');
+    setShowAddChannel(false);
+  };
 
   // Form states: 1. Post Job
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([
@@ -3332,43 +3351,47 @@ export function HRDepartmentModule({
       {/* ============================================================== */}
       {
         postingReq && (
-          <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl shadow-xl border border-slate-200 max-w-xl w-full p-6 space-y-4 animate-in fade-in zoom-in-95 duration-150 max-h-[92vh] overflow-y-auto">
+          <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl shadow-2xl border border-slate-200/90 max-w-2xl w-full p-6 space-y-4 animate-in fade-in zoom-in-95 duration-150 max-h-[92vh] overflow-y-auto">
               <div className="flex items-start justify-between border-b border-slate-100 pb-3">
                 <div>
-                  <span className="font-mono text-xs font-bold text-blue-900 bg-blue-50 px-2.5 py-0.5 rounded border border-blue-200">
-                    {postingReq.requestId}
-                  </span>
+                  <div className="flex items-center space-x-2">
+                    <span className="font-mono text-xs font-bold text-slate-700 bg-slate-100 px-2.5 py-0.5 rounded border border-slate-200">
+                      {postingReq.requestId}
+                    </span>
+                    <span className="text-xs text-slate-400 font-medium">{postingReq.department}</span>
+                  </div>
                   <h3 className="text-base font-bold text-slate-900 mt-1">
                     Publish Job Posting: {postingReq.postTitle}
                   </h3>
-                  <p className="text-xs text-slate-500">
-                    {postingReq.department} &bull; Budget: {postingReq.tentativeBudget}
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Positions: {postingReq.numberOfPositions} &bull; Budget: {postingReq.tentativeBudget}
                   </p>
                 </div>
                 <button
+                  type="button"
                   onClick={() => setPostingReq(null)}
-                  className="text-slate-400 hover:text-slate-600 text-sm font-bold cursor-pointer"
+                  className="text-slate-400 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-100 transition cursor-pointer"
                 >
-                  ✕
+                  <X className="w-4 h-4" />
                 </button>
               </div>
 
               <form onSubmit={handlePostJob} className="space-y-4 text-xs">
-                {/* Checkbox Platform Selector */}
+                {/* Platform Selector - Clean, Uncluttered, No AI icons */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <label className="block font-bold text-slate-800 text-xs">
-                      Select Advertising Platforms / Channels:
-                      <span className="ml-2 font-semibold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200 text-[11px]">
+                    <label className="font-semibold text-slate-800 text-xs flex items-center space-x-2">
+                      <span>Advertising Channels</span>
+                      <span className="font-semibold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200 text-[11px]">
                         {selectedPlatforms.length} selected
                       </span>
                     </label>
-                    <div className="flex items-center space-x-2 text-[11px]">
+                    <div className="flex items-center space-x-3 text-[11px]">
                       <button
                         type="button"
-                        onClick={() => setSelectedPlatforms(AVAILABLE_PLATFORMS.map(p => p.id))}
-                        className="text-blue-700 hover:text-blue-800 font-bold underline cursor-pointer"
+                        onClick={() => setSelectedPlatforms([...availablePlatforms])}
+                        className="text-blue-700 hover:text-blue-900 font-semibold cursor-pointer"
                       >
                         Select All
                       </button>
@@ -3376,106 +3399,155 @@ export function HRDepartmentModule({
                       <button
                         type="button"
                         onClick={() => setSelectedPlatforms([])}
-                        className="text-slate-500 hover:text-slate-700 font-semibold cursor-pointer"
+                        className="text-slate-500 hover:text-slate-700 font-medium cursor-pointer"
                       >
                         Clear
+                      </button>
+                      <span className="text-slate-300">|</span>
+                      <button
+                        type="button"
+                        onClick={() => setShowAddChannel(!showAddChannel)}
+                        className="text-blue-700 hover:text-blue-900 font-bold cursor-pointer flex items-center space-x-1"
+                      >
+                        <span>+ Add Channel</span>
                       </button>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-56 overflow-y-auto p-1.5 border border-slate-200 rounded-xl bg-slate-50/50">
-                    {AVAILABLE_PLATFORMS.map((platform) => {
-                      const isChecked = selectedPlatforms.includes(platform.id);
+                  {/* Inline Add Custom Channel Input */}
+                  {showAddChannel && (
+                    <div className="mb-2.5 p-2 bg-slate-50 border border-slate-200 rounded-xl flex items-center space-x-2 animate-in fade-in duration-100">
+                      <input
+                        type="text"
+                        value={customChannelInput}
+                        onChange={(e) => setCustomChannelInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleAddCustomChannel();
+                          }
+                        }}
+                        placeholder="Enter channel name (e.g. WhatsApp, Twitter/X, Telegram, HT)..."
+                        className="flex-1 bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        autoFocus
+                      />
+                      <button
+                        type="button"
+                        onClick={handleAddCustomChannel}
+                        className="px-3 py-1.5 bg-[#0f2d59] hover:bg-[#163f7a] text-white text-xs font-semibold rounded-lg cursor-pointer transition shadow-2xs"
+                      >
+                        Add
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowAddChannel(false);
+                          setCustomChannelInput('');
+                        }}
+                        className="px-2.5 py-1.5 text-slate-500 hover:text-slate-700 text-xs font-medium cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Clean Multi-Column Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                    {availablePlatforms.map((platform) => {
+                      const isChecked = selectedPlatforms.includes(platform);
                       return (
                         <label
-                          key={platform.id}
-                          className={`flex items-center space-x-2.5 p-2.5 rounded-lg border cursor-pointer select-none transition ${isChecked
-                            ? 'bg-blue-50/80 border-blue-300 text-blue-950 font-semibold shadow-2xs'
-                            : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
-                            }`}
+                          key={platform}
+                          className={`flex items-center space-x-2.5 px-3 py-2 rounded-xl border text-xs cursor-pointer select-none transition ${
+                            isChecked
+                              ? 'bg-blue-50/70 border-blue-400/80 text-blue-950 font-medium shadow-2xs'
+                              : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300'
+                          }`}
                         >
                           <input
                             type="checkbox"
                             checked={isChecked}
                             onChange={(e) => {
                               if (e.target.checked) {
-                                setSelectedPlatforms([...selectedPlatforms, platform.id]);
+                                setSelectedPlatforms([...selectedPlatforms, platform]);
                               } else {
-                                setSelectedPlatforms(selectedPlatforms.filter(id => id !== platform.id));
+                                setSelectedPlatforms(selectedPlatforms.filter((id) => id !== platform));
                               }
                             }}
                             className="w-4 h-4 rounded text-blue-600 border-slate-300 focus:ring-blue-500 cursor-pointer"
                           />
-                          <span className="text-base">{platform.icon}</span>
-                          <div className="flex-1 min-w-0">
-                            <div className="truncate text-xs font-bold">{platform.label}</div>
-                            <div className="text-[10px] text-slate-400 font-normal truncate">{platform.tag}</div>
-                          </div>
+                          <span className="truncate">{platform}</span>
                         </label>
                       );
                     })}
                   </div>
+
                   {selectedPlatforms.length === 0 && (
-                    <p className="text-rose-600 text-[11px] mt-1 font-semibold">
-                      ⚠️ Please select at least one platform to publish this job posting.
+                    <p className="text-rose-600 text-[11px] mt-1.5 font-semibold">
+                      Please select at least one advertising channel to publish.
                     </p>
                   )}
                 </div>
 
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1">
-                    Ad Spend Budget (₹):
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    step="500"
-                    value={adSpendBudget}
-                    onChange={(e) => setAdSpendBudget(e.target.value)}
-                    placeholder="e.g. 25000"
-                    className="w-full p-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 font-medium bg-white"
-                  />
+                {/* Side-by-side Budget & Expiry Date */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                  <div>
+                    <label className="block font-semibold text-slate-700 mb-1">
+                      Ad Spend Budget (₹)
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="500"
+                      value={adSpendBudget}
+                      onChange={(e) => setAdSpendBudget(e.target.value)}
+                      placeholder="e.g. 25000"
+                      className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 font-medium bg-white text-xs"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-semibold text-slate-700 mb-1">
+                      Valid Till / Expiry Date
+                    </label>
+                    <input
+                      type="date"
+                      value={adExpiry}
+                      onChange={(e) => setAdExpiry(e.target.value)}
+                      className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 font-medium bg-white text-xs"
+                    />
+                  </div>
                 </div>
 
+                {/* Remarks */}
                 <div>
                   <label className="block font-semibold text-slate-700 mb-1">
-                    Remarks:
+                    Remarks / Tracking Reference (Optional)
                   </label>
                   <textarea
                     rows={2}
                     value={postingRemarks}
                     onChange={(e) => setPostingRemarks(e.target.value)}
                     placeholder="Enter remarks, tracking notes, or job reference details..."
-                    className="w-full p-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 font-medium bg-white"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 font-medium bg-white text-xs resize-none"
                   />
                 </div>
 
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1">
-                    Valid Till / Expiry Date:
-                  </label>
-                  <input
-                    type="date"
-                    value={adExpiry}
-                    onChange={(e) => setAdExpiry(e.target.value)}
-                    className="w-full p-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 font-medium bg-white"
-                  />
-                </div>
-
-                <div className="flex items-center justify-end space-x-2 pt-3 border-t border-slate-100">
+                {/* Footer Actions */}
+                <div className="flex items-center justify-end space-x-2.5 pt-3 border-t border-slate-100">
                   <button
                     type="button"
                     onClick={() => setPostingReq(null)}
-                    className="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-900 cursor-pointer"
+                    className="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-900 border border-slate-200 rounded-xl hover:bg-slate-50 transition cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={isSubmitting || selectedPlatforms.length === 0}
-                    className="px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-xl text-xs font-bold transition disabled:opacity-50 cursor-pointer"
+                    className="px-5 py-2 bg-[#0f2d59] hover:bg-[#163f7a] text-white rounded-xl text-xs font-bold transition disabled:opacity-50 cursor-pointer shadow-xs"
                   >
-                    {isSubmitting ? 'Publishing...' : `Publish to ${selectedPlatforms.length} Platform(s) & Move to Posted Jobs`}
+                    {isSubmitting ? 'Publishing...' : `Publish to ${selectedPlatforms.length} Channel(s)`}
                   </button>
                 </div>
               </form>
