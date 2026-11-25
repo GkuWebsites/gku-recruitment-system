@@ -4,6 +4,17 @@ import './globals.css';
 export const metadata: Metadata = {
   title: 'Guru Kashi University | Recruitment Management System',
   description: 'University Hiring & Recruitment Management Portal',
+  icons: {
+    icon: [
+      { url: '/favicon.ico?v=2', sizes: 'any' },
+      { url: '/icon.png?v=2', type: 'image/png', sizes: '192x192' },
+      { url: '/gku-crest.png?v=2', type: 'image/png' },
+    ],
+    shortcut: '/favicon.ico?v=2',
+    apple: [
+      { url: '/apple-icon.png?v=2', sizes: '192x192', type: 'image/png' },
+    ],
+  },
 };
 
 export default function RootLayout({
@@ -14,6 +25,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <link rel="icon" type="image/x-icon" href="/favicon.ico?v=2" />
+        <link rel="icon" type="image/png" sizes="192x192" href="/gku-crest.png?v=2" />
+        <link rel="apple-touch-icon" href="/apple-icon.png?v=2" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
