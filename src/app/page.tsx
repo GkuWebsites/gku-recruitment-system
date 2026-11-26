@@ -323,11 +323,12 @@ export default function HomePage() {
           />
         )}
 
-        {/* Modal 3: Pure Job Details with Edit Option (until reviewed by Dean Academic) */}
+        {/* Modal 3: Pure Job Details with Edit & Delete Option */}
         {selectedJobDetailsRequest && (
           <JobDetailsModal
             isOpen={!!selectedJobDetailsRequest}
             request={selectedJobDetailsRequest}
+            currentUser={currentUser}
             onClose={() => setSelectedJobDetailsRequest(null)}
             onSuccess={() => {
               setSelectedJobDetailsRequest(null);

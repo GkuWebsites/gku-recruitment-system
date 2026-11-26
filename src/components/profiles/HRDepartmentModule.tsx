@@ -4795,7 +4795,12 @@ export function HRDepartmentModule({
           <JobDetailsModal
             isOpen={!!jobDetailsReq}
             request={jobDetailsReq}
+            currentUser={{ designation: 'HR', role: 'HR' }}
             onClose={() => setJobDetailsReq(null)}
+            onSuccess={() => {
+              setJobDetailsReq(null);
+              onRefresh();
+            }}
           />
         )
       }

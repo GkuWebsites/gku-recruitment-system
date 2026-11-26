@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { IHiringRequest } from '@/lib/types';
 import { UNIVERSITY_DEPARTMENTS } from '@/lib/constants';
-import { Plus, Search, Building2, MessageSquare, CheckCircle2, Clock, AlertCircle, FileText, Check, ShieldCheck, Filter } from 'lucide-react';
+import { Plus, Search, Building2, MessageSquare, CheckCircle2, Clock, AlertCircle, FileText, Check, ShieldCheck, Filter, Trash2 } from 'lucide-react';
 import { ClarificationThreadChat } from '../ClarificationThreadChat';
 
 interface DeanDepartmentModuleProps {
@@ -157,6 +157,30 @@ export function DeanDepartmentModule({
       console.error(err);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleDeleteRequest = async (req: IHiringRequest) => {
+    if (
+      !confirm(
+        `Are you sure you want to permanently delete requisition ${req.requestId} (${req.postTitle})?`
+      )
+    ) {
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/requests/${req.requestId}?role=Dean`, {
+        method: 'DELETE'
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        alert(data.error || 'Failed to delete requisition');
+        return;
+      }
+      onRefresh();
+    } catch (err: any) {
+      alert(err.message || 'Error deleting requisition');
     }
   };
 
@@ -406,18 +430,47 @@ export function DeanDepartmentModule({
                           </div>
                         </td>
                         <td className="py-4 px-6 text-right">
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onSelectRequest(req);
-                            }}
-                            className="inline-flex items-center space-x-1 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-xl font-bold text-xs transition cursor-pointer"
-                            title="View job specifications and edit if not yet reviewed"
-                          >
-                            <FileText className="w-3.5 h-3.5" />
-                            <span>View Job Details</span>
-                          </button>
+                          {(() => {
+                            const isReviewed =
+                              (req.currentStage || 1) >= 3 ||
+                              req.status === 'Approved by Dean Academic' ||
+                              req.status === 'Under Review (VC / Registrar)' ||
+                              req.status === 'Approved by VC / Registrar' ||
+                              req.status === 'In Process (HR - Recruitment)' ||
+                              req.status === 'Position Fulfilled (Recruitment Completed)' ||
+                              (req.deanAcademicApproval && req.deanAcademicApproval.decision === 'Approved');
+                            const canDeleteThis = !isReviewed;
+
+                            return (
+                              <div className="flex items-center justify-end space-x-2">
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onSelectRequest(req);
+                                  }}
+                                  className="inline-flex items-center space-x-1 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-xl font-bold text-xs transition cursor-pointer"
+                                  title="View job specifications and edit if not yet reviewed"
+                                >
+                                  <FileText className="w-3.5 h-3.5" />
+                                  <span>View Details</span>
+                                </button>
+                                {canDeleteThis && (
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDeleteRequest(req);
+                                    }}
+                                    className="inline-flex items-center space-x-1 p-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl transition cursor-pointer"
+                                    title="Delete Requisition (Available until reviewed by Dean Academic)"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                )}
+                              </div>
+                            );
+                          })()}
                         </td>
                       </tr>
                     );

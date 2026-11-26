@@ -16,7 +16,8 @@ import {
   AlertCircle,
   Plus,
   Minus,
-  Clock
+  Clock,
+  Trash2
 } from 'lucide-react';
 
 interface JobDetailsModalProps {
@@ -24,15 +25,24 @@ interface JobDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
+  currentUser?: {
+    name?: string;
+    email?: string;
+    designation?: string;
+    role?: string;
+    department?: string;
+  } | null;
 }
 
 export function JobDetailsModal({
   request,
   isOpen,
   onClose,
-  onSuccess
+  onSuccess,
+  currentUser
 }: JobDetailsModalProps) {
   const [isEditing, setIsEditing] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [editTitle, setEditTitle] = useState('');
   const [editPostLevel, setEditPostLevel] = useState('');
   const [editPositions, setEditPositions] = useState(1);
@@ -61,15 +71,54 @@ export function JobDetailsModal({
 
   if (!isOpen || !request) return null;
 
-  // Edit condition: Can edit UNTIL reviewed by Dean Academic
+  const isHR =
+    currentUser?.designation === 'HR' ||
+    currentUser?.designation === 'Admin' ||
+    currentUser?.role === 'HR';
+
+  // Edit/Delete condition: HR can edit & delete anytime. Dean/HOD can ONLY edit & delete UNTIL reviewed by Dean Academic!
   const isReviewedByDeanAcademic =
     (request.currentStage || 1) >= 3 ||
     request.status === 'Approved by Dean Academic' ||
+    request.status === 'Under Review (VC / Registrar)' ||
     request.status === 'Approved by VC / Registrar' ||
-    request.status === 'Rejected' ||
+    request.status === 'In Process (HR - Recruitment)' ||
+    request.status === 'Position Fulfilled (Recruitment Completed)' ||
     (request.deanAcademicApproval && request.deanAcademicApproval.decision === 'Approved');
 
-  const canEdit = !isReviewedByDeanAcademic;
+  const canEdit = isHR || !isReviewedByDeanAcademic;
+  const canDelete = isHR || !isReviewedByDeanAcademic;
+
+  const handleDelete = async () => {
+    if (
+      !confirm(
+        `Are you sure you want to permanently delete requisition ${request.requestId} (${request.postTitle})? This action cannot be undone.`
+      )
+    ) {
+      return;
+    }
+
+    setIsDeleting(true);
+    setErrorMsg('');
+
+    try {
+      const roleParam = encodeURIComponent(currentUser?.designation || currentUser?.role || '');
+      const res = await fetch(`/api/requests/${request.requestId}?role=${roleParam}`, {
+        method: 'DELETE'
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Failed to delete requisition');
+      }
+
+      if (onSuccess) onSuccess();
+      onClose();
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Error deleting requisition');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,7 +141,8 @@ export function JobDetailsModal({
           tentativeBudget: editBudget.trim(),
           justification: editJustification.trim(),
           requiredQualifications: editQualifications.trim(),
-          experienceRequired: editExperience.trim()
+          experienceRequired: editExperience.trim(),
+          userRole: currentUser?.designation || currentUser?.role
         })
       });
 
@@ -161,6 +211,19 @@ export function JobDetailsModal({
                 <Lock className="w-3 h-3 text-slate-400" />
                 <span>Locked (Reviewed by Dean Academic)</span>
               </span>
+            )}
+
+            {canDelete && (
+              <button
+                type="button"
+                onClick={handleDelete}
+                disabled={isDeleting}
+                className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition text-rose-700 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 border border-rose-200 cursor-pointer disabled:opacity-50"
+                title={isHR ? 'Delete Requisition (HR Authority)' : 'Delete Requisition (Available until reviewed by Dean Academic)'}
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>{isDeleting ? 'Deleting...' : 'Delete'}</span>
+              </button>
             )}
 
             <button
@@ -424,14 +487,16 @@ export function JobDetailsModal({
                 </div>
               </div>
 
-              {/* Status Note on Editability */}
+              {/* Status Note on Editability & Deletion */}
               <div className="p-3 bg-blue-50/50 border border-blue-100 rounded-xl text-xs text-blue-900 flex items-center justify-between">
                 <span className="flex items-center space-x-1.5">
-                  <Clock className="w-3.5 h-3.5 text-blue-600" />
+                  <Clock className="w-3.5 h-3.5 text-blue-600 shrink-0" />
                   <span>
-                    {canEdit
-                      ? 'Requisition is currently in Draft phase. You can modify these details until reviewed by Dean Academic.'
-                      : 'This requisition has been reviewed by Dean Academic and is locked for governance audit.'}
+                    {isHR
+                      ? 'HR Directorate Authority: You can edit or delete this requisition anytime.'
+                      : canEdit
+                      ? 'Department Draft Phase: You can edit or delete this requisition until reviewed by Dean Academic.'
+                      : 'This requisition has been reviewed by Dean Academic and is locked against departmental editing or deletion.'}
                   </span>
                 </span>
               </div>
