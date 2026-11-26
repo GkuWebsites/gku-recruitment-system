@@ -51,6 +51,9 @@ export function NewRequestModal({
   const [cadreType, setCadreType] = useState<'Teaching' | 'Non-Teaching'>('Teaching');
   const [postTitle, setPostTitle] = useState('');
   const [designationLevel, setDesignationLevel] = useState(POST_LEVELS[2] || 'Assistant Professor');
+  const [designationsList, setDesignationsList] = useState<string[]>([...POST_LEVELS, 'Other']);
+  const [isCustomDesignation, setIsCustomDesignation] = useState(false);
+  const [customDesignation, setCustomDesignation] = useState('');
   const [numberOfPositions, setNumberOfPositions] = useState(1);
   const [priority, setPriority] = useState<'Normal' | 'High' | 'Urgent'>('Normal');
   const [salaryScale, setSalaryScale] = useState('₹8,40,000 – ₹10,80,000 p.a.');
@@ -115,6 +118,12 @@ export function NewRequestModal({
 
   // Auto-suggest salary range when designation level changes
   const handleLevelChange = (lvl: string) => {
+    if (lvl === 'Other') {
+      setIsCustomDesignation(true);
+      setDesignationLevel('Other');
+      return;
+    }
+    setIsCustomDesignation(false);
     setDesignationLevel(lvl);
     if (lvl === 'Professor') {
       setSalaryScale('₹18,00,000 – ₹24,00,000 p.a.');
@@ -150,13 +159,22 @@ export function NewRequestModal({
       return;
     }
 
+    const effectiveDesignation = isCustomDesignation
+      ? customDesignation.trim() || 'Other'
+      : designationLevel;
+
+    if (!effectiveDesignation) {
+      setErrorMsg('Please specify a designation level.');
+      return;
+    }
+
     setIsSubmitting(true);
     setErrorMsg('');
 
     try {
-      const fullTitle = postTitle.toLowerCase().includes(designationLevel.toLowerCase())
+      const fullTitle = postTitle.toLowerCase().includes(effectiveDesignation.toLowerCase())
         ? postTitle.trim()
-        : `${designationLevel} (${postTitle.trim()})`;
+        : `${effectiveDesignation} (${postTitle.trim()})`;
 
       const authoritiesList: string[] = [];
       if (isHR && hrWorkflowMode === 'request_approval') {
@@ -177,7 +195,7 @@ export function NewRequestModal({
           department,
           employmentType: cadreType,
           postTitle: fullTitle,
-          postLevel: designationLevel,
+          postLevel: effectiveDesignation,
           numberOfPositions: Number(numberOfPositions),
           urgency: priority,
           tentativeBudget: salaryScale,
@@ -444,18 +462,56 @@ export function NewRequestModal({
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-slate-700 mb-1.5 block">
-                    Designation Level
-                  </label>
-                  <select
-                    value={designationLevel}
-                    onChange={(e) => handleLevelChange(e.target.value)}
-                    className="w-full bg-white border border-slate-200 rounded-xl p-2.5 font-medium text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                  >
-                    {POST_LEVELS.map((lvl) => (
-                      <option key={lvl} value={lvl}>{lvl}</option>
-                    ))}
-                  </select>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="text-xs font-semibold text-slate-700 block">
+                      Designation Level
+                    </label>
+                    {!isCustomDesignation ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsCustomDesignation(true);
+                          setCustomDesignation('');
+                        }}
+                        className="text-[11px] font-semibold text-blue-600 hover:text-blue-800 transition cursor-pointer"
+                      >
+                        + Add Custom
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsCustomDesignation(false);
+                          setDesignationLevel(POST_LEVELS[2] || 'Assistant Professor');
+                        }}
+                        className="text-[11px] font-semibold text-slate-500 hover:text-slate-700 transition cursor-pointer"
+                      >
+                        Choose Preset
+                      </button>
+                    )}
+                  </div>
+
+                  {!isCustomDesignation ? (
+                    <select
+                      value={designationLevel}
+                      onChange={(e) => handleLevelChange(e.target.value)}
+                      className="w-full bg-white border border-slate-200 rounded-xl p-2.5 font-medium text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    >
+                      {designationsList.map((lvl) => (
+                        <option key={lvl} value={lvl}>{lvl}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      type="text"
+                      value={customDesignation}
+                      onChange={(e) => setCustomDesignation(e.target.value)}
+                      placeholder="Type custom designation (e.g. Lab Technician, Librarian)..."
+                      className="w-full bg-white border border-blue-400 rounded-xl p-2.5 font-medium text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                      autoFocus
+                      required
+                    />
+                  )}
                 </div>
               </div>
 

@@ -45,6 +45,8 @@ export function JobDetailsModal({
   const [isDeleting, setIsDeleting] = useState(false);
   const [editTitle, setEditTitle] = useState('');
   const [editPostLevel, setEditPostLevel] = useState('');
+  const [isCustomLevel, setIsCustomLevel] = useState(false);
+  const [customLevelInput, setCustomLevelInput] = useState('');
   const [editPositions, setEditPositions] = useState(1);
   const [editBudget, setEditBudget] = useState('');
   const [editJustification, setEditJustification] = useState('');
@@ -57,7 +59,16 @@ export function JobDetailsModal({
   useEffect(() => {
     if (request) {
       setEditTitle(request.postTitle || '');
-      setEditPostLevel(request.postLevel || 'Assistant Professor');
+      const lvl = request.postLevel || 'Assistant Professor';
+      if (POST_LEVELS.includes(lvl)) {
+        setEditPostLevel(lvl);
+        setIsCustomLevel(false);
+        setCustomLevelInput('');
+      } else {
+        setEditPostLevel('Other');
+        setIsCustomLevel(true);
+        setCustomLevelInput(lvl);
+      }
       setEditPositions(request.numberOfPositions || 1);
       setEditBudget(request.tentativeBudget || '');
       setEditJustification(request.justification || '');
@@ -130,13 +141,17 @@ export function JobDetailsModal({
     setIsSaving(true);
     setErrorMsg('');
 
+    const effectiveLevel = isCustomLevel
+      ? customLevelInput.trim() || 'Other'
+      : editPostLevel;
+
     try {
       const res = await fetch(`/api/requests/${request.requestId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           postTitle: editTitle.trim(),
-          postLevel: editPostLevel,
+          postLevel: effectiveLevel,
           numberOfPositions: Number(editPositions),
           tentativeBudget: editBudget.trim(),
           justification: editJustification.trim(),
@@ -283,18 +298,65 @@ export function JobDetailsModal({
                   </div>
 
                   <div>
-                    <label className="block font-semibold text-slate-700 mb-1">
-                      Designation Level:
-                    </label>
-                    <select
-                      value={editPostLevel}
-                      onChange={(e) => setEditPostLevel(e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl p-2.5 font-medium text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                    >
-                      {POST_LEVELS.map((lvl) => (
-                        <option key={lvl} value={lvl}>{lvl}</option>
-                      ))}
-                    </select>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="block font-semibold text-slate-700">
+                        Designation Level:
+                      </label>
+                      {!isCustomLevel ? (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsCustomLevel(true);
+                            setCustomLevelInput('');
+                          }}
+                          className="text-[11px] font-semibold text-blue-600 hover:text-blue-800 transition cursor-pointer"
+                        >
+                          + Add Custom
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsCustomLevel(false);
+                            setEditPostLevel(POST_LEVELS[2] || 'Assistant Professor');
+                          }}
+                          className="text-[11px] font-semibold text-slate-500 hover:text-slate-700 transition cursor-pointer"
+                        >
+                          Choose Preset
+                        </button>
+                      )}
+                    </div>
+
+                    {!isCustomLevel ? (
+                      <select
+                        value={editPostLevel}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (val === 'Other') {
+                            setIsCustomLevel(true);
+                            setCustomLevelInput('');
+                            setEditPostLevel('Other');
+                          } else {
+                            setEditPostLevel(val);
+                          }
+                        }}
+                        className="w-full bg-white border border-slate-200 rounded-xl p-2.5 font-medium text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                      >
+                        {[...POST_LEVELS, 'Other'].map((lvl) => (
+                          <option key={lvl} value={lvl}>{lvl}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <input
+                        type="text"
+                        value={customLevelInput}
+                        onChange={(e) => setCustomLevelInput(e.target.value)}
+                        placeholder="Type custom designation (e.g. Lab Technician, Librarian)..."
+                        className="w-full bg-white border border-blue-400 rounded-xl p-2.5 font-medium text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        autoFocus
+                        required
+                      />
+                    )}
                   </div>
                 </div>
 
