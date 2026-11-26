@@ -587,9 +587,6 @@ export function DeanAcademicModule({
                           <div className="text-slate-500 text-[11px] mt-0.5">
                             {req.department} • {req.numberOfPositions} Position(s)
                           </div>
-                          <div className="text-[10px] text-slate-400 font-mono mt-1">
-                            Budget: {req.tentativeBudget}
-                          </div>
                         </td>
 
                         {/* Clarification Dialogue Summary */}
@@ -860,7 +857,7 @@ export function DeanAcademicModule({
                   Academic Scrutiny: {selectedReqForAction.postTitle}
                 </h3>
                 <p className="text-xs text-slate-500">
-                  {selectedReqForAction.department} • {selectedReqForAction.numberOfPositions} Position(s) • Package: {selectedReqForAction.tentativeBudget}
+                  {selectedReqForAction.department} • {selectedReqForAction.numberOfPositions} Position(s)
                 </p>
               </div>
               <button

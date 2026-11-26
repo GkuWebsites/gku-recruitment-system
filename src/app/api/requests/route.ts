@@ -171,7 +171,7 @@ export async function POST(req: NextRequest) {
       justification: body.justification,
       requiredQualifications: body.requiredQualifications,
       experienceRequired: body.experienceRequired || '0 - 3 Years',
-      tentativeBudget: body.tentativeBudget || 'As per UGC / University Norms',
+      tentativeBudget: body.tentativeBudget || (creatorRole === 'HR Department' ? '₹8,40,000 – ₹10,80,000 p.a.' : 'To be decided by HR'),
       budgetAmountNumber: Number(body.budgetAmountNumber) || 0,
       urgency: body.urgency || 'Normal',
       jobDescriptionFile: body.jobDescriptionFile || undefined,

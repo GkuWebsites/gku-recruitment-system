@@ -367,7 +367,6 @@ export function DeanDepartmentModule({
                   <th className="py-3.5 px-6">Requisition ID</th>
                   <th className="py-3.5 px-6">Post Title & Cadre</th>
                   <th className="py-3.5 px-6 text-center">Positions</th>
-                  <th className="py-3.5 px-6">Salary Scale / Budget</th>
                   <th className="py-3.5 px-6">Current Workflow Stage</th>
                   <th className="py-3.5 px-6 text-right">Details</th>
                 </tr>
@@ -375,7 +374,7 @@ export function DeanDepartmentModule({
               <tbody className="divide-y divide-slate-100">
                 {filteredRequests.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="py-12 text-center text-slate-400">
+                    <td colSpan={5} className="py-12 text-center text-slate-400">
                       No requisitions raised yet for this department. Click &ldquo;+ Raise New
                       Requisition&rdquo; to begin.
                     </td>
@@ -400,9 +399,6 @@ export function DeanDepartmentModule({
                         </td>
                         <td className="py-4 px-6 text-center font-bold text-slate-800">
                           {req.numberOfPositions}
-                        </td>
-                        <td className="py-4 px-6 text-slate-700 font-medium">
-                          {req.tentativeBudget}
                         </td>
                         <td className="py-4 px-6">
                           <div className="space-y-1.5">
@@ -504,7 +500,7 @@ export function DeanDepartmentModule({
                     <span className="font-bold text-slate-900 text-sm">{req.postTitle}</span>
                   </div>
                   <div className="text-xs text-slate-500">
-                    {req.department} • {req.numberOfPositions} Position(s) • Budget: {req.tentativeBudget}
+                    {req.department} • {req.numberOfPositions} Position(s)
                   </div>
                 </div>
 

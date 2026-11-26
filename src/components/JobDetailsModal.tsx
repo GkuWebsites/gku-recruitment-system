@@ -145,6 +145,10 @@ export function JobDetailsModal({
       ? customLevelInput.trim() || 'Other'
       : editPostLevel;
 
+    const effectiveBudget = isHR
+      ? editBudget.trim() || request.tentativeBudget || 'To be decided by HR'
+      : request.tentativeBudget;
+
     try {
       const res = await fetch(`/api/requests/${request.requestId}`, {
         method: 'PATCH',
@@ -153,7 +157,7 @@ export function JobDetailsModal({
           postTitle: editTitle.trim(),
           postLevel: effectiveLevel,
           numberOfPositions: Number(editPositions),
-          tentativeBudget: editBudget.trim(),
+          tentativeBudget: effectiveBudget,
           justification: editJustification.trim(),
           requiredQualifications: editQualifications.trim(),
           experienceRequired: editExperience.trim(),
@@ -360,7 +364,7 @@ export function JobDetailsModal({
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className={`grid grid-cols-1 ${isHR ? 'sm:grid-cols-3' : 'sm:grid-cols-1'} gap-3`}>
                   <div>
                     <label className="block font-semibold text-slate-700 mb-1">
                       Openings / Positions:
@@ -392,17 +396,19 @@ export function JobDetailsModal({
                     </div>
                   </div>
 
-                  <div className="sm:col-span-2">
-                    <label className="block font-semibold text-slate-700 mb-1">
-                      Budgeted Salary Head:
-                    </label>
-                    <input
-                      type="text"
-                      value={editBudget}
-                      onChange={(e) => setEditBudget(e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl p-2.5 font-medium text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                    />
-                  </div>
+                  {isHR && (
+                    <div className="sm:col-span-2">
+                      <label className="block font-semibold text-slate-700 mb-1">
+                        Budgeted Salary Head:
+                      </label>
+                      <input
+                        type="text"
+                        value={editBudget}
+                        onChange={(e) => setEditBudget(e.target.value)}
+                        className="w-full bg-white border border-slate-200 rounded-xl p-2.5 font-medium text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -491,8 +497,8 @@ export function JobDetailsModal({
           ) : (
             /* ================= VIEW MODE ================= */
             <div className="space-y-4">
-              {/* 4 Clean Summary Cards */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {/* Clean Summary Cards */}
+              <div className={`grid grid-cols-2 ${isHR ? 'sm:grid-cols-4' : 'sm:grid-cols-3'} gap-3`}>
                 <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-200/80">
                   <div className="text-[11px] font-semibold text-slate-500">Department</div>
                   <div className="text-xs font-bold text-slate-900 mt-0.5 truncate">{request.department}</div>
@@ -508,10 +514,12 @@ export function JobDetailsModal({
                   <div className="text-xs font-bold text-slate-900 mt-0.5">{request.numberOfPositions} Vacancy(s)</div>
                 </div>
 
-                <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-200/80">
-                  <div className="text-[11px] font-semibold text-slate-500">Budget Head</div>
-                  <div className="text-xs font-bold text-slate-900 mt-0.5 truncate">{request.tentativeBudget}</div>
-                </div>
+                {isHR && (
+                  <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-200/80">
+                    <div className="text-[11px] font-semibold text-slate-500">Budget Head</div>
+                    <div className="text-xs font-bold text-slate-900 mt-0.5 truncate">{request.tentativeBudget}</div>
+                  </div>
+                )}
               </div>
 
               {/* Workforce Need & Teaching Load */}

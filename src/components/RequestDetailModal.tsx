@@ -64,6 +64,7 @@ export function RequestDetailModal({
     request.status === 'Rejected' ||
     (request.deanAcademicApproval && request.deanAcademicApproval.decision === 'Approved');
 
+  const isHR = currentRole === 'HR Department' || currentRole === 'Admin (System)';
   const canDeanEdit = (currentRole === 'Department / Dean') && !isReviewedByDeanAcademic;
 
   const handleSaveDeanEdit = async (e: React.FormEvent) => {
@@ -82,7 +83,7 @@ export function RequestDetailModal({
           postTitle: editTitle.trim(),
           postLevel: editPostLevel,
           numberOfPositions: Number(editPositions),
-          tentativeBudget: editBudget.trim(),
+          tentativeBudget: request.tentativeBudget || 'To be decided by HR',
           justification: editJustification.trim(),
           requiredQualifications: editQualifications.trim(),
           experienceRequired: editExperience.trim()
@@ -140,8 +141,12 @@ export function RequestDetailModal({
 
             <div className="flex flex-wrap items-center gap-2.5 text-xs text-slate-500 pt-0.5">
               <span>Openings: <strong className="text-slate-800">{request.numberOfPositions} Position(s)</strong></span>
-              <span>•</span>
-              <span>Package: <strong className="text-slate-800">{request.tentativeBudget}</strong></span>
+              {isHR && (
+                <>
+                  <span>•</span>
+                  <span>Package: <strong className="text-slate-800">{request.tentativeBudget}</strong></span>
+                </>
+              )}
               <span>•</span>
               <span>Status: <strong className="text-blue-700">{request.status}</strong></span>
             </div>
@@ -227,7 +232,7 @@ export function RequestDetailModal({
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3">
                 <div>
                   <label className="block font-bold text-slate-700 uppercase tracking-wider text-[10px] mb-1">
                     Number of Openings *
@@ -240,17 +245,6 @@ export function RequestDetailModal({
                     onChange={(e) => setEditPositions(Number(e.target.value))}
                     className="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 font-bold text-slate-800 bg-white"
                     required
-                  />
-                </div>
-                <div>
-                  <label className="block font-bold text-slate-700 uppercase tracking-wider text-[10px] mb-1">
-                    Budgeted Salary Package
-                  </label>
-                  <input
-                    type="text"
-                    value={editBudget}
-                    onChange={(e) => setEditBudget(e.target.value)}
-                    className="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 font-medium text-slate-800 bg-white"
                   />
                 </div>
               </div>
@@ -314,8 +308,8 @@ export function RequestDetailModal({
           ) : (
             /* SIMPLE JOB DETAILS */
             <div className="space-y-4">
-              {/* 4 Summary Metrics */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50/80 p-3.5 rounded-xl border border-slate-200/80 text-xs">
+              {/* Summary Metrics */}
+              <div className={`grid grid-cols-2 ${isHR ? 'sm:grid-cols-4' : 'sm:grid-cols-3'} gap-3 bg-slate-50/80 p-3.5 rounded-xl border border-slate-200/80 text-xs`}>
                 <div>
                   <span className="text-[10px] font-semibold text-slate-400 block uppercase tracking-wider">Department</span>
                   <span className="font-bold text-slate-900 mt-0.5 block">{request.department}</span>
@@ -328,10 +322,12 @@ export function RequestDetailModal({
                   <span className="text-[10px] font-semibold text-slate-400 block uppercase tracking-wider">Positions</span>
                   <span className="font-bold text-slate-900 mt-0.5 block">{request.numberOfPositions} Position(s)</span>
                 </div>
-                <div>
-                  <span className="text-[10px] font-semibold text-slate-400 block uppercase tracking-wider">Budgeted Salary</span>
-                  <span className="font-bold text-slate-900 mt-0.5 block">{request.tentativeBudget}</span>
-                </div>
+                {isHR && (
+                  <div>
+                    <span className="text-[10px] font-semibold text-slate-400 block uppercase tracking-wider">Budgeted Salary</span>
+                    <span className="font-bold text-slate-900 mt-0.5 block">{request.tentativeBudget}</span>
+                  </div>
+                )}
               </div>
 
               {/* Justification Box */}

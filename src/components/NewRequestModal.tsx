@@ -198,7 +198,7 @@ export function NewRequestModal({
           postLevel: effectiveDesignation,
           numberOfPositions: Number(numberOfPositions),
           urgency: priority,
-          tentativeBudget: salaryScale,
+          tentativeBudget: isHR ? salaryScale : 'To be decided by HR',
           justification: justification.trim(),
           requiredQualifications: qualifications.trim(),
           experienceRequired: experience.trim(),
@@ -530,8 +530,8 @@ export function NewRequestModal({
                 />
               </div>
 
-              {/* Positions, Urgency & Budget */}
-              <div className="grid grid-cols-3 gap-3">
+              {/* Positions, Urgency & (HR only) Budget */}
+              <div className={`grid ${isHR ? 'grid-cols-3' : 'grid-cols-2'} gap-3`}>
                 <div>
                   <label className="text-xs font-semibold text-slate-700 mb-1.5 block">
                     Positions
@@ -562,18 +562,20 @@ export function NewRequestModal({
                   </select>
                 </div>
 
-                <div>
-                  <label className="text-xs font-semibold text-slate-700 mb-1.5 block">
-                    Budget / Salary
-                  </label>
-                  <input
-                    type="text"
-                    value={salaryScale}
-                    onChange={(e) => setSalaryScale(e.target.value)}
-                    placeholder="₹8,40,000 – ₹10,80,000"
-                    className="w-full bg-white border border-slate-200 rounded-xl p-2.5 font-medium text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none truncate"
-                  />
-                </div>
+                {isHR && (
+                  <div>
+                    <label className="text-xs font-semibold text-slate-700 mb-1.5 block">
+                      Budget / Salary
+                    </label>
+                    <input
+                      type="text"
+                      value={salaryScale}
+                      onChange={(e) => setSalaryScale(e.target.value)}
+                      placeholder="₹8,40,000 – ₹10,80,000"
+                      className="w-full bg-white border border-slate-200 rounded-xl p-2.5 font-medium text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none truncate"
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Requirement Document Upload */}
