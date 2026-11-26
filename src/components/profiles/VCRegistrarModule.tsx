@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { IHiringRequest } from '@/lib/types';
+import { IHiringRequest, Candidate } from '@/lib/types';
 import {
   CheckCircle2,
   Clock,
@@ -15,7 +15,9 @@ import {
   Ban,
   ShieldCheck,
   Users,
-  MessageSquare
+  MessageSquare,
+  FileText,
+  Download
 } from 'lucide-react';
 
 import { ClarificationThreadChat } from '../ClarificationThreadChat';
@@ -33,7 +35,7 @@ interface VCRegistrarModuleProps {
   } | null;
 }
 
-type VCTab = 'pendingSanction' | 'inClarification' | 'sanctionedHistory';
+type VCTab = 'pendingSanction' | 'inClarification' | 'sanctionedHistory' | 'cvApprovals';
 
 export function VCRegistrarModule({
   requests,
@@ -55,6 +57,45 @@ export function VCRegistrarModule({
   const [isProcessing, setIsProcessing] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
   const [openChatReqIds, setOpenChatReqIds] = useState<{ [reqId: string]: boolean }>({});
+
+  // CV Review States
+  const [reviewingCand, setReviewingCand] = useState<{ req: IHiringRequest; cand: Candidate } | null>(null);
+  const [cvDecision, setCvDecision] = useState<'Approved' | 'Rejected'>('Approved');
+  const [cvRemarks, setCvRemarks] = useState('');
+  const [isSubmittingCv, setIsSubmittingCv] = useState(false);
+
+  // Handle Review CV
+  const handleReviewCv = async (req: IHiringRequest, cand: Candidate, decision: 'Approved' | 'Rejected', remarks?: string) => {
+    setIsSubmittingCv(true);
+    setModalError('');
+    try {
+      const res = await fetch('/api/hr', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'review_cv',
+          requestId: req.requestId,
+          candidateId: cand.id,
+          decision,
+          remarks: remarks || (decision === 'Approved' ? 'CV Approved for interview assessment' : 'CV Rejected by Executive Authority'),
+          reviewerRole: currentUser?.designation || 'Vice-Chancellor (VC)',
+          reviewerName: currentUser?.name || 'Executive Authority'
+        })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Failed to review candidate CV');
+      }
+      setSuccessMsg(`✓ Candidate CV for ${cand.fullName} marked as ${decision}.`);
+      setReviewingCand(null);
+      setCvRemarks('');
+      onRefresh();
+    } catch (err: any) {
+      setModalError(err.message || 'Error processing CV review');
+    } finally {
+      setIsSubmittingCv(false);
+    }
+  };
 
   const toggleReqChat = (reqId: string) => {
     setOpenChatReqIds((prev) => ({
@@ -110,6 +151,21 @@ export function VCRegistrarModule({
       ].includes(r.status) ||
       (r.status === 'Rejected' && r.vcRegistrarApproval?.decision === 'Rejected')
   );
+
+  // 4. CV Approvals Queue (Sent to VC / Registrar by HR)
+  const cvApprovalCandidates: { request: IHiringRequest; candidate: Candidate }[] = [];
+  requests.forEach((req) => {
+    if (req.candidates && req.candidates.length > 0) {
+      req.candidates.forEach((cand) => {
+        if (
+          cand.cvApproval &&
+          cand.cvApproval.sentTo.some((t) => t.includes('VC') || t.includes('Registrar') || t === 'Vice-Chancellor (VC)')
+        ) {
+          cvApprovalCandidates.push({ request: req, candidate: cand });
+        }
+      });
+    }
+  });
 
   let baseList: IHiringRequest[] = [];
   if (activeTab === 'pendingSanction') baseList = pendingSanction;
@@ -343,6 +399,19 @@ export function VCRegistrarModule({
           <CheckCircle2 className="w-4 h-4 text-blue-600" />
           <span>3. Sanctioned & Released to HR ({sanctionedHistory.length})</span>
         </button>
+
+        {/* Tab 4: Candidate CV Approvals */}
+        <button
+          onClick={() => setActiveTab('cvApprovals')}
+          className={`py-3.5 px-4 border-b-2 transition flex items-center space-x-2 cursor-pointer ${
+            activeTab === 'cvApprovals'
+              ? 'border-indigo-600 text-indigo-900 font-extrabold bg-indigo-50/40 rounded-t-lg'
+              : 'border-transparent text-slate-500 hover:text-slate-800'
+          }`}
+        >
+          <FileText className="w-4 h-4 text-indigo-600" />
+          <span>4. Candidate CV Approvals ({cvApprovalCandidates.length})</span>
+        </button>
       </div>
 
       {/* Main Content Card */}
@@ -365,7 +434,134 @@ export function VCRegistrarModule({
         </div>
 
         {/* Clarification Desk Tab or Standard Data Table */}
-        {activeTab === 'inClarification' ? (
+        {activeTab === 'cvApprovals' ? (
+          <div className="p-6 space-y-4">
+            {cvApprovalCandidates.length === 0 ? (
+              <div className="py-12 text-center text-slate-400 text-xs space-y-2">
+                <FileText className="w-8 h-8 mx-auto text-slate-300" />
+                <div className="font-semibold text-slate-600">No Candidate CVs Pending Approval</div>
+                <p className="text-[11px] text-slate-400">
+                  When HR uploads candidate resumes and requests executive approval, they will appear here.
+                </p>
+              </div>
+            ) : (
+              cvApprovalCandidates.map(({ request: req, candidate: cand }) => {
+                const userReview = cand.cvApproval?.reviews?.find(
+                  (r) =>
+                    r.reviewerRole === currentUser?.designation ||
+                    (currentUser?.designation === 'Vice Chancellor' && r.reviewerRole.includes('VC')) ||
+                    (currentUser?.designation === 'Registrar' && r.reviewerRole.includes('Registrar'))
+                );
+
+                return (
+                  <div
+                    key={`${req.requestId}-${cand.id}`}
+                    className="p-5 bg-white border border-slate-200/90 rounded-2xl shadow-xs space-y-3.5 hover:border-slate-300 transition"
+                  >
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div>
+                        <div className="flex items-center space-x-2">
+                          <span className="font-mono text-xs font-bold text-purple-900 bg-purple-50 px-2.5 py-0.5 rounded border border-purple-200">
+                            {req.requestId}
+                          </span>
+                          <span className="text-xs font-semibold text-slate-500">{req.department}</span>
+                          <span className="text-slate-300">•</span>
+                          <span className="text-xs font-bold text-slate-800">{req.postTitle}</span>
+                        </div>
+                        <h4 className="text-base font-extrabold text-slate-900 mt-1">
+                          {cand.fullName}
+                        </h4>
+                        <div className="text-xs text-slate-500 mt-0.5">
+                          {cand.qualification} • {cand.experienceYears} Years Exp • Affiliation: {cand.currentAffiliation || 'Independent'}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center space-x-2">
+                        {cand.resumeFileName && (
+                          <a
+                            href={`/uploads/resumes/${cand.resumeFileName}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200 rounded-xl text-xs font-bold transition shadow-xs"
+                          >
+                            <Download className="w-3.5 h-3.5 text-blue-600" />
+                            <span>View CV ({cand.resumeFileName})</span>
+                          </a>
+                        )}
+
+                        {cand.cvApproval && (
+                          <span
+                            className={`px-2.5 py-1 rounded-full text-[11px] font-bold border ${
+                              cand.cvApproval.status === 'Approved'
+                                ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                                : cand.cvApproval.status === 'Rejected'
+                                ? 'bg-rose-50 text-rose-800 border-rose-300'
+                                : 'bg-amber-50 text-amber-900 border-amber-300'
+                            }`}
+                          >
+                            Status: {cand.cvApproval.status}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Review history */}
+                    {cand.cvApproval?.reviews && cand.cvApproval.reviews.length > 0 && (
+                      <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/70 text-xs space-y-1">
+                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
+                          Recorded Leadership Reviews:
+                        </span>
+                        {cand.cvApproval.reviews.map((rev, rIdx) => (
+                          <div key={rIdx} className="text-slate-700 flex items-center space-x-2">
+                            <span className={rev.decision === 'Approved' ? 'text-emerald-700 font-bold' : 'text-rose-700 font-bold'}>
+                              {rev.decision === 'Approved' ? '✓' : '✕'} {rev.reviewerRole} ({rev.reviewerName}): {rev.decision}
+                            </span>
+                            {rev.remarks && <span className="text-slate-500 italic">&ldquo;{rev.remarks}&rdquo;</span>}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Action buttons */}
+                    <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100">
+                      <div className="text-xs text-slate-500">
+                        {userReview ? (
+                          <span className="font-semibold text-purple-900">
+                            Your verdict: <strong className={userReview.decision === 'Approved' ? 'text-emerald-700' : 'text-rose-700'}>{userReview.decision}</strong> ({userReview.remarks || 'No remarks'})
+                          </span>
+                        ) : (
+                          <span className="text-amber-800 font-medium">
+                            Awaiting your statutory executive decision.
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="flex items-center space-x-2">
+                        <button
+                          type="button"
+                          disabled={isSubmittingCv}
+                          onClick={() => handleReviewCv(req, cand, 'Rejected', 'Qualifications do not meet minimum department bar')}
+                          className="px-3.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl text-xs font-bold transition disabled:opacity-50 cursor-pointer"
+                        >
+                          ✕ Reject CV
+                        </button>
+
+                        <button
+                          type="button"
+                          disabled={isSubmittingCv}
+                          onClick={() => handleReviewCv(req, cand, 'Approved', 'CV cleared for interview scheduling')}
+                          className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition shadow-xs disabled:opacity-50 cursor-pointer"
+                        >
+                          ✓ Approve CV & Clear
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        ) : activeTab === 'inClarification' ? (
           <div className="p-6 space-y-6">
             {displayedList.length === 0 ? (
               <div className="p-12 text-center text-slate-400">
@@ -398,7 +594,7 @@ export function VCRegistrarModule({
                           </span>
                         </div>
                         <div className="text-xs text-slate-500">
-                          {req.department} • {req.numberOfPositions} Position(s) • Budget: {req.tentativeBudget} • Submitter: {req.creator.name}
+                          {req.department} • {req.numberOfPositions} Position(s) • Submitter: {req.creator.name}
                         </div>
                       </div>
 
@@ -459,7 +655,6 @@ export function VCRegistrarModule({
                   <th className="py-3.5 px-6">Requisition ID</th>
                   <th className="py-3.5 px-6">Department & Post</th>
                   <th className="py-3.5 px-6">Positions</th>
-                  <th className="py-3.5 px-6">Salary Scale / Package</th>
                   <th className="py-3.5 px-6">Dean Academic Clearance Remarks</th>
                   <th className="py-3.5 px-6 text-right">Action</th>
                 </tr>
@@ -467,7 +662,7 @@ export function VCRegistrarModule({
               <tbody className="divide-y divide-slate-100">
                 {displayedList.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="py-12 text-center text-slate-400">
+                    <td colSpan={5} className="py-12 text-center text-slate-400">
                       {activeTab === 'pendingSanction' && 'No requisitions currently awaiting administrative sanction.'}
                       {activeTab === 'sanctionedHistory' && 'No sanctioned requisitions found.'}
                     </td>
@@ -490,9 +685,6 @@ export function VCRegistrarModule({
                       </td>
                       <td className="py-4 px-6 font-bold text-slate-800">
                         {req.numberOfPositions} Position(s)
-                      </td>
-                      <td className="py-4 px-6 font-semibold text-slate-700">
-                        {req.tentativeBudget}
                       </td>
 
                       {/* Column 5: Clearance Remarks */}

@@ -9,6 +9,7 @@ import { DeanDepartmentModule } from '@/components/profiles/DeanDepartmentModule
 import { VCRegistrarModule } from '@/components/profiles/VCRegistrarModule';
 import { HRDepartmentModule } from '@/components/profiles/HRDepartmentModule';
 import { DeanAcademicModule } from '@/components/profiles/DeanAcademicModule';
+import { ExpertInterviewWorkspace } from '@/components/profiles/ExpertInterviewWorkspace';
 import { NewRequestModal } from '@/components/NewRequestModal';
 import { RequestDetailModal } from '@/components/RequestDetailModal';
 import { TimelineModal } from '@/components/TimelineModal';
@@ -69,16 +70,15 @@ export default function HomePage() {
     if (!currentUser) return;
     try {
       // Map designation to query role
-      const isDeanOrHod =
+      const isDeanOrDirector =
         currentUser.designation === 'Dean' ||
-        currentUser.designation === 'Director' ||
-        currentUser.designation === 'HOD';
+        currentUser.designation === 'Director';
       const isVCRegistrar =
         currentUser.designation === 'VC / Registrar' ||
         currentUser.designation === 'Vice Chancellor' ||
         currentUser.designation === 'Registrar';
 
-      const roleQuery = isDeanOrHod
+      const roleQuery = isDeanOrDirector
         ? 'Department / Dean'
         : currentUser.designation === 'Dean Academic'
           ? 'Dean Academic'
@@ -86,7 +86,9 @@ export default function HomePage() {
             ? 'VC / Registrar'
             : currentUser.designation === 'HR'
               ? 'HR Department'
-              : 'Dean Academic';
+              : currentUser.designation === 'Expert'
+                ? 'Expert Panel'
+                : 'Dean Academic';
 
       const queryParams = new URLSearchParams({
         role: roleQuery,
@@ -262,15 +264,14 @@ export default function HomePage() {
     );
   }
 
-  // 3. IF LOGGED IN AS DEAN / HOD / DIRECTOR: Dedicated Faculty/Department Workspace
+  // 3. IF LOGGED IN AS DEAN / DIRECTOR: Dedicated Faculty/Department Workspace
   if (
     currentUser.designation === 'Dean' ||
-    currentUser.designation === 'Director' ||
-    currentUser.designation === 'HOD'
+    currentUser.designation === 'Director'
   ) {
     return (
       <div className="min-h-screen bg-[#f8fafc] text-slate-800 flex flex-col">
-        {/* Clean Header for Dean/HOD with Profile Settings Dropdown */}
+        {/* Clean Header for Dean/Director with Profile Settings Dropdown */}
         <header className="w-full bg-white border-b border-slate-200 shadow-xs sticky top-0 z-40">
           <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 flex items-center justify-between h-20">
             <UniversityLogo />
@@ -281,7 +282,7 @@ export default function HomePage() {
                 designation={currentUser.designation}
                 department={currentUser.department || 'Faculty'}
                 onLogout={handleLogout}
-                badgeText={currentUser.designation === 'HOD' ? 'HOD' : currentUser.name.charAt(0)}
+                badgeText={currentUser.name.charAt(0)}
                 badgeBgColor="bg-blue-600"
               />
             </div>
@@ -457,7 +458,39 @@ export default function HomePage() {
     );
   }
 
-  // 6. DEFAULT FALLBACK: Dean Academic
+  // 6. IF LOGGED IN AS EXPERT: Dedicated Subject Expert Panel Workspace
+  if (currentUser.designation === 'Expert') {
+    return (
+      <div className="min-h-screen bg-[#f8fafc] text-slate-800 flex flex-col">
+        <header className="w-full bg-white border-b border-slate-200 shadow-xs sticky top-0 z-40">
+          <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 flex items-center justify-between h-20">
+            <UniversityLogo />
+            <div className="flex items-center space-x-4">
+              <UserProfileHeaderMenu
+                name={currentUser.name}
+                email={currentUser.email}
+                designation={currentUser.designation}
+                department={currentUser.department || 'Expert Panel'}
+                onLogout={handleLogout}
+                badgeText="EX"
+                badgeBgColor="bg-amber-600"
+              />
+            </div>
+          </div>
+        </header>
+
+        <main className="flex-1 w-full max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 py-8">
+          <ExpertInterviewWorkspace
+            requests={requests}
+            currentUser={currentUser}
+            onRefresh={fetchRequests}
+          />
+        </main>
+      </div>
+    );
+  }
+
+  // 7. DEFAULT FALLBACK: Dean Academic
   return (
     <div className="min-h-screen bg-[#f8fafc] text-slate-800 flex flex-col">
       <header className="w-full bg-white border-b border-slate-200 shadow-xs sticky top-0 z-40">

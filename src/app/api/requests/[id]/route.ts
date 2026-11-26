@@ -49,7 +49,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       userRole === 'Admin' ||
       userRole === 'System Administrator';
 
-    // If Dean / HOD: can ONLY edit UNTIL reviewed by Dean Academic
+    // If Department Dean: can ONLY edit UNTIL reviewed by Dean Academic
     if (!isHRorAdmin) {
       const isReviewedByDeanAcademic =
         (existing.currentStage || 1) >= 3 ||
@@ -113,7 +113,7 @@ export async function DELETE(req: NextRequest, { params }: Params) {
       userRole === 'Admin' ||
       userRole === 'System Administrator';
 
-    // If Dean / HOD: can ONLY delete UNTIL reviewed by Dean Academic
+    // If Department Dean: can ONLY delete UNTIL reviewed by Dean Academic
     if (!isHRorAdmin) {
       const isReviewedByDeanAcademic =
         (existing.currentStage || 1) >= 3 ||

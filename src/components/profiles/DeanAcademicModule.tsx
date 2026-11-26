@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { IHiringRequest } from '@/lib/types';
+import { IHiringRequest, Candidate } from '@/lib/types';
 import {
   GraduationCap,
   CheckCircle2,
@@ -20,7 +20,9 @@ import {
   Eye,
   CheckCheck,
   ShieldCheck,
-  UserCheck
+  UserCheck,
+  FileText,
+  Download
 } from 'lucide-react';
 
 import { ClarificationThreadChat } from '../ClarificationThreadChat';
@@ -37,7 +39,7 @@ interface DeanAcademicModuleProps {
   } | null;
 }
 
-type DeanAcademicTab = 'pending' | 'clarifications' | 'forwarded_vc' | 'sanctioned';
+type DeanAcademicTab = 'pending' | 'clarifications' | 'forwarded_vc' | 'sanctioned' | 'cvApprovals';
 
 export function DeanAcademicModule({
   requests,
@@ -58,6 +60,52 @@ export function DeanAcademicModule({
   const [modalError, setModalError] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [actionSuccessMsg, setActionSuccessMsg] = useState('');
+  const [isSubmittingCv, setIsSubmittingCv] = useState(false);
+
+  // Candidates with CV sent for Dean Academic approval
+  const deanAcademicCvCandidates: { request: IHiringRequest; candidate: Candidate }[] = [];
+  requests.forEach((req) => {
+    if (req.candidates && req.candidates.length > 0) {
+      req.candidates.forEach((cand) => {
+        if (
+          cand.cvApproval &&
+          cand.cvApproval.sentTo.some((t) => t === 'Dean Academic')
+        ) {
+          deanAcademicCvCandidates.push({ request: req, candidate: cand });
+        }
+      });
+    }
+  });
+
+  const handleReviewCv = async (req: IHiringRequest, cand: Candidate, decision: 'Approved' | 'Rejected', remarks?: string) => {
+    setIsSubmittingCv(true);
+    setModalError('');
+    try {
+      const res = await fetch('/api/hr', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'review_cv',
+          requestId: req.requestId,
+          candidateId: cand.id,
+          decision,
+          remarks: remarks || (decision === 'Approved' ? 'Academic qualification cleared for interview' : 'Academic qualifications not aligned with department mandate'),
+          reviewerRole: 'Dean Academic',
+          reviewerName: currentUser?.name || 'Dean Academic Affairs'
+        })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Failed to review candidate CV');
+      }
+      setActionSuccessMsg(`✓ Candidate CV for ${cand.fullName} marked as ${decision}.`);
+      onRefresh();
+    } catch (err: any) {
+      setModalError(err.message || 'Error processing CV review');
+    } finally {
+      setIsSubmittingCv(false);
+    }
+  };
 
   // Helpers to analyze clarification state
   const hasClarificationDialogue = (r: IHiringRequest) => {
@@ -413,6 +461,25 @@ export function DeanAcademicModule({
           <span>4. Approved / Sanctioned</span>
           <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-900">
             {sanctionedQueue.length}
+          </span>
+        </button>
+
+        {/* Tab 5: Candidate CV Approvals */}
+        <button
+          onClick={() => {
+            setActiveTab('cvApprovals');
+            setShowRejectionsHistory(false);
+          }}
+          className={`py-3.5 px-4 border-b-2 transition flex items-center space-x-2 cursor-pointer ${
+            activeTab === 'cvApprovals'
+              ? 'border-indigo-600 text-indigo-900 bg-indigo-50/40 rounded-t-lg font-extrabold'
+              : 'border-transparent text-slate-500 hover:text-slate-800'
+          }`}
+        >
+          <FileText className="w-4 h-4 text-indigo-600" />
+          <span>5. Candidate CV Approvals</span>
+          <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-indigo-100 text-indigo-900">
+            {deanAcademicCvCandidates.length}
           </span>
         </button>
       </div>
@@ -837,6 +904,135 @@ export function DeanAcademicModule({
                 )}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {/* ======================================================== */}
+        {/* TAB 5: CANDIDATE CV APPROVALS */}
+        {/* ======================================================== */}
+        {activeTab === 'cvApprovals' && (
+          <div className="p-6 space-y-4">
+            {deanAcademicCvCandidates.length === 0 ? (
+              <div className="py-12 text-center text-slate-400 text-xs space-y-2">
+                <FileText className="w-8 h-8 mx-auto text-slate-300" />
+                <div className="font-semibold text-slate-600">No Candidate CVs Pending Academic Clearance</div>
+                <p className="text-[11px] text-slate-400">
+                  When HR uploads candidate resumes and requests Dean Academic clearance, they will appear here.
+                </p>
+              </div>
+            ) : (
+              deanAcademicCvCandidates.map(({ request: req, candidate: cand }) => {
+                const deanReview = cand.cvApproval?.reviews?.find(
+                  (r) => r.reviewerRole === 'Dean Academic'
+                );
+
+                return (
+                  <div
+                    key={`${req.requestId}-${cand.id}`}
+                    className="p-5 bg-white border border-slate-200/90 rounded-2xl shadow-xs space-y-3.5 hover:border-slate-300 transition"
+                  >
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div>
+                        <div className="flex items-center space-x-2">
+                          <span className="font-mono text-xs font-bold text-amber-900 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                            {req.requestId}
+                          </span>
+                          <span className="text-xs font-semibold text-slate-500">{req.department}</span>
+                          <span className="text-slate-300">•</span>
+                          <span className="text-xs font-bold text-slate-800">{req.postTitle}</span>
+                        </div>
+                        <h4 className="text-base font-extrabold text-slate-900 mt-1">
+                          {cand.fullName}
+                        </h4>
+                        <div className="text-xs text-slate-500 mt-0.5">
+                          {cand.qualification} • {cand.experienceYears} Years Exp • Affiliation: {cand.currentAffiliation || 'Independent'}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center space-x-2">
+                        {cand.resumeFileName && (
+                          <a
+                            href={`/uploads/resumes/${cand.resumeFileName}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200 rounded-xl text-xs font-bold transition shadow-xs"
+                          >
+                            <Download className="w-3.5 h-3.5 text-blue-600" />
+                            <span>Download CV ({cand.resumeFileName})</span>
+                          </a>
+                        )}
+
+                        {cand.cvApproval && (
+                          <span
+                            className={`px-2.5 py-1 rounded-full text-[11px] font-bold border ${
+                              cand.cvApproval.status === 'Approved'
+                                ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                                : cand.cvApproval.status === 'Rejected'
+                                ? 'bg-rose-50 text-rose-800 border-rose-300'
+                                : 'bg-amber-50 text-amber-900 border-amber-300'
+                            }`}
+                          >
+                            Status: {cand.cvApproval.status}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Review history */}
+                    {cand.cvApproval?.reviews && cand.cvApproval.reviews.length > 0 && (
+                      <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/70 text-xs space-y-1">
+                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
+                          Recorded Leadership Reviews:
+                        </span>
+                        {cand.cvApproval.reviews.map((rev, rIdx) => (
+                          <div key={rIdx} className="text-slate-700 flex items-center space-x-2">
+                            <span className={rev.decision === 'Approved' ? 'text-emerald-700 font-bold' : 'text-rose-700 font-bold'}>
+                              {rev.decision === 'Approved' ? '✓' : '✕'} {rev.reviewerRole} ({rev.reviewerName}): {rev.decision}
+                            </span>
+                            {rev.remarks && <span className="text-slate-500 italic">&ldquo;{rev.remarks}&rdquo;</span>}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Action buttons */}
+                    <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100">
+                      <div className="text-xs text-slate-500">
+                        {deanReview ? (
+                          <span className="font-semibold text-blue-900">
+                            Your verdict: <strong className={deanReview.decision === 'Approved' ? 'text-emerald-700' : 'text-rose-700'}>{deanReview.decision}</strong> ({deanReview.remarks || 'No remarks'})
+                          </span>
+                        ) : (
+                          <span className="text-amber-800 font-medium">
+                            Awaiting your academic qualification scrutiny.
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="flex items-center space-x-2">
+                        <button
+                          type="button"
+                          disabled={isSubmittingCv}
+                          onClick={() => handleReviewCv(req, cand, 'Rejected', 'Qualifications do not align with UGC / statutory norms')}
+                          className="px-3.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl text-xs font-bold transition disabled:opacity-50 cursor-pointer"
+                        >
+                          ✕ Reject CV
+                        </button>
+
+                        <button
+                          type="button"
+                          disabled={isSubmittingCv}
+                          onClick={() => handleReviewCv(req, cand, 'Approved', 'Academic qualifications aligned and cleared for interview')}
+                          className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition shadow-xs disabled:opacity-50 cursor-pointer"
+                        >
+                          ✓ Approve Academic CV
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            )}
           </div>
         )}
       </div>

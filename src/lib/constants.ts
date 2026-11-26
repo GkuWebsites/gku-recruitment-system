@@ -18,7 +18,7 @@ export const UNIVERSITY_DEPARTMENTS: AcademicDepartment[] = [
 export const USER_ROLES: { id: UserRole; label: string; description: string; avatar: string }[] = [
   {
     id: 'Department / Dean',
-    label: 'Department Dean / HOD',
+    label: 'Department Dean',
     description: 'Raise requests, view department status, reply to clarifications',
     avatar: 'D'
   },
@@ -45,6 +45,12 @@ export const USER_ROLES: { id: UserRole; label: string; description: string; ava
     label: 'System Administrator',
     description: 'Complete institutional visibility, audit logs & system setup',
     avatar: 'SA'
+  },
+  {
+    id: 'Expert Panel',
+    label: 'Subject Expert / Panelist',
+    description: 'Review assigned interviews, evaluate candidates and score out of 50',
+    avatar: 'EX'
   }
 ];
 

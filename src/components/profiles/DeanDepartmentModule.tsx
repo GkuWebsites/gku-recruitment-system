@@ -144,7 +144,7 @@ export function DeanDepartmentModule({
         body: JSON.stringify({
           action: 'clarification_reply',
           requestId,
-          actorName: `Dean / Director / HOD (${selectedDept})`,
+          actorName: `Dean / Director (${selectedDept})`,
           remarks: text.trim()
         })
       });

@@ -76,10 +76,10 @@ const DEFAULT_ACCOUNTS: {
     status: 'Active'
   },
   {
-    name: 'Head of Department (CSE)',
-    email: 'hod@gku.ac.in',
+    name: 'Prof. (Dr.) Harpreet Singh (Subject Expert)',
+    email: 'expert@gku.ac.in',
     password: 'admin123',
-    designation: 'HOD',
+    designation: 'Expert',
     department: 'Computer Science & Engineering',
     phone: '+91 98721 00008',
     status: 'Active'

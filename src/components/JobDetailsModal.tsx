@@ -87,7 +87,7 @@ export function JobDetailsModal({
     currentUser?.designation === 'Admin' ||
     currentUser?.role === 'HR';
 
-  // Edit/Delete condition: HR can edit & delete anytime. Dean/HOD can ONLY edit & delete UNTIL reviewed by Dean Academic!
+  // Edit/Delete condition: HR can edit & delete anytime. Department Dean can ONLY edit & delete UNTIL reviewed by Dean Academic!
   const isReviewedByDeanAcademic =
     (request.currentStage || 1) >= 3 ||
     request.status === 'Approved by Dean Academic' ||

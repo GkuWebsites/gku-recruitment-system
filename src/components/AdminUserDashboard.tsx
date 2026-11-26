@@ -147,7 +147,7 @@ export function AdminUserDashboard() {
 
   // Helper to determine assigned department
   const resolveAssignedDepartment = (des: UserDesignation, dept: string) => {
-    if (des === 'Dean' || des === 'HOD' || des === 'Director') {
+    if (des === 'Dean' || des === 'Director' || des === 'Expert') {
       return dept || departments[0] || 'Faculty of Engineering & Technology';
     }
     if (des === 'Vice Chancellor') return "Vice Chancellor's Secretariat";
@@ -329,7 +329,8 @@ export function AdminUserDashboard() {
 
   // Metrics
   const totalCount = users.length;
-  const deansAndHodCount = users.filter((u) => u.designation === 'Dean' || u.designation === 'HOD').length;
+  const deansCount = users.filter((u) => u.designation === 'Dean' || u.designation === 'Director').length;
+  const expertsCount = users.filter((u) => u.designation === 'Expert').length;
   const deanAcademicCount = users.filter((u) => u.designation === 'Dean Academic').length;
   const directorsCount = users.filter((u) => u.designation === 'Director').length;
   const vcCount = users.filter((u) => u.designation === 'Vice Chancellor' || (u.designation === 'VC / Registrar' && u.email.includes('vc'))).length;
@@ -426,8 +427,8 @@ export function AdminUserDashboard() {
         </div>
 
         <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-xs">
-          <div className="text-[11px] font-bold text-blue-700 uppercase">Deans & HODs</div>
-          <div className="text-2xl font-extrabold text-blue-900 mt-1">{deansAndHodCount}</div>
+          <div className="text-[11px] font-bold text-blue-700 uppercase">Department Deans</div>
+          <div className="text-2xl font-extrabold text-blue-900 mt-1">{deansCount}</div>
           <div className="text-[10px] text-slate-400 mt-0.5">Academic Units</div>
         </div>
 
@@ -486,7 +487,7 @@ export function AdminUserDashboard() {
             >
               <option value="All">All Designations</option>
               <option value="Dean">Dean</option>
-              <option value="HOD">HOD (Head of Department)</option>
+              <option value="Expert">Subject Expert / Panelist</option>
               <option value="Dean Academic">Dean Academic</option>
               <option value="Director">Director</option>
               <option value="Vice Chancellor">Vice Chancellor (VC)</option>
@@ -541,8 +542,8 @@ export function AdminUserDashboard() {
                         <span
                           className={`inline-block px-2.5 py-1 rounded-full text-[11px] font-bold border ${u.designation === 'Dean'
                             ? 'bg-blue-50 text-blue-800 border-blue-200'
-                            : u.designation === 'HOD'
-                              ? 'bg-sky-50 text-sky-800 border-sky-200'
+                            : u.designation === 'Expert'
+                              ? 'bg-amber-50 text-amber-800 border-amber-200'
                               : u.designation === 'Dean Academic'
                                 ? 'bg-cyan-50 text-cyan-800 border-cyan-200'
                                 : u.designation === 'Director'
@@ -699,7 +700,7 @@ export function AdminUserDashboard() {
                     className="w-full p-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 font-semibold text-slate-800"
                   >
                     <option value="Dean">Dean</option>
-                    <option value="HOD">Head of Department (HOD)</option>
+                    <option value="Expert">Subject Expert / Panelist</option>
                     <option value="Dean Academic">Dean Academic</option>
                     <option value="Director">Director</option>
                     <option value="Vice Chancellor">Vice Chancellor (VC)</option>
@@ -722,7 +723,7 @@ export function AdminUserDashboard() {
                 </div>
               </div>
 
-              {(createDesignation === 'Dean' || createDesignation === 'HOD' || createDesignation === 'Director') && (
+              {(createDesignation === 'Dean' || createDesignation === 'Director' || createDesignation === 'Expert') && (
                 <div>
                   <div className="flex items-center justify-between mb-1">
                     <label className="font-semibold text-slate-700">
@@ -855,7 +856,7 @@ export function AdminUserDashboard() {
                     className="w-full p-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 font-semibold text-slate-800"
                   >
                     <option value="Dean">Dean</option>
-                    <option value="HOD">Head of Department (HOD)</option>
+                    <option value="Expert">Subject Expert / Panelist</option>
                     <option value="Dean Academic">Dean Academic</option>
                     <option value="Director">Director</option>
                     <option value="Vice Chancellor">Vice Chancellor (VC)</option>
@@ -880,7 +881,7 @@ export function AdminUserDashboard() {
                 </div>
               </div>
 
-              {(editDesignation === 'Dean' || editDesignation === 'HOD' || editDesignation === 'Director') && (
+              {(editDesignation === 'Dean' || editDesignation === 'Director' || editDesignation === 'Expert') && (
                 <div>
                   <div className="flex items-center justify-between mb-1">
                     <label className="font-semibold text-slate-700">

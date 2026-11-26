@@ -179,6 +179,16 @@ export async function POST(req: NextRequest) {
         status: 'Applied'
       };
 
+      if (Array.isArray(body.sendCvApprovalTo) && body.sendCvApprovalTo.length > 0) {
+        newCandidate.cvApproval = {
+          sentTo: body.sendCvApprovalTo,
+          sentAt: timestamp,
+          sentBy: actorName || 'HR Screening Desk',
+          status: 'Pending',
+          reviews: []
+        };
+      }
+
       request.candidates.push(newCandidate);
 
       request.auditTrail.unshift({
@@ -186,15 +196,114 @@ export async function POST(req: NextRequest) {
         action: 'Applicant Resume Registered',
         performedBy: actorName || 'HR Screening Desk',
         role: 'HR Department',
-        details: `Registered applicant ${fullName} (${newCandidate.qualification}, ${newCandidate.experienceYears} yrs exp).`,
+        details: `Registered applicant ${fullName} (${newCandidate.qualification}, ${newCandidate.experienceYears} yrs exp).${newCandidate.cvApproval ? ` CV dispatched for statutory review to: ${newCandidate.cvApproval.sentTo.join(', ')}.` : ''}`,
         timestamp
       });
 
       await request.save();
       return NextResponse.json({
         success: true,
-        message: `Candidate ${fullName} registered successfully`,
+        message: `Candidate ${fullName} registered successfully${newCandidate.cvApproval ? ' and CV sent for approval' : ''}`,
         data: request.candidates
+      });
+    }
+
+    // HR ACTION: Send Candidate CV for Approval to VC, Registrar, Dean Academic
+    if (action === 'send_cv_approval') {
+      const { candidateId, sendTo, actorName } = body;
+
+      const candidateIndex = request.candidates.findIndex((c) => c.id === candidateId);
+      if (candidateIndex === -1) {
+        return NextResponse.json({ success: false, error: 'Candidate not found' }, { status: 404 });
+      }
+
+      const targetList = Array.isArray(sendTo) && sendTo.length > 0
+        ? sendTo
+        : ['Vice-Chancellor (VC)', 'Registrar', 'Dean Academic'];
+
+      const candidate = request.candidates[candidateIndex];
+      candidate.cvApproval = {
+        sentTo: targetList,
+        sentAt: timestamp,
+        sentBy: actorName || 'HR Directorate',
+        status: 'Pending',
+        reviews: candidate.cvApproval?.reviews || []
+      };
+
+      request.candidates[candidateIndex] = candidate;
+
+      request.auditTrail.unshift({
+        id: `audit-${Date.now()}`,
+        action: `CV Sent for Approval (${candidate.fullName})`,
+        performedBy: actorName || 'HR Directorate',
+        role: 'HR Department',
+        details: `Dispatched CV of ${candidate.fullName} for statutory review & clearance to: ${targetList.join(', ')}.`,
+        timestamp
+      });
+
+      await request.save();
+      return NextResponse.json({
+        success: true,
+        message: `CV for ${candidate.fullName} sent for approval to ${targetList.join(', ')}`,
+        data: request
+      });
+    }
+
+    // STATUTORY REVIEW ACTION: Approve or Reject Candidate CV (by VC, Registrar, Dean Academic)
+    if (action === 'review_cv') {
+      const { candidateId, decision, remarks, reviewerRole, reviewerName } = body;
+
+      const candidateIndex = request.candidates.findIndex((c) => c.id === candidateId);
+      if (candidateIndex === -1) {
+        return NextResponse.json({ success: false, error: 'Candidate not found' }, { status: 404 });
+      }
+
+      const candidate = request.candidates[candidateIndex];
+      const revRole = reviewerRole || 'Authority';
+      const revName = reviewerName || revRole;
+
+      candidate.cvApproval = candidate.cvApproval || {
+        sentTo: [revRole],
+        sentAt: timestamp,
+        sentBy: 'System',
+        status: 'Pending',
+        reviews: []
+      };
+
+      // Replace prior review by this reviewer role if present
+      candidate.cvApproval.reviews = candidate.cvApproval.reviews.filter((r) => r.reviewerRole !== revRole);
+      candidate.cvApproval.reviews.push({
+        reviewerRole: revRole,
+        reviewerName: revName,
+        decision: decision || 'Approved',
+        remarks: remarks || '',
+        reviewedAt: timestamp
+      });
+
+      // Status check
+      const hasRejection = candidate.cvApproval.reviews.some((r) => r.decision === 'Rejected');
+      const allApproved = candidate.cvApproval.sentTo.length > 0 &&
+        candidate.cvApproval.sentTo.every((target) =>
+          candidate.cvApproval?.reviews.some((r) => r.reviewerRole === target && r.decision === 'Approved')
+        );
+
+      candidate.cvApproval.status = hasRejection ? 'Rejected' : allApproved ? 'Approved' : 'Pending';
+      request.candidates[candidateIndex] = candidate;
+
+      request.auditTrail.unshift({
+        id: `audit-${Date.now()}`,
+        action: `Candidate CV ${decision === 'Approved' ? 'Approved' : 'Reviewed'} (${candidate.fullName})`,
+        performedBy: revName,
+        role: revRole.includes('VC') || revRole.includes('Registrar') ? 'VC / Registrar' : 'Dean Academic',
+        details: `CV decision: ${decision} by ${revRole} (${revName}).${remarks ? ` Remarks: ${remarks}` : ''}`,
+        timestamp
+      });
+
+      await request.save();
+      return NextResponse.json({
+        success: true,
+        message: `CV for ${candidate.fullName} marked as ${decision}`,
+        data: request
       });
     }
 
@@ -260,9 +369,19 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // HR ACTION 3.2: Record Interview Completion & Score (Out of 10)
+    // HR ACTION 3.2: Record Interview Completion & Score (Out of 50 per Member, or Legacy out of 10)
     if (action === 'evaluate_interview') {
-      const { candidateId, scores, evaluatorRatings, ratingScorecardFile, panelRemarks, recommendation, actorName } = body;
+      const {
+        candidateId,
+        scores,
+        evaluatorRatings,
+        memberEvaluations,
+        decision,
+        ratingScorecardFile,
+        panelRemarks,
+        recommendation,
+        actorName
+      } = body;
 
       const candidateIndex = request.candidates.findIndex((c) => c.id === candidateId);
       if (candidateIndex === -1) {
@@ -270,70 +389,83 @@ export async function POST(req: NextRequest) {
       }
 
       const candidate = request.candidates[candidateIndex];
-      candidate.status = recommendation === 'Not Recommended' ? 'Rejected' : 'Interviewed';
 
-      let avgOutOf10 = 0;
-      if (Array.isArray(evaluatorRatings) && evaluatorRatings.length > 0) {
+      // Handle custom 50-mark member evaluations
+      let avgScore = 0;
+      let scoreScale = 10;
+      if (Array.isArray(memberEvaluations) && memberEvaluations.length > 0) {
+        scoreScale = 50;
+        const total = memberEvaluations.reduce((sum: number, ev: any) => sum + (Number(ev.totalScore) || 0), 0);
+        avgScore = Number((total / memberEvaluations.length).toFixed(1));
+      } else if (Array.isArray(evaluatorRatings) && evaluatorRatings.length > 0) {
         const total = evaluatorRatings.reduce((sum: number, ev: any) => sum + (Number(ev.rating) || 0), 0);
-        avgOutOf10 = Number((total / evaluatorRatings.length).toFixed(1));
+        avgScore = Number((total / evaluatorRatings.length).toFixed(1));
       } else {
         const sKnowledge = Number(scores?.subjectKnowledge) || 0;
         const rPubs = Number(scores?.researchPublications) || 0;
         const tAptitude = Number(scores?.teachingAptitude) || 0;
         const comms = Number(scores?.communication) || 0;
-        avgOutOf10 = Number(((sKnowledge + rPubs + tAptitude + comms) / 4).toFixed(1));
+        avgScore = Number(((sKnowledge + rPubs + tAptitude + comms) / 4).toFixed(1));
       }
 
-      const updatedPanelMembers = Array.isArray(evaluatorRatings) && evaluatorRatings.length > 0
-        ? evaluatorRatings.map((ev: any) => ev.evaluatorName.trim()).filter(Boolean)
-        : candidate.interviewDetails?.panelMembers || ['Selection Committee'];
-
-      if (!candidate.interviewDetails) {
-        candidate.interviewDetails = {
-          date: new Date().toISOString().split('T')[0],
-          panelMembers: updatedPanelMembers,
-          panelRemarks: panelRemarks || 'Interview completed.',
-          scores: {
-            subjectKnowledge: avgOutOf10,
-            researchPublications: avgOutOf10,
-            teachingAptitude: avgOutOf10,
-            communication: avgOutOf10,
-            totalScore: avgOutOf10
-          },
-          recommendation: recommendation || 'Recommend',
-          evaluatorRatings: Array.isArray(evaluatorRatings) ? evaluatorRatings : [],
-          scorecardFile: ratingScorecardFile || ''
-        };
+      // Determine final status
+      if (decision === 'shortlist' || recommendation === 'Strongly Recommend') {
+        candidate.status = 'Shortlisted';
+      } else if (decision === 'reject' || recommendation === 'Not Recommended') {
+        candidate.status = 'Rejected';
       } else {
-        candidate.interviewDetails.scores = {
-          subjectKnowledge: avgOutOf10,
-          researchPublications: avgOutOf10,
-          teachingAptitude: avgOutOf10,
-          communication: avgOutOf10,
-          totalScore: avgOutOf10
-        };
-        candidate.interviewDetails.panelMembers = updatedPanelMembers;
-        if (panelRemarks) candidate.interviewDetails.panelRemarks = panelRemarks;
-        candidate.interviewDetails.recommendation = recommendation || 'Recommend';
-        if (Array.isArray(evaluatorRatings)) candidate.interviewDetails.evaluatorRatings = evaluatorRatings;
-        if (ratingScorecardFile) candidate.interviewDetails.scorecardFile = ratingScorecardFile;
+        candidate.status = 'Interviewed';
       }
+
+      const updatedPanelMembers = Array.isArray(memberEvaluations) && memberEvaluations.length > 0
+        ? memberEvaluations.map((ev: any) => ev.memberName.trim()).filter(Boolean)
+        : Array.isArray(evaluatorRatings) && evaluatorRatings.length > 0
+          ? evaluatorRatings.map((ev: any) => ev.evaluatorName.trim()).filter(Boolean)
+          : candidate.interviewDetails?.panelMembers || ['Selection Committee'];
+
+      candidate.interviewDetails = candidate.interviewDetails || {
+        date: new Date().toISOString().split('T')[0],
+        panelMembers: updatedPanelMembers,
+        panelRemarks: panelRemarks || 'Interview completed.',
+        scores: {
+          subjectKnowledge: avgScore,
+          researchPublications: avgScore,
+          teachingAptitude: avgScore,
+          communication: avgScore,
+          totalScore: avgScore
+        },
+        recommendation: recommendation || 'Recommend'
+      };
+
+      candidate.interviewDetails.scores = {
+        subjectKnowledge: avgScore,
+        researchPublications: avgScore,
+        teachingAptitude: avgScore,
+        communication: avgScore,
+        totalScore: avgScore
+      };
+      candidate.interviewDetails.panelMembers = updatedPanelMembers;
+      if (panelRemarks) candidate.interviewDetails.panelRemarks = panelRemarks;
+      candidate.interviewDetails.recommendation = recommendation || 'Recommend';
+      if (Array.isArray(memberEvaluations)) candidate.interviewDetails.memberEvaluations = memberEvaluations;
+      if (Array.isArray(evaluatorRatings)) candidate.interviewDetails.evaluatorRatings = evaluatorRatings;
+      if (ratingScorecardFile) candidate.interviewDetails.scorecardFile = ratingScorecardFile;
 
       request.candidates[candidateIndex] = candidate;
 
       request.auditTrail.unshift({
         id: `audit-${Date.now()}`,
-        action: `Interview Evaluated & Scored for ${candidate.fullName}`,
-        performedBy: actorName || 'HR Selection Committee Desk',
+        action: `Interview Evaluated for ${candidate.fullName} (${candidate.status})`,
+        performedBy: actorName || 'Selection Committee Panel',
         role: 'HR Department',
-        details: `Interview marked done. Score: ${avgOutOf10}/10. Recommendation: ${candidate.interviewDetails.recommendation}. Remarks: ${panelRemarks || 'None'}.`,
+        details: `Interview score: ${avgScore}/${scoreScale} (Average across ${updatedPanelMembers.length} panelist(s)). Outcome: ${candidate.status}. Recommendation: ${candidate.interviewDetails.recommendation}.${panelRemarks ? ` Remarks: ${panelRemarks}` : ''}`,
         timestamp
       });
 
       await request.save();
       return NextResponse.json({
         success: true,
-        message: `Interview evaluated for ${candidate.fullName} (Score: ${avgOutOf10}/10)`,
+        message: `Interview evaluated for ${candidate.fullName} (Score: ${avgScore}/${scoreScale}) - Status: ${candidate.status}`,
         data: request.candidates
       });
     }

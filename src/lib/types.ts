@@ -3,7 +3,8 @@ export type UserRole =
   | 'Dean Academic'
   | 'VC / Registrar'
   | 'HR Department'
-  | 'Admin (System)';
+  | 'Admin (System)'
+  | 'Expert Panel';
 
 export type HiringStatus =
   | 'Request Submitted (Department)'
@@ -72,6 +73,42 @@ export interface InterviewScores {
   totalScore: number; // 100
 }
 
+export interface EvaluationMetric {
+  id: string;
+  name: string; // e.g. "Communication Skills", "Technical Knowledge"
+  maxMarks: number; // e.g. 10 or 15
+  marksObtained: number;
+}
+
+export interface MemberEvaluation {
+  memberId?: string;
+  memberName: string;
+  memberRole?: string; // 'Expert' | 'Dean' | 'HR' | 'Panelist'
+  metrics: EvaluationMetric[];
+  totalScore: number; // Score out of 50
+  remarks?: string;
+  recommendation?: 'Strongly Recommend' | 'Recommend' | 'Waitlist' | 'Not Recommended';
+  evaluatedAt?: string;
+}
+
+export interface CvApprovalReview {
+  role?: string;
+  reviewerRole: 'Vice-Chancellor (VC)' | 'Registrar' | 'Dean Academic' | string;
+  reviewerName: string;
+  status?: string;
+  decision: 'Approved' | 'Rejected' | 'Needs Clarification' | string;
+  remarks?: string;
+  reviewedAt: string;
+}
+
+export interface CandidateCvApproval {
+  sentTo: ('Vice-Chancellor (VC)' | 'Registrar' | 'Dean Academic' | string)[];
+  sentAt: string;
+  sentBy: string;
+  status: 'Pending' | 'Approved' | 'Rejected';
+  reviews: CvApprovalReview[];
+}
+
 export interface DocumentFileMeta {
   fileName: string;
   fileSize?: string;
@@ -103,16 +140,23 @@ export interface Candidate {
   status: 'Applied' | 'Shortlisted' | 'Interview Scheduled' | 'Interviewed' | 'Selected' | 'Rejected' | 'Offer Issued' | 'Joined';
   interviewDetails?: {
     date: string;
+    time?: string;
+    venue?: string;
     panelMembers: string[];
-    scores: InterviewScores;
+    assignedExpertIds?: string[];
+    scores?: InterviewScores;
     panelRemarks: string;
     recommendation: 'Strongly Recommend' | 'Recommend' | 'Waitlist' | 'Not Recommended';
     evaluatorRatings?: {
       evaluatorName: string;
       rating: number;
     }[];
+    memberEvaluations?: MemberEvaluation[];
+    averageScore?: number;
+    totalScore50?: number;
     scorecardFile?: string;
   };
+  cvApproval?: CandidateCvApproval;
   joiningDetails?: {
     offerLetterRef?: string;
     offerLetterDate?: string;

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/db';
 import { HiringRequestModel } from '@/lib/models/HiringRequest';
 
-// API Category 1: Dean, Director & HODs
+// API Category 1: Department Deans & Directors
 export async function GET(req: NextRequest) {
   try {
     await connectToDatabase();
@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
 
       request.comments.push({
         id: `c-${Date.now()}`,
-        authorName: actorName || 'Department Dean / HOD',
+        authorName: actorName || 'Department Dean',
         authorRole: 'Department / Dean',
         text: remarks || 'Clarification and workload justification submitted.',
         timestamp,
@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
       request.auditTrail.unshift({
         id: `audit-${Date.now()}`,
         action: 'Clarification Submitted by Department',
-        performedBy: actorName || 'Department Dean / HOD',
+        performedBy: actorName || 'Department Dean',
         role: 'Department / Dean',
         details: remarks || 'Clarifications provided. Re-forwarded to Dean Academic for scrutiny.',
         timestamp
@@ -70,7 +70,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true, data: request });
     }
 
-    // Action 2: Raise new requisition by Dean / Director / HOD
+    // Action 2: Raise new requisition by Department Dean / Director
     // Auto-generate request ID following GKUJD0001 pattern
     const existingGku = await HiringRequestModel.find({ requestId: /^GKUJD\d+/i }).select('requestId').lean();
     let maxNum = 0;
@@ -105,7 +105,7 @@ export async function POST(req: NextRequest) {
       budgetAmountNumber: Number(body.budgetAmountNumber) || 0,
       urgency: body.urgency || 'Normal',
       creator: {
-        name: body.creatorName || 'Dean / Director / HOD',
+        name: body.creatorName || 'Department Dean / Director',
         role: 'Department / Dean',
         email: body.creatorEmail || 'department@gku.ac.in'
       },
@@ -118,7 +118,7 @@ export async function POST(req: NextRequest) {
         ? [
             {
               id: `c-${Date.now()}`,
-              authorName: body.creatorName || 'Dean / Director / HOD',
+              authorName: body.creatorName || 'Department Dean / Director',
               authorRole: 'Department / Dean',
               text: body.initialComment,
               timestamp,
@@ -130,7 +130,7 @@ export async function POST(req: NextRequest) {
         {
           id: `audit-${Date.now()}`,
           action: 'Requisition Raised by Department Leadership',
-          performedBy: body.creatorName || 'Dean / Director / HOD',
+          performedBy: body.creatorName || 'Department Dean / Director',
           role: 'Department / Dean',
           details: `Requisition submitted for ${body.numberOfPositions} position(s) of ${body.postTitle} in ${body.department}. Dispatched to Dean Academic & HR.`,
           timestamp

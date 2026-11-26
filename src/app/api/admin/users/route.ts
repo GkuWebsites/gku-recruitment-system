@@ -58,10 +58,10 @@ const SEED_PROFILES: IUserProfile[] = [
     status: 'Active'
   },
   {
-    name: 'Dr. Jaspreet Kaur (HOD CSE)',
-    email: 'hod@gku.ac.in',
+    name: 'Prof. (Dr.) Harpreet Singh (Subject Expert)',
+    email: 'expert@gku.ac.in',
     password: 'admin123',
-    designation: 'HOD',
+    designation: 'Expert',
     department: 'Computer Science & Engineering',
     phone: '+91 98721 00103',
     status: 'Active'

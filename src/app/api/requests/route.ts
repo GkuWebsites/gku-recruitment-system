@@ -40,7 +40,7 @@ export async function GET(req: NextRequest) {
 
     // Role-specific scoping:
     // 1. Department / Dean role: Strictly isolated to own requisitions or HR requisitions marked visibleToDean
-    const isDean = role === 'Department / Dean' || userRole === 'Dean' || userRole === 'HOD' || userRole === 'Director';
+    const isDean = role === 'Department / Dean' || userRole === 'Dean' || userRole === 'Director';
     if (isDean) {
       const orConditions: any[] = [];
       if (userEmail) {

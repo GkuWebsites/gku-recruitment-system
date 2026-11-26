@@ -49,7 +49,7 @@ export function AnalyticsPanel({ stats }: AnalyticsPanelProps) {
             </div>
           </div>
           <div className="text-3xl font-extrabold text-slate-900 mt-2">14 Days</div>
-          <p className="text-xs text-slate-500 mt-1 font-medium">From HOD submission to VC administrative sanction</p>
+          <p className="text-xs text-slate-500 mt-1 font-medium">From Dean submission to VC administrative sanction</p>
         </div>
 
         <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-2xs">

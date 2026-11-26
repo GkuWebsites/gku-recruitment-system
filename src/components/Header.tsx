@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { UserRole } from '@/lib/types';
 import { USER_ROLES } from '@/lib/constants';
 import { UniversityLogo } from './UniversityLogo';
+export { UniversityLogo };
 import { Plus, RotateCcw } from 'lucide-react';
 
 interface HeaderProps {
@@ -27,10 +28,11 @@ export function Header({
 
   const navLinks = [
     { href: '/', label: 'Overview' },
-    { href: '/dean', label: 'Deans, Directors & HODs' },
+    { href: '/dean', label: 'Deans & Directors' },
     { href: '/dean-academic', label: 'Dean Academic' },
     { href: '/vc-registrar', label: 'VC / Registrar' },
     { href: '/hr', label: 'HR Recruitment' },
+    { href: '/expert', label: 'Expert Panel' },
     { href: '/admin', label: 'Admin (Profiles)' }
   ];
 
