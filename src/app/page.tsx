@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { IUserProfile } from '@/lib/models/UserProfile';
 import { AdminHeader } from '@/components/AdminHeader';
 import { AdminUserDashboard } from '@/components/AdminUserDashboard';
@@ -34,6 +35,7 @@ import {
 } from 'lucide-react';
 
 export default function HomePage() {
+  const router = useRouter();
   const [currentUser, setCurrentUser] = useState<IUserProfile | null>(null);
 
   // Login form state
@@ -294,7 +296,7 @@ export default function HomePage() {
             requests={requests}
             onSelectRequest={(r) => setSelectedJobDetailsRequest(r)}
             onOpenTimeline={(r) => setSelectedTimelineRequest(r)}
-            onOpenNewModal={() => setIsNewModalOpen(true)}
+            onOpenNewModal={() => router.push(`/requisitions/new?role=dean&department=${encodeURIComponent(currentUser.department || '')}`)}
             onRefresh={fetchRequests}
             currentUser={currentUser}
           />
@@ -426,7 +428,7 @@ export default function HomePage() {
             requests={requests}
             onSelectRequest={(r) => setSelectedRequest(r)}
             onRefresh={fetchRequests}
-            onOpenNewModal={() => setIsNewModalOpen(true)}
+            onOpenNewModal={() => router.push('/requisitions/new?role=hr')}
           />
         </main>
 

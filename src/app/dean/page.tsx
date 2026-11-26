@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { IHiringRequest } from '@/lib/types';
 import { Header } from '@/components/Header';
 import { DeanDepartmentModule } from '@/components/profiles/DeanDepartmentModule';
@@ -8,6 +9,7 @@ import { NewRequestModal } from '@/components/NewRequestModal';
 import { RequestDetailModal } from '@/components/RequestDetailModal';
 
 export default function DeanPage() {
+  const router = useRouter();
   const [requests, setRequests] = useState<IHiringRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [isNewModalOpen, setIsNewModalOpen] = useState(false);
@@ -37,7 +39,7 @@ export default function DeanPage() {
       <Header
         currentRole="Department / Dean"
         onRoleChange={() => {}}
-        onOpenNewModal={() => setIsNewModalOpen(true)}
+        onOpenNewModal={() => router.push('/requisitions/new?role=dean')}
         onSeedData={() => {}}
         isSeeding={false}
       />
@@ -46,7 +48,7 @@ export default function DeanPage() {
         <DeanDepartmentModule
           requests={requests}
           onSelectRequest={(req) => setSelectedRequest(req)}
-          onOpenNewModal={() => setIsNewModalOpen(true)}
+          onOpenNewModal={() => router.push('/requisitions/new?role=dean')}
           onRefresh={fetchData}
         />
       </main>

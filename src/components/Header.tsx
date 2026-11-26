@@ -97,13 +97,14 @@ export function Header({
             </div>
 
             {/* New Requisition Button */}
-            <button
-              onClick={onOpenNewModal}
+            <Link
+              href="/requisitions/new"
               className="inline-flex items-center text-xs sm:text-sm font-bold text-white bg-[#0f2d59] hover:bg-[#163f7a] px-3.5 sm:px-4 py-2 rounded-lg shadow-sm transition shrink-0"
+              title="Open full-page create requirement form"
             >
               <Plus className="w-4 h-4 mr-1.5" />
               <span>New Requisition</span>
-            </button>
+            </Link>
           </div>
         </div>
 

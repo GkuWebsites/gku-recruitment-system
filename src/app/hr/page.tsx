@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { IHiringRequest } from '@/lib/types';
 import { Header } from '@/components/Header';
 import { HRDepartmentModule } from '@/components/profiles/HRDepartmentModule';
@@ -8,6 +9,7 @@ import { RequestDetailModal } from '@/components/RequestDetailModal';
 import { NewRequestModal } from '@/components/NewRequestModal';
 
 export default function HRPage() {
+  const router = useRouter();
   const [requests, setRequests] = useState<IHiringRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedRequest, setSelectedRequest] = useState<IHiringRequest | null>(null);
@@ -37,7 +39,7 @@ export default function HRPage() {
       <Header
         currentRole="HR Department"
         onRoleChange={() => {}}
-        onOpenNewModal={() => setIsNewModalOpen(true)}
+        onOpenNewModal={() => router.push('/requisitions/new?role=hr')}
         onSeedData={() => {}}
         isSeeding={false}
       />
@@ -47,7 +49,7 @@ export default function HRPage() {
           requests={requests}
           onSelectRequest={(req) => setSelectedRequest(req)}
           onRefresh={fetchData}
-          onOpenNewModal={() => setIsNewModalOpen(true)}
+          onOpenNewModal={() => router.push('/requisitions/new?role=hr')}
         />
       </main>
 

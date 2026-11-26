@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
+import Link from 'next/link';
 import { IHiringRequest } from '@/lib/types';
 import { UNIVERSITY_DEPARTMENTS } from '@/lib/constants';
 import { Plus, Search, Building2, MessageSquare, CheckCircle2, Clock, AlertCircle, FileText, Check, ShieldCheck, Filter, Trash2 } from 'lucide-react';
@@ -255,13 +256,14 @@ export function DeanDepartmentModule({
             </div>
           </div>
 
-          <button
-            onClick={onOpenNewModal}
+          <Link
+            href={`/requisitions/new?role=dean&department=${encodeURIComponent(currentUser?.department || selectedDept)}`}
             className="inline-flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-xs transition"
+            title="Open full-page requisition form"
           >
             <Plus className="w-4 h-4" />
-            <span>Raise New Requisition</span>
-          </button>
+            <span>Raise New Requisition (Full Page)</span>
+          </Link>
         </div>
       </div>
 
