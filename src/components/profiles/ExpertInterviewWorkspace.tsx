@@ -352,7 +352,7 @@ export function ExpertInterviewWorkspace({
                       className="inline-flex items-center space-x-1.5 px-4 py-2 bg-blue-900 hover:bg-blue-800 text-white rounded-xl text-xs font-bold shadow-xs transition"
                     >
                       <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                      <span>{isCompleted ? 'View / Edit Assessment' : 'Open Assessment Sheet (50 Marks) &rarr;'}</span>
+                      <span>{isCompleted ? 'View / Edit Assessment' : 'Open Assessment Sheet &rarr;'}</span>
                     </Link>
                   ) : (
                     <button

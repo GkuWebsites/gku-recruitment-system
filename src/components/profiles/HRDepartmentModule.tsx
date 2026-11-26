@@ -1235,10 +1235,9 @@ export function HRDepartmentModule({
         <Link
           href="/requisitions/new?role=hr"
           className="inline-flex items-center space-x-2 bg-[#0f2d59] hover:bg-[#163f7a] text-white px-4.5 py-2.5 rounded-xl text-xs font-bold shadow-xs hover:shadow transition cursor-pointer"
-          title="Open full-page create requirement form"
         >
           <Plus className="w-4 h-4" />
-          <span>Create Requirement (Full Page)</span>
+          <span>Create Requirement</span>
         </Link>
       </div>
 
@@ -2053,9 +2052,8 @@ export function HRDepartmentModule({
                                       <a
                                         href={`/interviews/${req.requestId}/${cand.id}`}
                                         className="px-3 py-1 bg-indigo-700 hover:bg-indigo-800 text-white rounded-lg text-xs font-bold transition flex items-center space-x-1 shadow-xs"
-                                        title="Open full-page 50-marks evaluation sheet"
                                       >
-                                        <span>Evaluate (50 Marks) &rarr;</span>
+                                        <span>Evaluate Candidate &rarr;</span>
                                       </a>
                                     </div>
                                   )}
@@ -2312,9 +2310,8 @@ export function HRDepartmentModule({
                                   <a
                                     href={`/interviews/${req.requestId}/${candidate.id}`}
                                     className="px-3 py-1.5 bg-indigo-700 hover:bg-indigo-800 text-white rounded-lg text-xs font-bold transition cursor-pointer shadow-xs inline-flex items-center space-x-1"
-                                    title="Open dedicated 50-mark committee scoring page"
                                   >
-                                    <span>Evaluate (50 Marks) &rarr;</span>
+                                    <span>Evaluate Candidate &rarr;</span>
                                   </a>
                                 ) : candidate.status === 'Interviewed' ? (
                                   <div className="flex items-center space-x-1.5">
@@ -4005,26 +4002,23 @@ export function HRDepartmentModule({
                             <a
                               href={`/interviews/${viewApplicantsReq.requestId}/${cand.id}`}
                               className="px-3 py-1.5 bg-indigo-700 hover:bg-indigo-800 text-white rounded-lg text-xs font-bold transition shadow-xs flex items-center space-x-1"
-                              title="Open dedicated 50-marks evaluation sheet"
                             >
-                              <span>Evaluate (50 Marks Page) &rarr;</span>
+                              <span>Evaluate Candidate &rarr;</span>
                             </a>
                             <a
                               href={`/interviews/schedule/${viewApplicantsReq.requestId}/${cand.id}`}
                               className="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 rounded-lg text-xs font-bold transition border border-amber-200 inline-flex items-center space-x-1"
-                              title="Open full-page schedule workspace"
                             >
-                              <span>Reschedule (Full Page) &rarr;</span>
+                              <span>Reschedule &rarr;</span>
                             </a>
                           </div>
                         ) : (
                           <a
                             href={`/interviews/schedule/${viewApplicantsReq.requestId}/${cand.id}`}
                             className="px-3.5 py-1.5 bg-blue-700 hover:bg-blue-800 text-white rounded-lg text-xs font-bold transition shadow-xs flex items-center space-x-1.5 cursor-pointer"
-                            title="Open full-page schedule workspace"
                           >
                             <Calendar className="w-3.5 h-3.5" />
-                            <span>Schedule Interview (Full Page) &rarr;</span>
+                            <span>Schedule Interview &rarr;</span>
                           </a>
                         )}
                       </div>

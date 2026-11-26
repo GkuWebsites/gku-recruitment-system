@@ -259,10 +259,9 @@ export function DeanDepartmentModule({
           <Link
             href={`/requisitions/new?role=dean&department=${encodeURIComponent(currentUser?.department || selectedDept)}`}
             className="inline-flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-xs transition"
-            title="Open full-page requisition form"
           >
             <Plus className="w-4 h-4" />
-            <span>Raise New Requisition (Full Page)</span>
+            <span>Raise New Requisition</span>
           </Link>
         </div>
       </div>
