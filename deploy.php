@@ -134,6 +134,39 @@ if ($action === 'run_backup') {
     exit;
 }
 
+if ($action === 'clear_data') {
+    // 1. Take a safe automated backup snapshot first
+    $backupScriptPath = "{$homeDir}/mongodb/backup.sh";
+    if (file_exists($backupScriptPath) && function_exists('shell_exec')) {
+        @shell_exec("bash " . escapeshellarg($backupScriptPath) . " 2>&1");
+    }
+
+    // 2. Clear hiringrequests collection via node one-liner
+    $clearJs = "const mongoose = require('mongoose');" .
+        "mongoose.connect('mongodb://127.0.0.1:27017/gku_recruitment').then(async () => {" .
+        "    const res = await mongoose.connection.collection('hiringrequests').deleteMany({});" .
+        "    console.log(JSON.stringify({ success: true, deletedCount: res.deletedCount }));" .
+        "    process.exit(0);" .
+        "}).catch(err => {" .
+        "    console.error(err);" .
+        "    process.exit(1);" .
+        "});";
+
+    $tmpJs = "{$appDir}/tmp_clear_data.js";
+    file_put_contents($tmpJs, $clearJs);
+    $nodeCmd = "cd {$appDir} && node " . escapeshellarg($tmpJs) . " 2>&1";
+    $out = function_exists('shell_exec') ? @shell_exec($nodeCmd) : 'shell_exec disabled';
+    @unlink($tmpJs);
+
+    echo json_encode([
+        'status' => 'success',
+        'action' => 'clear_data',
+        'output' => trim((string)$out),
+        'timestamp' => date('Y-m-d H:i:s')
+    ]);
+    exit;
+}
+
 if ($action === 'clean') {
     // Completely wipe old .next folder and tmp/restart.txt
     if (is_dir("{$appDir}/.next")) {

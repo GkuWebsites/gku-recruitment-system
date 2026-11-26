@@ -58,6 +58,23 @@ export function AdminUserDashboard() {
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
+  // Database Clear & Production Launch State
+  const [isClearModalOpen, setIsClearModalOpen] = useState(false);
+  const [isClearingData, setIsClearingData] = useState(false);
+  const [dbStatus, setDbStatus] = useState<{ totalRequests: number; status: string } | null>(null);
+
+  const fetchDbStatus = async () => {
+    try {
+      const res = await fetch('/api/seed');
+      const data = await res.json();
+      if (data.success) {
+        setDbStatus({ totalRequests: data.totalRequests, status: data.status });
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   const fetchDepartments = async () => {
     try {
       const res = await fetch('/api/departments');
@@ -88,6 +105,7 @@ export function AdminUserDashboard() {
   useEffect(() => {
     fetchUsers();
     fetchDepartments();
+    fetchDbStatus();
   }, []);
 
   // Handle Create Department
@@ -355,6 +373,17 @@ export function AdminUserDashboard() {
         </div>
 
         <div className="flex items-center space-x-3">
+          <button
+            onClick={() => {
+              fetchDbStatus();
+              setIsClearModalOpen(true);
+            }}
+            className="inline-flex items-center space-x-2 bg-white hover:bg-rose-50 text-rose-700 border border-rose-200 px-4 py-2.5 rounded-xl text-xs font-bold shadow-xs transition cursor-pointer"
+          >
+            <Trash2 className="w-4 h-4 text-rose-600" />
+            <span>Clear Test Requisitions</span>
+          </button>
+
           <button
             onClick={() => {
               setIsDeptModalOpen(true);
@@ -1020,6 +1049,98 @@ export function AdminUserDashboard() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Clear Test Data Modal for Live Launch */}
+      {isClearModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-md w-full p-6 space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-start justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center space-x-2.5">
+                <div className="w-8 h-8 rounded-lg bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-600">
+                  <Trash2 className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-slate-900">
+                    Prepare for Live Launch
+                  </h3>
+                  <p className="text-xs text-slate-400">Clear test requisitions &amp; candidates</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsClearModalOpen(false)}
+                className="text-slate-400 hover:text-slate-700 p-1 rounded-lg hover:bg-slate-100 transition cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-3 text-xs text-slate-600">
+              <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1.5">
+                <div className="flex items-center justify-between font-semibold">
+                  <span>Current Requisitions in DB:</span>
+                  <span className="font-mono font-bold text-slate-900 text-sm">
+                    {dbStatus?.totalRequests ?? 'Checking...'}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-[11px] text-slate-500">
+                  <span>Status:</span>
+                  <span className={`font-semibold ${dbStatus?.totalRequests === 0 ? 'text-emerald-700' : 'text-amber-700'}`}>
+                    {dbStatus?.totalRequests === 0 ? 'Clean / Production Ready' : 'Test Mode (Dummy Data Present)'}
+                  </span>
+                </div>
+              </div>
+
+              <p className="leading-relaxed">
+                This will wipe all <strong>test recruitment requisitions</strong>, candidate applications, interview logs, and workflow history so real recruitment work can start fresh.
+              </p>
+
+              <div className="p-3 bg-blue-50/70 border border-blue-200 rounded-xl text-blue-900 space-y-1">
+                <p className="font-bold">What is kept safe:</p>
+                <p className="text-[11px] text-blue-800">
+                  All user logins (Admins, VC, Registrar, Deans, HR) and custom departments will <strong>not</strong> be deleted.
+                </p>
+              </div>
+            </div>
+
+            <div className="pt-3 border-t border-slate-100 flex items-center justify-end space-x-2.5">
+              <button
+                type="button"
+                onClick={() => setIsClearModalOpen(false)}
+                disabled={isClearingData}
+                className="px-4 py-2 border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50 font-bold transition cursor-pointer text-xs"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={isClearingData}
+                onClick={async () => {
+                  setIsClearingData(true);
+                  try {
+                    const res = await fetch('/api/seed', { method: 'DELETE' });
+                    const data = await res.json();
+                    if (data.success) {
+                      setSuccessMsg(`✓ Portal Cleaned: Successfully removed ${data.deletedCount} test requisitions. Portal is clean for real hiring!`);
+                      setIsClearModalOpen(false);
+                      fetchDbStatus();
+                    } else {
+                      setErrorMsg(data.error || 'Failed to clear database');
+                    }
+                  } catch (err: any) {
+                    setErrorMsg(err.message || 'Error clearing database');
+                  } finally {
+                    setIsClearingData(false);
+                  }
+                }}
+                className="px-5 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold transition disabled:opacity-50 cursor-pointer shadow-xs text-xs"
+              >
+                {isClearingData ? 'Clearing...' : 'Clear All Test Data Now'}
+              </button>
+            </div>
           </div>
         </div>
       )}

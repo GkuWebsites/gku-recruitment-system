@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/db';
 import { HiringRequestModel } from '@/lib/models/HiringRequest';
 import { AcademicDepartment, EmploymentType, HiringStatus, IHiringRequest, UserRole } from '@/lib/types';
@@ -1541,41 +1541,102 @@ function generateSeedRequests(): IHiringRequest[] {
   return requests;
 }
 
-export async function POST() {
+// GET /api/seed: Check current database count and launch readiness status
+export async function GET() {
   try {
     await connectToDatabase();
-
-    // Clear existing data and reseed with comprehensive real university recruitment records
-    await HiringRequestModel.deleteMany({});
-
-    const initialRequests = generateSeedRequests();
-    const result = await HiringRequestModel.insertMany(initialRequests);
-
+    const count = await HiringRequestModel.countDocuments();
     return NextResponse.json({
       success: true,
-      message: `Database successfully reseeded with ${result.length} comprehensive recruitment records across all 12 Guru Kashi University departments and governance stages.`,
-      count: result.length,
-      stages: {
-        stage1DepartmentSubmitted: 14,
-        stage2DeanAcademicScrutiny: 16,
-        stage3VCRegistrarSanctions: 16,
-        stage4HRMediaPosting: 24,
-        stage5InterviewScoring: 20,
-        stage6OffersWorkbench: 14,
-        stage7ArchivesCabinet: 36,
-        total: result.length
-      }
+      totalRequests: count,
+      status: count === 0 ? 'Clean / Production Ready' : `${count} records present`,
+      message:
+        count === 0
+          ? 'Database is clean with 0 requisitions. Ready for live institutional hiring.'
+          : `${count} test requisitions present in database.`
     });
   } catch (error: any) {
-    console.error('Seed Error:', error);
     return NextResponse.json(
-      { success: false, error: error.message || 'Failed to seed database' },
+      { success: false, error: error.message || 'Failed to check database status' },
       { status: 500 }
     );
   }
 }
 
-export async function GET() {
-  // Support seeding via GET for quick browser verification
-  return POST();
+// DELETE /api/seed: Clear all test hiring requests and candidates for production launch
+export async function DELETE(req: NextRequest) {
+  try {
+    await connectToDatabase();
+    const result = await HiringRequestModel.deleteMany({});
+    return NextResponse.json({
+      success: true,
+      message: `Database cleaned successfully. Cleared ${result.deletedCount} test requisitions. Portal is now fresh for live launch.`,
+      deletedCount: result.deletedCount,
+      totalRequests: 0,
+      status: 'Clean / Production Ready'
+    });
+  } catch (error: any) {
+    console.error('Clear Database Error:', error);
+    return NextResponse.json(
+      { success: false, error: error.message || 'Failed to clear database' },
+      { status: 500 }
+    );
+  }
+}
+
+// POST /api/seed: Support { action: 'clear' } or guarded { action: 'reseed', secret: 'gku_seed_2026' }
+export async function POST(req: NextRequest) {
+  try {
+    await connectToDatabase();
+
+    let body: any = {};
+    try {
+      body = await req.json();
+    } catch {
+      // Body may be empty if called without json
+    }
+
+    const { searchParams } = new URL(req.url);
+    const action = body.action || searchParams.get('action');
+    const secret = body.secret || searchParams.get('secret');
+
+    // Action 1: Clear all test data
+    if (action === 'clear' || searchParams.get('clear') === 'true') {
+      const result = await HiringRequestModel.deleteMany({});
+      return NextResponse.json({
+        success: true,
+        message: `Database cleaned successfully. Cleared ${result.deletedCount} test requisitions. Portal is now fresh for live launch.`,
+        deletedCount: result.deletedCount,
+        totalRequests: 0,
+        status: 'Clean / Production Ready'
+      });
+    }
+
+    // Action 2: Guarded reseed
+    if (action === 'reseed' || secret === 'gku_seed_2026') {
+      await HiringRequestModel.deleteMany({});
+      const initialRequests = generateSeedRequests();
+      const result = await HiringRequestModel.insertMany(initialRequests);
+
+      return NextResponse.json({
+        success: true,
+        message: `Database successfully reseeded with ${result.length} test recruitment records.`,
+        count: result.length
+      });
+    }
+
+    return NextResponse.json(
+      {
+        success: false,
+        message: 'Invalid action. Use DELETE /api/seed or POST with action="clear" to wipe test data for live launch.'
+      },
+      { status: 400 }
+    );
+  } catch (error: any) {
+    console.error('Seed Error:', error);
+    return NextResponse.json(
+      { success: false, error: error.message || 'Failed to execute seed action' },
+      { status: 500 }
+    );
+  }
 }
