@@ -227,7 +227,7 @@ export default function HomePage() {
               <button
                 type="submit"
                 disabled={isLoggingIn}
-                className="w-full mt-2 bg-[#0b1f3a] hover:bg-[#163f7a] text-white py-3 rounded-xl font-bold text-xs flex items-center justify-center space-x-2 shadow-md hover:shadow-lg active:scale-[0.99] transition disabled:opacity-50 cursor-pointer"
+                className="w-full mt-2 bg-[#0b1f3a] hover:bg-[#D3D3D3] text-white py-3 rounded-xl font-bold text-xs flex items-center justify-center space-x-2 shadow-md hover:shadow-lg active:scale-[0.99] transition disabled:opacity-50 cursor-pointer"
               >
                 <span>{isLoggingIn ? 'Signing In...' : 'Sign In to Portal'}</span>
                 <ArrowRight className="w-4 h-4" />

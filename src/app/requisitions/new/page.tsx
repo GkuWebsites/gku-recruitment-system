@@ -221,7 +221,7 @@ function NewRequisitionContent() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
+    <div className="min-h-screen bg-[#D3D3D3] flex flex-col">
       {/* ── Sticky top header ─────────────────────────────────────── */}
       <header className="sticky top-0 z-40 bg-white border-b border-slate-200 shadow-xs">
         <div className="max-w-6xl mx-auto px-4 sm:px-8 h-16 flex items-center justify-between">
@@ -238,9 +238,6 @@ function NewRequisitionContent() {
           <div className="flex items-center gap-3">
             <span className="hidden sm:block text-xs text-slate-500 font-medium">
               Role: <strong className="text-slate-800">{isHR ? 'HR Directorate' : 'Department Dean'}</strong>
-            </span>
-            <span className="text-xs font-bold px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-lg border border-indigo-200">
-              GKUJD0001
             </span>
           </div>
         </div>
@@ -300,11 +297,10 @@ function NewRequisitionContent() {
                     <button
                       type="button"
                       onClick={() => setHrWorkflowMode('direct')}
-                      className={`flex-1 sm:flex-none flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-bold transition cursor-pointer ${
-                        hrWorkflowMode === 'direct'
-                          ? 'bg-emerald-600 text-white shadow-sm'
-                          : 'text-slate-600 hover:text-slate-900'
-                      }`}
+                      className={`flex-1 sm:flex-none flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-bold transition cursor-pointer ${hrWorkflowMode === 'direct'
+                        ? 'bg-emerald-600 text-white shadow-sm'
+                        : 'text-slate-600 hover:text-slate-900'
+                        }`}
                     >
                       <Zap className="w-3.5 h-3.5" />
                       Direct Recruitment
@@ -312,11 +308,10 @@ function NewRequisitionContent() {
                     <button
                       type="button"
                       onClick={() => setHrWorkflowMode('request_approval')}
-                      className={`flex-1 sm:flex-none flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-bold transition cursor-pointer ${
-                        hrWorkflowMode === 'request_approval'
-                          ? 'bg-[#0f2d59] text-white shadow-sm'
-                          : 'text-slate-600 hover:text-slate-900'
-                      }`}
+                      className={`flex-1 sm:flex-none flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-bold transition cursor-pointer ${hrWorkflowMode === 'request_approval'
+                        ? 'bg-[#0f2d59] text-white shadow-sm'
+                        : 'text-slate-600 hover:text-slate-900'
+                        }`}
                     >
                       <ShieldCheck className="w-3.5 h-3.5" />
                       Request Governance Approval
@@ -385,11 +380,10 @@ function NewRequisitionContent() {
                 <button
                   type="button"
                   onClick={() => setCadreType('Teaching')}
-                  className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition cursor-pointer ${
-                    cadreType === 'Teaching'
-                      ? 'bg-[#0f2d59] text-white shadow-sm'
-                      : 'text-slate-500 hover:text-slate-800'
-                  }`}
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition cursor-pointer ${cadreType === 'Teaching'
+                    ? 'bg-[#0f2d59] text-white shadow-sm'
+                    : 'text-slate-500 hover:text-slate-800'
+                    }`}
                 >
                   <BookOpen className="w-3.5 h-3.5" />
                   Teaching
@@ -397,11 +391,10 @@ function NewRequisitionContent() {
                 <button
                   type="button"
                   onClick={() => setCadreType('Non-Teaching')}
-                  className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition cursor-pointer ${
-                    cadreType === 'Non-Teaching'
-                      ? 'bg-[#0f2d59] text-white shadow-sm'
-                      : 'text-slate-500 hover:text-slate-800'
-                  }`}
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition cursor-pointer ${cadreType === 'Non-Teaching'
+                    ? 'bg-[#0f2d59] text-white shadow-sm'
+                    : 'text-slate-500 hover:text-slate-800'
+                    }`}
                 >
                   <Users className="w-3.5 h-3.5" />
                   Non-Teaching
@@ -639,11 +632,10 @@ function NewRequisitionContent() {
                     key={p.label}
                     type="button"
                     onClick={() => setExperience(p.value)}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
-                      experience === p.value
-                        ? 'bg-indigo-600 text-white'
-                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                    }`}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${experience === p.value
+                      ? 'bg-indigo-600 text-white'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      }`}
                   >
                     {p.label}
                   </button>
@@ -672,9 +664,8 @@ function NewRequisitionContent() {
                       key={p.label}
                       type="button"
                       onClick={() => setExperience(p.value)}
-                      className={`px-2 py-0.5 rounded text-xs font-bold cursor-pointer ${
-                        experience === p.value ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600'
-                      }`}
+                      className={`px-2 py-0.5 rounded text-xs font-bold cursor-pointer ${experience === p.value ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600'
+                        }`}
                     >
                       {p.label}
                     </button>

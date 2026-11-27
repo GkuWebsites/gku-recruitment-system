@@ -191,10 +191,10 @@ export function HRDepartmentModule({
             authority.includes('Vice-Chancellor') || authority.includes('VC')
               ? 'VC'
               : authority.includes('Registrar')
-              ? 'Registrar'
-              : authority.includes('Dean')
-              ? 'Dean Academic'
-              : authority;
+                ? 'Registrar'
+                : authority.includes('Dean')
+                  ? 'Dean Academic'
+                  : authority;
           const review = cand.cvApproval?.reviews?.find(
             (r) =>
               r.reviewerRole === authority ||
@@ -207,8 +207,8 @@ export function HRDepartmentModule({
             status === 'Approved'
               ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
               : status === 'Rejected'
-              ? 'bg-rose-50 text-rose-800 border-rose-300'
-              : 'bg-amber-50 text-amber-900 border-amber-300';
+                ? 'bg-rose-50 text-rose-800 border-rose-300'
+                : 'bg-amber-50 text-amber-900 border-amber-300';
           const icon = status === 'Approved' ? '✓' : status === 'Rejected' ? '✕' : '⏳';
 
           return (
@@ -1582,7 +1582,7 @@ export function HRDepartmentModule({
             ) : (
               <div className="space-y-3">
                 {/* Column Headers for Clean Alignment */}
-                <div className="hidden lg:grid grid-cols-12 gap-4 px-5 py-1 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                <div className="hidden lg:grid grid-cols-12 gap-4 px-5 py-1 text-[11px] font-bold text-black uppercase tracking-wider">
                   <div className="col-span-2">Requisition ID</div>
                   <div className="col-span-4">Post &amp; Department</div>
                   <div className="col-span-2">Positions &amp; Budget</div>
@@ -1622,15 +1622,11 @@ export function HRDepartmentModule({
                       <div className="font-bold text-slate-800 text-xs">
                         {req.numberOfPositions} Open Position{req.numberOfPositions > 1 ? 's' : ''}
                       </div>
-                      <div className="text-slate-500 text-[11px] font-medium mt-0.5 truncate" title={req.tentativeBudget}>
-                        {req.tentativeBudget}
-                      </div>
                     </div>
 
                     {/* Col 4: Clearances & Status */}
                     <div className="col-span-2 space-y-1">
                       <div className="inline-flex items-center space-x-1.5 text-emerald-800 bg-emerald-50 border border-emerald-200/70 px-2.5 py-0.5 rounded-lg text-[11px] font-semibold">
-                        <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                         <span className="truncate">Sanctioned by VC &amp; Academic</span>
                       </div>
                       <div>
@@ -3072,7 +3068,7 @@ export function HRDepartmentModule({
             ) : (
               <div className="space-y-3">
                 {/* Column Headers for Clean Alignment */}
-                <div className="hidden lg:grid grid-cols-12 gap-4 px-5 py-1 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                <div className="hidden lg:grid grid-cols-12 gap-4 px-5 py-1 text-[11px] font-bold text-black uppercase tracking-wider">
                   <div className="col-span-2">Requisition ID</div>
                   <div className="col-span-4">Post &amp; Department</div>
                   <div className="col-span-2">Submitted By (Dean)</div>
@@ -3529,11 +3525,10 @@ export function HRDepartmentModule({
                       return (
                         <label
                           key={platform}
-                          className={`flex items-center space-x-2.5 px-3 py-2 rounded-xl border text-xs cursor-pointer select-none transition ${
-                            isChecked
-                              ? 'bg-blue-50/70 border-blue-400/80 text-blue-950 font-medium shadow-2xs'
-                              : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300'
-                          }`}
+                          className={`flex items-center space-x-2.5 px-3 py-2 rounded-xl border text-xs cursor-pointer select-none transition ${isChecked
+                            ? 'bg-blue-50/70 border-blue-400/80 text-blue-950 font-medium shadow-2xs'
+                            : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300'
+                            }`}
                         >
                           <input
                             type="checkbox"

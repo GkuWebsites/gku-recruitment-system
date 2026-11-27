@@ -401,7 +401,7 @@ export function AdminUserDashboard() {
               setIsCreateModalOpen(true);
               setErrorMsg('');
             }}
-            className="inline-flex items-center space-x-2 bg-[#0f2d59] hover:bg-[#163f7a] text-white px-4 py-2.5 rounded-xl text-xs font-bold shadow-xs transition cursor-pointer"
+            className="inline-flex items-center space-x-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-4 py-2.5 rounded-xl text-xs font-bold shadow-xs transition cursor-pointer"
           >
             <UserPlus className="w-4 h-4" />
             <span>+ Create New User</span>

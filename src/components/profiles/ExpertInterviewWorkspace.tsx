@@ -127,7 +127,7 @@ export function ExpertInterviewWorkspace({
             <Users className="w-5 h-5 text-blue-300" />
             <div>
               <div className="text-xl font-black">{allInterviews.length}</div>
-              <div className="text-[10px] text-slate-300 uppercase font-semibold">Total Assigned</div>
+              <div className="text-[10px] text-slate-700 uppercase font-semibold">Total Assigned</div>
             </div>
           </div>
         </div>
