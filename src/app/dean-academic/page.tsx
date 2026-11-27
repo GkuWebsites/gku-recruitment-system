@@ -1,12 +1,14 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { IHiringRequest } from '@/lib/types';
 import { Header } from '@/components/Header';
 import { DeanAcademicModule } from '@/components/profiles/DeanAcademicModule';
 import { RequestDetailModal } from '@/components/RequestDetailModal';
 
 export default function DeanAcademicPage() {
+  const router = useRouter();
   const [requests, setRequests] = useState<IHiringRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedRequest, setSelectedRequest] = useState<IHiringRequest | null>(null);
@@ -43,7 +45,7 @@ export default function DeanAcademicPage() {
       <main className="flex-1 w-full max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 py-8">
         <DeanAcademicModule
           requests={requests}
-          onSelectRequest={(req) => setSelectedRequest(req)}
+          onSelectRequest={(req) => router.push(`/requisitions/${req.requestId}?role=dean-academic`)}
           onRefresh={fetchData}
         />
       </main>

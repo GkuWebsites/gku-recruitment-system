@@ -47,7 +47,7 @@ export default function DeanPage() {
       <main className="flex-1 w-full max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 py-8">
         <DeanDepartmentModule
           requests={requests}
-          onSelectRequest={(req) => setSelectedRequest(req)}
+          onSelectRequest={(req) => router.push(`/requisitions/${req.requestId}?role=dean`)}
           onOpenNewModal={() => router.push('/requisitions/new?role=dean')}
           onRefresh={fetchData}
         />

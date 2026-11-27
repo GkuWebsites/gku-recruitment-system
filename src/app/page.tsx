@@ -294,7 +294,7 @@ export default function HomePage() {
         <main className="flex-1 w-full max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 py-8">
           <DeanDepartmentModule
             requests={requests}
-            onSelectRequest={(r) => setSelectedJobDetailsRequest(r)}
+            onSelectRequest={(r) => router.push(`/requisitions/${r.requestId}?role=dean`)}
             onOpenTimeline={(r) => setSelectedTimelineRequest(r)}
             onOpenNewModal={() => router.push(`/requisitions/new?role=dean&department=${encodeURIComponent(currentUser.department || '')}`)}
             onRefresh={fetchRequests}
@@ -380,7 +380,7 @@ export default function HomePage() {
         <main className="flex-1 w-full max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 py-8">
           <VCRegistrarModule
             requests={requests}
-            onSelectRequest={(r) => setSelectedRequest(r)}
+            onSelectRequest={(r) => router.push(`/requisitions/${r.requestId}?role=vc`)}
             onRefresh={fetchRequests}
             currentUser={currentUser}
           />
@@ -426,7 +426,7 @@ export default function HomePage() {
         <main className="flex-1 w-full max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 py-8">
           <HRDepartmentModule
             requests={requests}
-            onSelectRequest={(r) => setSelectedRequest(r)}
+            onSelectRequest={(r) => router.push(`/requisitions/${r.requestId}?role=hr`)}
             onRefresh={fetchRequests}
             onOpenNewModal={() => router.push('/requisitions/new?role=hr')}
           />
@@ -515,7 +515,7 @@ export default function HomePage() {
       <main className="flex-1 w-full max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 py-8">
         <DeanAcademicModule
           requests={requests}
-          onSelectRequest={(r) => setSelectedRequest(r)}
+          onSelectRequest={(r) => router.push(`/requisitions/${r.requestId}?role=dean-academic`)}
           onRefresh={fetchRequests}
           currentUser={currentUser}
         />

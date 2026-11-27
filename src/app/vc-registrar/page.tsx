@@ -1,12 +1,14 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { IHiringRequest } from '@/lib/types';
 import { Header } from '@/components/Header';
 import { VCRegistrarModule } from '@/components/profiles/VCRegistrarModule';
 import { RequestDetailModal } from '@/components/RequestDetailModal';
 
 export default function VCRegistrarPage() {
+  const router = useRouter();
   const [requests, setRequests] = useState<IHiringRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedRequest, setSelectedRequest] = useState<IHiringRequest | null>(null);
@@ -43,7 +45,7 @@ export default function VCRegistrarPage() {
       <main className="flex-1 w-full max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 py-8">
         <VCRegistrarModule
           requests={requests}
-          onSelectRequest={(req) => setSelectedRequest(req)}
+          onSelectRequest={(req) => router.push(`/requisitions/${req.requestId}?role=vc`)}
           onRefresh={fetchData}
         />
       </main>
