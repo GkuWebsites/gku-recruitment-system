@@ -49,7 +49,7 @@ export function Header({}: HeaderProps) {
   };
 
   return (
-    <header className="w-full bg-white border-b border-slate-200 shadow-xs sticky top-0 z-40">
+    <header className="w-full bg-white border-b border-slate-200 shadow-xs sticky top-0 z-40 print:hidden">
       <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12">
         <div className="flex items-center justify-between h-20 gap-4">
           <Link href="/" className="hover:opacity-95 transition">

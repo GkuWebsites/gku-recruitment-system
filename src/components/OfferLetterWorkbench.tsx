@@ -883,7 +883,7 @@ export function OfferLetterWorkbench({
         <div className="lg:col-span-7">
           {offerMode === 'generate' ? (
             /* MODE 1: OFFICIAL A4 LETTERHEAD (WITH INLINE EDITING) */
-            <div className="bg-white border border-slate-300 rounded-2xl shadow-lg p-6 sm:p-10 text-slate-900 space-y-5 print:m-0 print:p-0 print:border-none print:shadow-none min-h-[900px]">
+            <div className="bg-white border border-slate-300 rounded-2xl shadow-lg p-6 sm:p-10 text-slate-900 space-y-5 print:m-0 print:p-0 print:border-none print:shadow-none print:min-h-0 min-h-[900px]">
               {/* Toolbar above letter */}
               <div className="flex items-center justify-between border-b border-slate-200 pb-3 print:hidden">
                 <div className="flex items-center space-x-2">

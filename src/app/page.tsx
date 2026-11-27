@@ -406,7 +406,7 @@ export default function HomePage() {
   if (currentUser.designation === 'HR') {
     return (
       <div className="min-h-screen bg-[#D3D3D3] text-slate-800 flex flex-col">
-        <header className="w-full bg-white border-b border-slate-200 shadow-xs sticky top-0 z-40">
+        <header className="w-full bg-white border-b border-slate-200 shadow-xs sticky top-0 z-40 print:hidden">
           <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 flex items-center justify-between h-20">
             <UniversityLogo />
             <div className="flex items-center space-x-4">
@@ -423,7 +423,7 @@ export default function HomePage() {
           </div>
         </header>
 
-        <main className="flex-1 w-full max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 py-8">
+        <main className="flex-1 w-full max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 py-8 print:p-0 print:max-w-none">
           <HRDepartmentModule
             requests={requests}
             onSelectRequest={(r) => router.push(`/requisitions/${r.requestId}?role=hr`)}

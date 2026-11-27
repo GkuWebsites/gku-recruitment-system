@@ -25,3 +25,13 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #64748b;
 }
+
+@media print {
+  @page {
+    size: A4;
+    margin: 12mm;
+  }
+  body {
+    background-color: #ffffff !important;
+  }
+}
