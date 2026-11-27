@@ -118,16 +118,9 @@ export function ExpertInterviewWorkspace({
       <div className="bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 text-white rounded-2xl p-6 sm:p-7 shadow-md border border-slate-800 space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="space-y-1">
-            <span className="text-[11px] font-bold text-blue-300 uppercase tracking-wider bg-blue-900/60 px-2.5 py-0.5 rounded border border-blue-700/50">
-              Subject Matter Expert Panelist Workspace
-            </span>
             <h2 className="text-xl sm:text-2xl font-black tracking-tight">
               Welcome, {currentUser?.name || 'Subject Expert'}
             </h2>
-            <p className="text-xs text-slate-300 max-w-2xl leading-relaxed">
-              Conduct objective academic assessments for faculty recruitment. Candidate personal details and
-              resumes remain <strong>cryptographically protected</strong> until the scheduled interview time to prevent bias.
-            </p>
           </div>
 
           <div className="flex items-center space-x-3 bg-white/10 backdrop-blur-xs px-4 py-3 rounded-xl border border-white/15">
@@ -138,14 +131,6 @@ export function ExpertInterviewWorkspace({
             </div>
           </div>
         </div>
-
-        {/* Confidentiality Standard Badge */}
-        <div className="pt-2 flex items-center space-x-2 text-xs text-blue-200 border-t border-white/10 font-medium">
-          <ShieldAlert className="w-4 h-4 text-amber-400 shrink-0" />
-          <span>
-            Strict Protocol: Designation & Schedule are visible immediately. Candidate identity, contact & resume unlock only at interview time.
-          </span>
-        </div>
       </div>
 
       {/* Filter Tabs */}
@@ -154,44 +139,40 @@ export function ExpertInterviewWorkspace({
           <button
             type="button"
             onClick={() => setFilterType('all')}
-            className={`px-3 py-1.5 rounded-lg font-bold transition cursor-pointer ${
-              filterType === 'all'
-                ? 'bg-blue-900 text-white shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
+            className={`px-3 py-1.5 rounded-lg font-bold transition cursor-pointer ${filterType === 'all'
+              ? 'bg-blue-900 text-white shadow-xs'
+              : 'text-slate-600 hover:text-slate-900'
+              }`}
           >
             All Interviews ({allInterviews.length})
           </button>
           <button
             type="button"
             onClick={() => setFilterType('unlocked')}
-            className={`px-3 py-1.5 rounded-lg font-bold transition cursor-pointer ${
-              filterType === 'unlocked'
-                ? 'bg-blue-900 text-white shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
+            className={`px-3 py-1.5 rounded-lg font-bold transition cursor-pointer ${filterType === 'unlocked'
+              ? 'bg-blue-900 text-white shadow-xs'
+              : 'text-slate-600 hover:text-slate-900'
+              }`}
           >
             Ready to Evaluate ({allInterviews.filter((i) => i.isTimeReached && i.candidate.status === 'Interview Scheduled').length})
           </button>
           <button
             type="button"
             onClick={() => setFilterType('locked')}
-            className={`px-3 py-1.5 rounded-lg font-bold transition cursor-pointer ${
-              filterType === 'locked'
-                ? 'bg-blue-900 text-white shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
+            className={`px-3 py-1.5 rounded-lg font-bold transition cursor-pointer ${filterType === 'locked'
+              ? 'bg-blue-900 text-white shadow-xs'
+              : 'text-slate-600 hover:text-slate-900'
+              }`}
           >
             Upcoming (Locked) ({allInterviews.filter((i) => !i.isTimeReached).length})
           </button>
           <button
             type="button"
             onClick={() => setFilterType('completed')}
-            className={`px-3 py-1.5 rounded-lg font-bold transition cursor-pointer ${
-              filterType === 'completed'
-                ? 'bg-blue-900 text-white shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
+            className={`px-3 py-1.5 rounded-lg font-bold transition cursor-pointer ${filterType === 'completed'
+              ? 'bg-blue-900 text-white shadow-xs'
+              : 'text-slate-600 hover:text-slate-900'
+              }`}
           >
             Evaluated ({allInterviews.filter((i) => i.candidate.status !== 'Interview Scheduled').length})
           </button>
@@ -228,13 +209,12 @@ export function ExpertInterviewWorkspace({
             return (
               <div
                 key={`${req.requestId}-${cand.id}`}
-                className={`bg-white rounded-2xl border transition shadow-xs overflow-hidden flex flex-col justify-between ${
-                  !isTimeReached
-                    ? 'border-amber-200/80 bg-gradient-to-b from-amber-50/20 to-white'
-                    : isCompleted
-                      ? 'border-emerald-200 bg-emerald-50/10'
-                      : 'border-blue-200 shadow-md'
-                }`}
+                className={`bg-white rounded-2xl border transition shadow-xs overflow-hidden flex flex-col justify-between ${!isTimeReached
+                  ? 'border-amber-200/80 bg-gradient-to-b from-amber-50/20 to-white'
+                  : isCompleted
+                    ? 'border-emerald-200 bg-emerald-50/10'
+                    : 'border-blue-200 shadow-md'
+                  }`}
               >
                 {/* Card Top Details */}
                 <div className="p-5 space-y-4">

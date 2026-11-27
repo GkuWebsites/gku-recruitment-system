@@ -210,7 +210,7 @@ function ScheduleInterviewContent({ params }: SchedulePageProps) {
 
       setStatusMsg(`✓ Interview successfully scheduled for ${candidate?.fullName} on ${interviewDate} at ${interviewTime}! Redirecting...`);
       setTimeout(() => {
-        router.push('/hr');
+        router.push('/');
       }, 1300);
     } catch (err: unknown) {
       setErrorMsg((err as Error).message);

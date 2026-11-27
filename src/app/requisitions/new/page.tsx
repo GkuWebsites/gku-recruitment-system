@@ -192,7 +192,7 @@ function NewRequisitionContent() {
       if (!res.ok || !data.success) throw new Error(data.error || 'Failed to submit requisition');
 
       setSuccessMsg(`Job requirement for ${fullTitle} created successfully. Redirecting to dashboard...`);
-      setTimeout(() => { router.push(isHR ? '/hr' : '/dean'); }, 1400);
+      setTimeout(() => { router.push('/'); }, 1400);
     } catch (err: unknown) {
       setErrorMsg((err as Error).message || 'Failed to submit requisition');
     } finally {
