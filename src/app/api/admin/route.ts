@@ -66,12 +66,7 @@ export async function GET(req: NextRequest) {
       query.designation = designation;
     }
 
-    let profiles = await UserProfileModel.find(query).sort({ createdAt: -1 });
-
-    if (profiles.length === 0) {
-      await UserProfileModel.insertMany(INITIAL_PROFILES);
-      profiles = await UserProfileModel.find(query).sort({ createdAt: -1 });
-    }
+    const profiles = await UserProfileModel.find(query).sort({ createdAt: -1 });
 
     return NextResponse.json({
       success: true,

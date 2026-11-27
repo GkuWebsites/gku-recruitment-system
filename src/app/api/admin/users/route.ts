@@ -84,11 +84,6 @@ export async function GET(req: NextRequest) {
     const designation = searchParams.get('designation');
     const search = searchParams.get('search');
 
-    const count = await UserProfileModel.countDocuments();
-    if (count === 0) {
-      await UserProfileModel.insertMany(SEED_PROFILES);
-    }
-
     const query: Record<string, unknown> = {};
     if (designation && designation !== 'All') {
       query.designation = designation;
