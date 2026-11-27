@@ -551,25 +551,37 @@ export function VCRegistrarModule({
                         )}
                       </div>
 
-                      <div className="flex items-center space-x-2">
-                        <button
-                          type="button"
-                          disabled={isSubmittingCv}
-                          onClick={() => handleReviewCv(req, cand, 'Rejected', 'Qualifications do not meet minimum department bar')}
-                          className="px-3.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl text-xs font-bold transition disabled:opacity-50 cursor-pointer"
-                        >
-                          ✕ Reject CV
-                        </button>
+                      {!userReview ? (
+                        <div className="flex items-center space-x-2">
+                          <button
+                            type="button"
+                            disabled={isSubmittingCv}
+                            onClick={() => handleReviewCv(req, cand, 'Rejected', 'Qualifications do not meet minimum department bar')}
+                            className="px-3.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl text-xs font-bold transition disabled:opacity-50 cursor-pointer"
+                          >
+                            ✕ Reject CV
+                          </button>
 
-                        <button
-                          type="button"
-                          disabled={isSubmittingCv}
-                          onClick={() => handleReviewCv(req, cand, 'Approved', 'CV cleared for interview scheduling')}
-                          className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition shadow-xs disabled:opacity-50 cursor-pointer"
+                          <button
+                            type="button"
+                            disabled={isSubmittingCv}
+                            onClick={() => handleReviewCv(req, cand, 'Approved', 'CV cleared for interview scheduling')}
+                            className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition shadow-xs disabled:opacity-50 cursor-pointer"
+                          >
+                            ✓ Approve CV & Clear
+                          </button>
+                        </div>
+                      ) : (
+                        <span
+                          className={`px-3 py-1 rounded-xl text-xs font-bold border ${
+                            userReview.decision === 'Approved'
+                              ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                              : 'bg-rose-50 text-rose-800 border-rose-200'
+                          }`}
                         >
-                          ✓ Approve CV & Clear
-                        </button>
-                      </div>
+                          {userReview.decision === 'Approved' ? '✓ Decision Recorded: Approved' : '✕ Decision Recorded: Rejected'}
+                        </span>
+                      )}
                     </div>
                   </div>
                 );
