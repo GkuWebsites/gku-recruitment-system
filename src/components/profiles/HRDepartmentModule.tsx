@@ -2481,48 +2481,6 @@ export function HRDepartmentModule({
                   </div>
                 </div>
 
-                {/* Statutory CV Clearance Routing Checklist */}
-                <div className="p-3 bg-amber-50/70 border border-amber-200 rounded-xl space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-amber-950 flex items-center gap-1.5">
-                      <FileCheck2 className="w-3.5 h-3.5 text-amber-700" />
-                      Statutory CV Clearance & Approval Routing:
-                    </span>
-                    <span className="text-[10px] text-amber-700 font-semibold">Leadership Review</span>
-                  </div>
-                  <p className="text-[11px] text-slate-600">
-                    Select University leadership authorities to review and approve this candidate&apos;s CV:
-                  </p>
-                  <div className="flex flex-wrap items-center gap-4 pt-1">
-                    <label className="flex items-center gap-1.5 text-xs text-slate-800 font-medium cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={sendApprovalVC}
-                        onChange={(e) => setSendApprovalVC(e.target.checked)}
-                        className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                      />
-                      <span>Vice-Chancellor (VC)</span>
-                    </label>
-                    <label className="flex items-center gap-1.5 text-xs text-slate-800 font-medium cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={sendApprovalRegistrar}
-                        onChange={(e) => setSendApprovalRegistrar(e.target.checked)}
-                        className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                      />
-                      <span>Registrar</span>
-                    </label>
-                    <label className="flex items-center gap-1.5 text-xs text-slate-800 font-medium cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={sendApprovalDeanAcademic}
-                        onChange={(e) => setSendApprovalDeanAcademic(e.target.checked)}
-                        className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                      />
-                      <span>Dean Academic</span>
-                    </label>
-                  </div>
-                </div>
 
                 {/* Expand / Collapse buttons in Grouped mode */}
                 {offerLetterViewMode === 'grouped' && (
@@ -3628,48 +3586,6 @@ export function HRDepartmentModule({
                   </div>
                 </div>
 
-                {/* Statutory CV Clearance Routing Checklist */}
-                <div className="p-3 bg-amber-50/70 border border-amber-200 rounded-xl space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-amber-950 flex items-center gap-1.5">
-                      <FileCheck2 className="w-3.5 h-3.5 text-amber-700" />
-                      Statutory CV Clearance & Approval Routing:
-                    </span>
-                    <span className="text-[10px] text-amber-700 font-semibold">Leadership Review</span>
-                  </div>
-                  <p className="text-[11px] text-slate-600">
-                    Select University leadership authorities to review and approve this candidate&apos;s CV:
-                  </p>
-                  <div className="flex flex-wrap items-center gap-4 pt-1">
-                    <label className="flex items-center gap-1.5 text-xs text-slate-800 font-medium cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={sendApprovalVC}
-                        onChange={(e) => setSendApprovalVC(e.target.checked)}
-                        className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                      />
-                      <span>Vice-Chancellor (VC)</span>
-                    </label>
-                    <label className="flex items-center gap-1.5 text-xs text-slate-800 font-medium cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={sendApprovalRegistrar}
-                        onChange={(e) => setSendApprovalRegistrar(e.target.checked)}
-                        className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                      />
-                      <span>Registrar</span>
-                    </label>
-                    <label className="flex items-center gap-1.5 text-xs text-slate-800 font-medium cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={sendApprovalDeanAcademic}
-                        onChange={(e) => setSendApprovalDeanAcademic(e.target.checked)}
-                        className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                      />
-                      <span>Dean Academic</span>
-                    </label>
-                  </div>
-                </div>
 
                 {/* Remarks */}
                 <div>
@@ -4212,48 +4128,6 @@ export function HRDepartmentModule({
                   </div>
                 </div>
 
-                {/* Statutory CV Clearance Routing Checklist */}
-                <div className="p-3 bg-amber-50/70 border border-amber-200 rounded-xl space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-amber-950 flex items-center gap-1.5">
-                      <FileCheck2 className="w-3.5 h-3.5 text-amber-700" />
-                      Statutory CV Clearance & Approval Routing:
-                    </span>
-                    <span className="text-[10px] text-amber-700 font-semibold">Leadership Review</span>
-                  </div>
-                  <p className="text-[11px] text-slate-600">
-                    Select University leadership authorities to review and approve this candidate&apos;s CV:
-                  </p>
-                  <div className="flex flex-wrap items-center gap-4 pt-1">
-                    <label className="flex items-center gap-1.5 text-xs text-slate-800 font-medium cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={sendApprovalVC}
-                        onChange={(e) => setSendApprovalVC(e.target.checked)}
-                        className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                      />
-                      <span>Vice-Chancellor (VC)</span>
-                    </label>
-                    <label className="flex items-center gap-1.5 text-xs text-slate-800 font-medium cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={sendApprovalRegistrar}
-                        onChange={(e) => setSendApprovalRegistrar(e.target.checked)}
-                        className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                      />
-                      <span>Registrar</span>
-                    </label>
-                    <label className="flex items-center gap-1.5 text-xs text-slate-800 font-medium cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={sendApprovalDeanAcademic}
-                        onChange={(e) => setSendApprovalDeanAcademic(e.target.checked)}
-                        className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                      />
-                      <span>Dean Academic</span>
-                    </label>
-                  </div>
-                </div>
 
                 <div className="flex items-center justify-end space-x-2 pt-3 border-t border-slate-100">
                   <button
@@ -4407,48 +4281,6 @@ export function HRDepartmentModule({
                   </div>
                 </div>
 
-                {/* Statutory CV Clearance Routing Checklist */}
-                <div className="p-3 bg-amber-50/70 border border-amber-200 rounded-xl space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-amber-950 flex items-center gap-1.5">
-                      <FileCheck2 className="w-3.5 h-3.5 text-amber-700" />
-                      Statutory CV Clearance & Approval Routing:
-                    </span>
-                    <span className="text-[10px] text-amber-700 font-semibold">Leadership Review</span>
-                  </div>
-                  <p className="text-[11px] text-slate-600">
-                    Select University leadership authorities to review and approve this candidate&apos;s CV:
-                  </p>
-                  <div className="flex flex-wrap items-center gap-4 pt-1">
-                    <label className="flex items-center gap-1.5 text-xs text-slate-800 font-medium cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={sendApprovalVC}
-                        onChange={(e) => setSendApprovalVC(e.target.checked)}
-                        className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                      />
-                      <span>Vice-Chancellor (VC)</span>
-                    </label>
-                    <label className="flex items-center gap-1.5 text-xs text-slate-800 font-medium cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={sendApprovalRegistrar}
-                        onChange={(e) => setSendApprovalRegistrar(e.target.checked)}
-                        className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                      />
-                      <span>Registrar</span>
-                    </label>
-                    <label className="flex items-center gap-1.5 text-xs text-slate-800 font-medium cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={sendApprovalDeanAcademic}
-                        onChange={(e) => setSendApprovalDeanAcademic(e.target.checked)}
-                        className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                      />
-                      <span>Dean Academic</span>
-                    </label>
-                  </div>
-                </div>
 
                 {/* Minimal Single-Line Scorecard Upload */}
                 <div>
@@ -4525,48 +4357,6 @@ export function HRDepartmentModule({
                   </div>
                 </div>
 
-                {/* Statutory CV Clearance Routing Checklist */}
-                <div className="p-3 bg-amber-50/70 border border-amber-200 rounded-xl space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-amber-950 flex items-center gap-1.5">
-                      <FileCheck2 className="w-3.5 h-3.5 text-amber-700" />
-                      Statutory CV Clearance & Approval Routing:
-                    </span>
-                    <span className="text-[10px] text-amber-700 font-semibold">Leadership Review</span>
-                  </div>
-                  <p className="text-[11px] text-slate-600">
-                    Select University leadership authorities to review and approve this candidate&apos;s CV:
-                  </p>
-                  <div className="flex flex-wrap items-center gap-4 pt-1">
-                    <label className="flex items-center gap-1.5 text-xs text-slate-800 font-medium cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={sendApprovalVC}
-                        onChange={(e) => setSendApprovalVC(e.target.checked)}
-                        className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                      />
-                      <span>Vice-Chancellor (VC)</span>
-                    </label>
-                    <label className="flex items-center gap-1.5 text-xs text-slate-800 font-medium cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={sendApprovalRegistrar}
-                        onChange={(e) => setSendApprovalRegistrar(e.target.checked)}
-                        className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                      />
-                      <span>Registrar</span>
-                    </label>
-                    <label className="flex items-center gap-1.5 text-xs text-slate-800 font-medium cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={sendApprovalDeanAcademic}
-                        onChange={(e) => setSendApprovalDeanAcademic(e.target.checked)}
-                        className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                      />
-                      <span>Dean Academic</span>
-                    </label>
-                  </div>
-                </div>
 
                 {/* Remarks */}
                 <div>
@@ -4751,48 +4541,6 @@ export function HRDepartmentModule({
                   </div>
                 </div>
 
-                {/* Statutory CV Clearance Routing Checklist */}
-                <div className="p-3 bg-amber-50/70 border border-amber-200 rounded-xl space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-amber-950 flex items-center gap-1.5">
-                      <FileCheck2 className="w-3.5 h-3.5 text-amber-700" />
-                      Statutory CV Clearance & Approval Routing:
-                    </span>
-                    <span className="text-[10px] text-amber-700 font-semibold">Leadership Review</span>
-                  </div>
-                  <p className="text-[11px] text-slate-600">
-                    Select University leadership authorities to review and approve this candidate&apos;s CV:
-                  </p>
-                  <div className="flex flex-wrap items-center gap-4 pt-1">
-                    <label className="flex items-center gap-1.5 text-xs text-slate-800 font-medium cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={sendApprovalVC}
-                        onChange={(e) => setSendApprovalVC(e.target.checked)}
-                        className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                      />
-                      <span>Vice-Chancellor (VC)</span>
-                    </label>
-                    <label className="flex items-center gap-1.5 text-xs text-slate-800 font-medium cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={sendApprovalRegistrar}
-                        onChange={(e) => setSendApprovalRegistrar(e.target.checked)}
-                        className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                      />
-                      <span>Registrar</span>
-                    </label>
-                    <label className="flex items-center gap-1.5 text-xs text-slate-800 font-medium cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={sendApprovalDeanAcademic}
-                        onChange={(e) => setSendApprovalDeanAcademic(e.target.checked)}
-                        className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                      />
-                      <span>Dean Academic</span>
-                    </label>
-                  </div>
-                </div>
 
                 <div>
                   <label className="block font-bold text-slate-800 mb-1">
@@ -4892,48 +4640,6 @@ export function HRDepartmentModule({
                   </div>
                 </div>
 
-                {/* Statutory CV Clearance Routing Checklist */}
-                <div className="p-3 bg-amber-50/70 border border-amber-200 rounded-xl space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-amber-950 flex items-center gap-1.5">
-                      <FileCheck2 className="w-3.5 h-3.5 text-amber-700" />
-                      Statutory CV Clearance & Approval Routing:
-                    </span>
-                    <span className="text-[10px] text-amber-700 font-semibold">Leadership Review</span>
-                  </div>
-                  <p className="text-[11px] text-slate-600">
-                    Select University leadership authorities to review and approve this candidate&apos;s CV:
-                  </p>
-                  <div className="flex flex-wrap items-center gap-4 pt-1">
-                    <label className="flex items-center gap-1.5 text-xs text-slate-800 font-medium cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={sendApprovalVC}
-                        onChange={(e) => setSendApprovalVC(e.target.checked)}
-                        className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                      />
-                      <span>Vice-Chancellor (VC)</span>
-                    </label>
-                    <label className="flex items-center gap-1.5 text-xs text-slate-800 font-medium cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={sendApprovalRegistrar}
-                        onChange={(e) => setSendApprovalRegistrar(e.target.checked)}
-                        className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                      />
-                      <span>Registrar</span>
-                    </label>
-                    <label className="flex items-center gap-1.5 text-xs text-slate-800 font-medium cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={sendApprovalDeanAcademic}
-                        onChange={(e) => setSendApprovalDeanAcademic(e.target.checked)}
-                        className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                      />
-                      <span>Dean Academic</span>
-                    </label>
-                  </div>
-                </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
@@ -4962,48 +4668,6 @@ export function HRDepartmentModule({
                   </div>
                 </div>
 
-                {/* Statutory CV Clearance Routing Checklist */}
-                <div className="p-3 bg-amber-50/70 border border-amber-200 rounded-xl space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-amber-950 flex items-center gap-1.5">
-                      <FileCheck2 className="w-3.5 h-3.5 text-amber-700" />
-                      Statutory CV Clearance & Approval Routing:
-                    </span>
-                    <span className="text-[10px] text-amber-700 font-semibold">Leadership Review</span>
-                  </div>
-                  <p className="text-[11px] text-slate-600">
-                    Select University leadership authorities to review and approve this candidate&apos;s CV:
-                  </p>
-                  <div className="flex flex-wrap items-center gap-4 pt-1">
-                    <label className="flex items-center gap-1.5 text-xs text-slate-800 font-medium cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={sendApprovalVC}
-                        onChange={(e) => setSendApprovalVC(e.target.checked)}
-                        className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                      />
-                      <span>Vice-Chancellor (VC)</span>
-                    </label>
-                    <label className="flex items-center gap-1.5 text-xs text-slate-800 font-medium cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={sendApprovalRegistrar}
-                        onChange={(e) => setSendApprovalRegistrar(e.target.checked)}
-                        className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                      />
-                      <span>Registrar</span>
-                    </label>
-                    <label className="flex items-center gap-1.5 text-xs text-slate-800 font-medium cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={sendApprovalDeanAcademic}
-                        onChange={(e) => setSendApprovalDeanAcademic(e.target.checked)}
-                        className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                      />
-                      <span>Dean Academic</span>
-                    </label>
-                  </div>
-                </div>
 
                 {/* Induction Checklist */}
                 <div>
@@ -5054,48 +4718,6 @@ export function HRDepartmentModule({
                   </div>
                 </div>
 
-                {/* Statutory CV Clearance Routing Checklist */}
-                <div className="p-3 bg-amber-50/70 border border-amber-200 rounded-xl space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-amber-950 flex items-center gap-1.5">
-                      <FileCheck2 className="w-3.5 h-3.5 text-amber-700" />
-                      Statutory CV Clearance & Approval Routing:
-                    </span>
-                    <span className="text-[10px] text-amber-700 font-semibold">Leadership Review</span>
-                  </div>
-                  <p className="text-[11px] text-slate-600">
-                    Select University leadership authorities to review and approve this candidate&apos;s CV:
-                  </p>
-                  <div className="flex flex-wrap items-center gap-4 pt-1">
-                    <label className="flex items-center gap-1.5 text-xs text-slate-800 font-medium cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={sendApprovalVC}
-                        onChange={(e) => setSendApprovalVC(e.target.checked)}
-                        className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                      />
-                      <span>Vice-Chancellor (VC)</span>
-                    </label>
-                    <label className="flex items-center gap-1.5 text-xs text-slate-800 font-medium cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={sendApprovalRegistrar}
-                        onChange={(e) => setSendApprovalRegistrar(e.target.checked)}
-                        className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                      />
-                      <span>Registrar</span>
-                    </label>
-                    <label className="flex items-center gap-1.5 text-xs text-slate-800 font-medium cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={sendApprovalDeanAcademic}
-                        onChange={(e) => setSendApprovalDeanAcademic(e.target.checked)}
-                        className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                      />
-                      <span>Dean Academic</span>
-                    </label>
-                  </div>
-                </div>
 
                 <div>
                   <label className="block font-semibold text-slate-700 mb-1">
@@ -5183,48 +4805,6 @@ export function HRDepartmentModule({
                   </div>
                 </div>
 
-                {/* Statutory CV Clearance Routing Checklist */}
-                <div className="p-3 bg-amber-50/70 border border-amber-200 rounded-xl space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-amber-950 flex items-center gap-1.5">
-                      <FileCheck2 className="w-3.5 h-3.5 text-amber-700" />
-                      Statutory CV Clearance & Approval Routing:
-                    </span>
-                    <span className="text-[10px] text-amber-700 font-semibold">Leadership Review</span>
-                  </div>
-                  <p className="text-[11px] text-slate-600">
-                    Select University leadership authorities to review and approve this candidate&apos;s CV:
-                  </p>
-                  <div className="flex flex-wrap items-center gap-4 pt-1">
-                    <label className="flex items-center gap-1.5 text-xs text-slate-800 font-medium cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={sendApprovalVC}
-                        onChange={(e) => setSendApprovalVC(e.target.checked)}
-                        className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                      />
-                      <span>Vice-Chancellor (VC)</span>
-                    </label>
-                    <label className="flex items-center gap-1.5 text-xs text-slate-800 font-medium cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={sendApprovalRegistrar}
-                        onChange={(e) => setSendApprovalRegistrar(e.target.checked)}
-                        className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                      />
-                      <span>Registrar</span>
-                    </label>
-                    <label className="flex items-center gap-1.5 text-xs text-slate-800 font-medium cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={sendApprovalDeanAcademic}
-                        onChange={(e) => setSendApprovalDeanAcademic(e.target.checked)}
-                        className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                      />
-                      <span>Dean Academic</span>
-                    </label>
-                  </div>
-                </div>
 
                 {/* Status selection options */}
                 <div className="space-y-2">
