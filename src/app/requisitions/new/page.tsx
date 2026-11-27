@@ -577,7 +577,7 @@ function NewRequisitionContent() {
                 {/* JD Upload */}
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                    Specification Document / JD <span className="text-slate-400 font-normal">(Optional)</span>
+                    Specification Document / JD <span className="text-slate-400 font-normal"></span>
                   </label>
                   {jobDescriptionFileName ? (
                     <div className="flex items-center justify-between p-3 bg-indigo-50 border border-indigo-200 rounded-xl">

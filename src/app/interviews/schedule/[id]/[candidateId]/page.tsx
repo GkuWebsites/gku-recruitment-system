@@ -221,7 +221,7 @@ function ScheduleInterviewContent({ params }: SchedulePageProps) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-8 text-center">
+      <div className="min-h-screen bg-[#D3D3D3] flex flex-col items-center justify-center p-8 text-center">
         <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mb-4" />
         <h2 className="text-base font-bold text-slate-800">Loading Candidate & Requisition Details...</h2>
         <p className="text-xs text-slate-500 mt-1">Fetching candidate record and selection committee details</p>
@@ -231,7 +231,7 @@ function ScheduleInterviewContent({ params }: SchedulePageProps) {
 
   if (errorMsg && !request) {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-8 text-center max-w-md mx-auto">
+      <div className="min-h-screen bg-[#D3D3D3] flex flex-col items-center justify-center p-8 text-center max-w-md mx-auto">
         <AlertTriangle className="w-12 h-12 text-rose-600 mb-3" />
         <h2 className="text-lg font-bold text-slate-800">Unable to Open Schedule Workspace</h2>
         <p className="text-xs text-slate-600 mt-2 mb-4">{errorMsg}</p>
@@ -519,8 +519,8 @@ function ScheduleInterviewContent({ params }: SchedulePageProps) {
                         onClick={() => handleAddProfileMember(profile)}
                         disabled={isAdded}
                         className={`px-2.5 py-1 rounded-lg border text-[11px] font-semibold transition cursor-pointer ${isAdded
-                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200 cursor-default'
-                            : 'bg-white hover:bg-blue-100 text-blue-900 border-blue-200'
+                          ? 'bg-emerald-50 text-emerald-700 border-emerald-200 cursor-default'
+                          : 'bg-white hover:bg-blue-100 text-blue-900 border-blue-200'
                           }`}
                       >
                         {isAdded ? '✓ ' : '+ '}

@@ -833,7 +833,7 @@ export default function CandidateInterviewEvaluationPage(props: EvaluationPagePr
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-8 text-center">
+        <div className="min-h-screen bg-[#D3D3D3] flex flex-col items-center justify-center p-8 text-center">
           <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mb-4" />
           <h2 className="text-base font-bold text-slate-800">Loading Interview Evaluation Workspace...</h2>
           <p className="text-xs text-slate-500 mt-1">Fetching candidate and selection committee metrics</p>

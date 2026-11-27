@@ -157,7 +157,7 @@ export default function HomePage() {
   // 1. IF NOT LOGGED IN: Render Simple, Clean Institutional Authentication Card
   if (!currentUser) {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col justify-between text-slate-800">
+      <div className="min-h-screen bg-[#D3D3D3] flex flex-col justify-between text-slate-800">
         {/* Clean Institutional Top Bar */}
         <header className="w-full bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
           <div className="flex items-center">
