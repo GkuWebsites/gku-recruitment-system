@@ -246,7 +246,7 @@ function ScheduleInterviewContent({ params }: SchedulePageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] text-slate-800 flex flex-col">
+    <div className="min-h-screen bg-[#D3D3D3] text-slate-800 flex flex-col">
       {/* Top Header */}
       <header className="w-full bg-white border-b border-slate-200 sticky top-0 z-40 shadow-xs">
         <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-8 py-4 flex items-center justify-between">
@@ -518,11 +518,10 @@ function ScheduleInterviewContent({ params }: SchedulePageProps) {
                         type="button"
                         onClick={() => handleAddProfileMember(profile)}
                         disabled={isAdded}
-                        className={`px-2.5 py-1 rounded-lg border text-[11px] font-semibold transition cursor-pointer ${
-                          isAdded
+                        className={`px-2.5 py-1 rounded-lg border text-[11px] font-semibold transition cursor-pointer ${isAdded
                             ? 'bg-emerald-50 text-emerald-700 border-emerald-200 cursor-default'
                             : 'bg-white hover:bg-blue-100 text-blue-900 border-blue-200'
-                        }`}
+                          }`}
                       >
                         {isAdded ? '✓ ' : '+ '}
                         {label}

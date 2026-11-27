@@ -370,7 +370,7 @@ function CandidateInterviewEvaluationContent({ params }: EvaluationPageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] text-slate-800 pb-20">
+    <div className="min-h-screen bg-[#D3D3D3] text-slate-800 pb-20">
       {/* Top Banner Navigation */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
@@ -523,208 +523,208 @@ function CandidateInterviewEvaluationContent({ params }: EvaluationPageProps) {
           {memberEvaluations.map((member, mIdx) => {
             const isExpanded = Boolean(expandedMembers[mIdx]);
             return (
-            <div
-              key={member.memberId || mIdx}
-              className="bg-white rounded-2xl border border-slate-200/90 shadow-xs overflow-hidden transition hover:border-slate-300"
-            >
-              {/* Panel Member Card Header */}
-              <div className={`p-4 sm:p-5 bg-slate-50/70 ${isExpanded ? 'border-b border-slate-200' : ''} flex flex-wrap items-center justify-between gap-3`}>
-                <div className="flex flex-wrap items-center gap-3 flex-1 min-w-[260px]">
-                  <button
-                    type="button"
-                    onClick={() => toggleMemberExpand(mIdx)}
-                    className="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 hover:text-blue-700 hover:border-blue-300 transition cursor-pointer shrink-0"
-                    title={isExpanded ? 'Collapse evaluator section' : 'Expand evaluator section'}
-                  >
-                    {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-                  </button>
+              <div
+                key={member.memberId || mIdx}
+                className="bg-white rounded-2xl border border-slate-200/90 shadow-xs overflow-hidden transition hover:border-slate-300"
+              >
+                {/* Panel Member Card Header */}
+                <div className={`p-4 sm:p-5 bg-slate-50/70 ${isExpanded ? 'border-b border-slate-200' : ''} flex flex-wrap items-center justify-between gap-3`}>
+                  <div className="flex flex-wrap items-center gap-3 flex-1 min-w-[260px]">
+                    <button
+                      type="button"
+                      onClick={() => toggleMemberExpand(mIdx)}
+                      className="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 hover:text-blue-700 hover:border-blue-300 transition cursor-pointer shrink-0"
+                      title={isExpanded ? 'Collapse evaluator section' : 'Expand evaluator section'}
+                    >
+                      {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                    </button>
 
-                  <div className="w-8 h-8 rounded-full bg-blue-900 text-white font-bold flex items-center justify-center text-xs shrink-0">
-                    {mIdx + 1}
-                  </div>
+                    <div className="w-8 h-8 rounded-full bg-blue-900 text-white font-bold flex items-center justify-center text-xs shrink-0">
+                      {mIdx + 1}
+                    </div>
 
-                  <div className="flex-1 max-w-sm">
-                    <label className="text-[10px] font-bold text-slate-500 uppercase block mb-0.5">
-                      Panel Member Name:
-                    </label>
-                    <input
-                      type="text"
-                      value={member.memberName}
-                      onChange={(e) => handleMemberChange(mIdx, 'memberName', e.target.value)}
-                      placeholder="Enter panel member name..."
-                      className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-bold text-slate-900 focus:ring-2 focus:ring-blue-500 focus:outline-none placeholder:text-slate-400 placeholder:font-normal"
-                    />
-                  </div>
-
-                  <div className="max-w-[200px]">
-                    <label className="text-[10px] font-bold text-slate-500 uppercase block mb-0.5">
-                      Panelist Role:
-                    </label>
-                    <input
-                      type="text"
-                      value={member.memberRole || ''}
-                      onChange={(e) => handleMemberChange(mIdx, 'memberRole', e.target.value)}
-                      placeholder="Enter role (e.g. Expert, Dean)..."
-                      className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-700 focus:ring-2 focus:ring-blue-500 focus:outline-none placeholder:text-slate-400"
-                    />
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-3 shrink-0">
-                  {/* Editable Member Score out of 50 */}
-                  <div className="text-right">
-                    <div className="text-[10px] font-bold text-slate-500 uppercase mb-0.5">Member Score</div>
-                    <div className="flex items-center justify-end space-x-1">
+                    <div className="flex-1 max-w-sm">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase block mb-0.5">
+                        Panel Member Name:
+                      </label>
                       <input
-                        type="number"
-                        min={0}
-                        max={50}
-                        step={0.5}
-                        value={member.totalScore}
-                        onChange={(e) => handleMemberScoreChange(mIdx, e.target.value)}
-                        className="w-16 bg-white border border-blue-300 rounded-lg px-2 py-1 text-center text-sm font-black text-blue-950 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                        title="Edit member score directly (out of 50)"
+                        type="text"
+                        value={member.memberName}
+                        onChange={(e) => handleMemberChange(mIdx, 'memberName', e.target.value)}
+                        placeholder="Enter panel member name..."
+                        className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-bold text-slate-900 focus:ring-2 focus:ring-blue-500 focus:outline-none placeholder:text-slate-400 placeholder:font-normal"
                       />
-                      <span className="text-xs text-slate-400 font-semibold">/ 50</span>
+                    </div>
+
+                    <div className="max-w-[200px]">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase block mb-0.5">
+                        Panelist Role:
+                      </label>
+                      <input
+                        type="text"
+                        value={member.memberRole || ''}
+                        onChange={(e) => handleMemberChange(mIdx, 'memberRole', e.target.value)}
+                        placeholder="Enter role (e.g. Expert, Dean)..."
+                        className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-700 focus:ring-2 focus:ring-blue-500 focus:outline-none placeholder:text-slate-400"
+                      />
                     </div>
                   </div>
 
-                  {memberEvaluations.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => handleRemovePanelMember(mIdx)}
-                      className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer"
-                      title="Remove this panel member"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* Dynamic Assessment Metrics List for this Member */}
-              {isExpanded && (
-              <div className="p-4 sm:p-5 space-y-4">
-                <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                  <span className="font-bold text-xs text-slate-800 uppercase tracking-wider">
-                    Assessment Metrics & Criteria (Score out of 50)
-                  </span>
-
-                  <button
-                    type="button"
-                    onClick={() => handleAddMetric(mIdx)}
-                    className="text-xs font-bold text-blue-700 hover:text-blue-900 flex items-center space-x-1 cursor-pointer"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>+ Add Metric to this Member</span>
-                  </button>
-                </div>
-
-                {member.metrics.length === 0 ? (
-                  <div className="text-center py-4 bg-slate-50 rounded-xl text-xs text-slate-400">
-                    No metrics added for this member. Click &quot;+ Add Metric&quot; to define criteria.
-                  </div>
-                ) : (
-                  <div className="space-y-2.5">
-                    {member.metrics.map((metric, metIdx) => (
-                      <div
-                        key={metric.id || metIdx}
-                        className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 items-center bg-slate-50/60 p-3 rounded-xl border border-slate-200/70"
-                      >
-                        <div className="sm:col-span-6">
-                          <label className="text-[10px] font-bold text-slate-500 block mb-0.5">
-                            Metric / Skill Name:
-                          </label>
-                          <input
-                            type="text"
-                            value={metric.name}
-                            onChange={(e) => handleMetricChange(mIdx, metIdx, 'name', e.target.value)}
-                            placeholder="e.g. Communication Skills, Technical Domain"
-                            className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                          />
-                        </div>
-
-                        <div className="sm:col-span-2">
-                          <label className="text-[10px] font-bold text-slate-500 block mb-0.5">
-                            Max Marks:
-                          </label>
-                          <input
-                            type="number"
-                            min={1}
-                            max={50}
-                            value={metric.maxMarks}
-                            onChange={(e) => handleMetricChange(mIdx, metIdx, 'maxMarks', e.target.value)}
-                            className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-bold text-slate-900 text-center focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                          />
-                        </div>
-
-                        <div className="sm:col-span-3">
-                          <label className="text-[10px] font-bold text-slate-500 block mb-0.5">
-                            Marks Awarded:
-                          </label>
-                          <div className="flex items-center space-x-1.5">
-                            <input
-                              type="number"
-                              min={0}
-                              max={metric.maxMarks}
-                              step={0.5}
-                              value={metric.marksObtained}
-                              onChange={(e) => handleMetricChange(mIdx, metIdx, 'marksObtained', e.target.value)}
-                              className="w-full bg-white border border-blue-400 rounded-lg px-2.5 py-1.5 text-xs font-black text-blue-900 text-center focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                            />
-                            <span className="text-xs text-slate-400 font-medium">/ {metric.maxMarks}</span>
-                          </div>
-                        </div>
-
-                        <div className="sm:col-span-1 text-right">
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveMetric(mIdx, metIdx)}
-                            className="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg transition cursor-pointer"
-                            title="Remove this metric"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
+                  <div className="flex items-center space-x-3 shrink-0">
+                    {/* Editable Member Score out of 50 */}
+                    <div className="text-right">
+                      <div className="text-[10px] font-bold text-slate-500 uppercase mb-0.5">Member Score</div>
+                      <div className="flex items-center justify-end space-x-1">
+                        <input
+                          type="number"
+                          min={0}
+                          max={50}
+                          step={0.5}
+                          value={member.totalScore}
+                          onChange={(e) => handleMemberScoreChange(mIdx, e.target.value)}
+                          className="w-16 bg-white border border-blue-300 rounded-lg px-2 py-1 text-center text-sm font-black text-blue-950 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                          title="Edit member score directly (out of 50)"
+                        />
+                        <span className="text-xs text-slate-400 font-semibold">/ 50</span>
                       </div>
-                    ))}
+                    </div>
+
+                    {memberEvaluations.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => handleRemovePanelMember(mIdx)}
+                        className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer"
+                        title="Remove this panel member"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Dynamic Assessment Metrics List for this Member */}
+                {isExpanded && (
+                  <div className="p-4 sm:p-5 space-y-4">
+                    <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                      <span className="font-bold text-xs text-slate-800 uppercase tracking-wider">
+                        Assessment Metrics & Criteria (Score out of 50)
+                      </span>
+
+                      <button
+                        type="button"
+                        onClick={() => handleAddMetric(mIdx)}
+                        className="text-xs font-bold text-blue-700 hover:text-blue-900 flex items-center space-x-1 cursor-pointer"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>+ Add Metric to this Member</span>
+                      </button>
+                    </div>
+
+                    {member.metrics.length === 0 ? (
+                      <div className="text-center py-4 bg-slate-50 rounded-xl text-xs text-slate-400">
+                        No metrics added for this member. Click &quot;+ Add Metric&quot; to define criteria.
+                      </div>
+                    ) : (
+                      <div className="space-y-2.5">
+                        {member.metrics.map((metric, metIdx) => (
+                          <div
+                            key={metric.id || metIdx}
+                            className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 items-center bg-slate-50/60 p-3 rounded-xl border border-slate-200/70"
+                          >
+                            <div className="sm:col-span-6">
+                              <label className="text-[10px] font-bold text-slate-500 block mb-0.5">
+                                Metric / Skill Name:
+                              </label>
+                              <input
+                                type="text"
+                                value={metric.name}
+                                onChange={(e) => handleMetricChange(mIdx, metIdx, 'name', e.target.value)}
+                                placeholder="e.g. Communication Skills, Technical Domain"
+                                className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                              />
+                            </div>
+
+                            <div className="sm:col-span-2">
+                              <label className="text-[10px] font-bold text-slate-500 block mb-0.5">
+                                Max Marks:
+                              </label>
+                              <input
+                                type="number"
+                                min={1}
+                                max={50}
+                                value={metric.maxMarks}
+                                onChange={(e) => handleMetricChange(mIdx, metIdx, 'maxMarks', e.target.value)}
+                                className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-bold text-slate-900 text-center focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                              />
+                            </div>
+
+                            <div className="sm:col-span-3">
+                              <label className="text-[10px] font-bold text-slate-500 block mb-0.5">
+                                Marks Awarded:
+                              </label>
+                              <div className="flex items-center space-x-1.5">
+                                <input
+                                  type="number"
+                                  min={0}
+                                  max={metric.maxMarks}
+                                  step={0.5}
+                                  value={metric.marksObtained}
+                                  onChange={(e) => handleMetricChange(mIdx, metIdx, 'marksObtained', e.target.value)}
+                                  className="w-full bg-white border border-blue-400 rounded-lg px-2.5 py-1.5 text-xs font-black text-blue-900 text-center focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                                />
+                                <span className="text-xs text-slate-400 font-medium">/ {metric.maxMarks}</span>
+                              </div>
+                            </div>
+
+                            <div className="sm:col-span-1 text-right">
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveMetric(mIdx, metIdx)}
+                                className="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg transition cursor-pointer"
+                                title="Remove this metric"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Member Recommendation & Remarks */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+                      <div>
+                        <label className="text-[10px] font-bold text-slate-700 uppercase block mb-1">
+                          Individual Recommendation:
+                        </label>
+                        <select
+                          value={member.recommendation || 'Recommend'}
+                          onChange={(e) => handleMemberChange(mIdx, 'recommendation', e.target.value)}
+                          className="w-full bg-white border border-slate-200 rounded-xl p-2 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        >
+                          <option value="Strongly Recommend">Strongly Recommend</option>
+                          <option value="Recommend">Recommend</option>
+                          <option value="Waitlist">Waitlist</option>
+                          <option value="Not Recommended">Not Recommended</option>
+                        </select>
+                      </div>
+
+                      <div className="sm:col-span-2">
+                        <label className="text-[10px] font-bold text-slate-700 uppercase block mb-1">
+                          Evaluator Confidential Remarks:
+                        </label>
+                        <input
+                          type="text"
+                          value={member.remarks || ''}
+                          onChange={(e) => handleMemberChange(mIdx, 'remarks', e.target.value)}
+                          placeholder="e.g. Excellent teaching demonstration, deep conceptual clarity in algorithms..."
+                          className="w-full bg-white border border-slate-200 rounded-xl p-2 text-xs font-medium text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        />
+                      </div>
+                    </div>
                   </div>
                 )}
-
-                {/* Member Recommendation & Remarks */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
-                  <div>
-                    <label className="text-[10px] font-bold text-slate-700 uppercase block mb-1">
-                      Individual Recommendation:
-                    </label>
-                    <select
-                      value={member.recommendation || 'Recommend'}
-                      onChange={(e) => handleMemberChange(mIdx, 'recommendation', e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl p-2 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                    >
-                      <option value="Strongly Recommend">Strongly Recommend</option>
-                      <option value="Recommend">Recommend</option>
-                      <option value="Waitlist">Waitlist</option>
-                      <option value="Not Recommended">Not Recommended</option>
-                    </select>
-                  </div>
-
-                  <div className="sm:col-span-2">
-                    <label className="text-[10px] font-bold text-slate-700 uppercase block mb-1">
-                      Evaluator Confidential Remarks:
-                    </label>
-                    <input
-                      type="text"
-                      value={member.remarks || ''}
-                      onChange={(e) => handleMemberChange(mIdx, 'remarks', e.target.value)}
-                      placeholder="e.g. Excellent teaching demonstration, deep conceptual clarity in algorithms..."
-                      className="w-full bg-white border border-slate-200 rounded-xl p-2 text-xs font-medium text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                    />
-                  </div>
-                </div>
               </div>
-              )}
-            </div>
             );
           })}
         </div>

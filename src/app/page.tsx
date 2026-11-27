@@ -253,7 +253,7 @@ export default function HomePage() {
   // 2. IF LOGGED IN AS ADMIN: Clean Admin User Management Dashboard
   if (currentUser.designation === 'Admin') {
     return (
-      <div className="min-h-screen bg-[#f8fafc] text-slate-800 flex flex-col">
+      <div className="min-h-screen bg-[#D3D3D3] text-slate-800 flex flex-col">
         <AdminHeader
           adminName={currentUser.name}
           adminEmail={currentUser.email}
@@ -272,7 +272,7 @@ export default function HomePage() {
     currentUser.designation === 'Director'
   ) {
     return (
-      <div className="min-h-screen bg-[#f8fafc] text-slate-800 flex flex-col">
+      <div className="min-h-screen bg-[#D3D3D3] text-slate-800 flex flex-col">
         {/* Clean Header for Dean/Director with Profile Settings Dropdown */}
         <header className="w-full bg-white border-b border-slate-200 shadow-xs sticky top-0 z-40">
           <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 flex items-center justify-between h-20">
@@ -359,7 +359,7 @@ export default function HomePage() {
         : 'Executive Sanction Desk';
 
     return (
-      <div className="min-h-screen bg-[#f8fafc] text-slate-800 flex flex-col">
+      <div className="min-h-screen bg-[#D3D3D3] text-slate-800 flex flex-col">
         <header className="w-full bg-white border-b border-slate-200 shadow-xs sticky top-0 z-40">
           <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 flex items-center justify-between h-20">
             <UniversityLogo />
@@ -405,7 +405,7 @@ export default function HomePage() {
   // 5. IF LOGGED IN AS HR
   if (currentUser.designation === 'HR') {
     return (
-      <div className="min-h-screen bg-[#f8fafc] text-slate-800 flex flex-col">
+      <div className="min-h-screen bg-[#D3D3D3] text-slate-800 flex flex-col">
         <header className="w-full bg-white border-b border-slate-200 shadow-xs sticky top-0 z-40">
           <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 flex items-center justify-between h-20">
             <UniversityLogo />
@@ -463,7 +463,7 @@ export default function HomePage() {
   // 6. IF LOGGED IN AS EXPERT: Dedicated Subject Expert Panel Workspace
   if (currentUser.designation === 'Expert') {
     return (
-      <div className="min-h-screen bg-[#f8fafc] text-slate-800 flex flex-col">
+      <div className="min-h-screen bg-[#D3D3D3] text-slate-800 flex flex-col">
         <header className="w-full bg-white border-b border-slate-200 shadow-xs sticky top-0 z-40">
           <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 flex items-center justify-between h-20">
             <UniversityLogo />
@@ -494,7 +494,7 @@ export default function HomePage() {
 
   // 7. DEFAULT FALLBACK: Dean Academic
   return (
-    <div className="min-h-screen bg-[#f8fafc] text-slate-800 flex flex-col">
+    <div className="min-h-screen bg-[#D3D3D3] text-slate-800 flex flex-col">
       <header className="w-full bg-white border-b border-slate-200 shadow-xs sticky top-0 z-40">
         <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 flex items-center justify-between h-20">
           <UniversityLogo />

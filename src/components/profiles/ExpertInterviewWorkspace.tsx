@@ -115,7 +115,7 @@ export function ExpertInterviewWorkspace({
   return (
     <div className="space-y-6">
       {/* Expert Profile Welcome Banner */}
-      <div className="bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 text-white rounded-2xl p-6 sm:p-7 shadow-md border border-slate-800 space-y-3">
+      <div className="text-black rounded-2xl p-6 sm:p-7 shadow-md border border-slate-200 space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="space-y-1">
             <h2 className="text-xl sm:text-2xl font-black tracking-tight">
