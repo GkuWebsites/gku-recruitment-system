@@ -31,7 +31,7 @@ export default function ExpertPanelPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] text-slate-800 flex flex-col">
+    <div className="min-h-screen bg-[#D3D3D3] text-slate-800 flex flex-col">
       {/* Top Header */}
       <header className="w-full bg-white border-b border-slate-200 shadow-xs sticky top-0 z-40">
         <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 flex items-center justify-between h-20">

@@ -402,8 +402,12 @@ export async function POST(req: NextRequest) {
       let scoreScale = 10;
       if (Array.isArray(memberEvaluations) && memberEvaluations.length > 0) {
         scoreScale = 50;
-        const total = memberEvaluations.reduce((sum: number, ev: any) => sum + (Number(ev.totalScore) || 0), 0);
-        avgScore = Number((total / memberEvaluations.length).toFixed(1));
+        if (typeof body.totalScore50 === 'number' && !isNaN(body.totalScore50)) {
+          avgScore = Math.min(50, Math.max(0, Number(body.totalScore50.toFixed(1))));
+        } else {
+          const total = memberEvaluations.reduce((sum: number, ev: any) => sum + (Number(ev.totalScore) || 0), 0);
+          avgScore = Number((total / memberEvaluations.length).toFixed(1));
+        }
       } else if (Array.isArray(evaluatorRatings) && evaluatorRatings.length > 0) {
         const total = evaluatorRatings.reduce((sum: number, ev: any) => sum + (Number(ev.rating) || 0), 0);
         avgScore = Number((total / evaluatorRatings.length).toFixed(1));

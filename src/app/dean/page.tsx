@@ -35,12 +35,12 @@ export default function DeanPage() {
   }, [fetchData]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#f1f5f9] text-slate-800">
+    <div className="min-h-screen flex flex-col bg-[#D3D3D3] text-slate-800">
       <Header
         currentRole="Department / Dean"
-        onRoleChange={() => {}}
+        onRoleChange={() => { }}
         onOpenNewModal={() => router.push('/requisitions/new?role=dean')}
-        onSeedData={() => {}}
+        onSeedData={() => { }}
         isSeeding={false}
       />
 

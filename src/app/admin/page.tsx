@@ -14,7 +14,7 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#f8fafc] text-slate-800">
+    <div className="min-h-screen flex flex-col bg-[#D3D3D3] text-slate-800">
       <AdminHeader adminName="System Administrator" onLogout={handleLogout} />
       <main className="flex-1 w-full max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 py-8">
         <AdminUserDashboard />

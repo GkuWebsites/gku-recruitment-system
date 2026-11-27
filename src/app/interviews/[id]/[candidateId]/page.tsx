@@ -10,6 +10,8 @@ import {
   Building2,
   Calendar,
   CheckCircle2,
+  ChevronDown,
+  ChevronRight,
   Clock,
   Download,
   FileText,
@@ -49,40 +51,35 @@ function CandidateInterviewEvaluationContent({ params }: EvaluationPageProps) {
   const [request, setRequest] = useState<IHiringRequest | null>(null);
   const [candidate, setCandidate] = useState<Candidate | null>(null);
 
-  // Panel Members & Metric evaluations out of 50
+  // Panel Members & Metric evaluations out of 50 (default clean: no dummy names/marks/remarks)
   const [memberEvaluations, setMemberEvaluations] = useState<MemberEvaluation[]>([
     {
       memberId: 'm-1',
-      memberName: 'Subject Matter Expert',
-      memberRole: 'External Expert',
+      memberName: '',
+      memberRole: '',
       metrics: [
-        { id: 'met-1', name: 'Technical & Domain Knowledge', maxMarks: 20, marksObtained: 17 },
-        { id: 'met-2', name: 'Communication & Articulation Skills', maxMarks: 15, marksObtained: 13 },
-        { id: 'met-3', name: 'Teaching Aptitude & Pedagogy', maxMarks: 15, marksObtained: 12 }
+        { id: 'met-1', name: 'Technical & Domain Knowledge', maxMarks: 20, marksObtained: 0 },
+        { id: 'met-2', name: 'Communication & Articulation Skills', maxMarks: 15, marksObtained: 0 },
+        { id: 'met-3', name: 'Teaching Aptitude & Pedagogy', maxMarks: 15, marksObtained: 0 }
       ],
-      totalScore: 42,
-      remarks: 'Demonstrated strong depth in foundational subjects and clear articulation.',
-      recommendation: 'Recommend'
-    },
-    {
-      memberId: 'm-2',
-      memberName: 'Department Dean',
-      memberRole: 'Internal Faculty',
-      metrics: [
-        { id: 'met-4', name: 'Workload & Curriculum Fit', maxMarks: 20, marksObtained: 18 },
-        { id: 'met-5', name: 'Research Publications & UGC-CARE', maxMarks: 15, marksObtained: 12 },
-        { id: 'met-6', name: 'Institutional Contribution & Vision', maxMarks: 15, marksObtained: 13 }
-      ],
-      totalScore: 43,
-      remarks: 'Very good fit for department teaching load and student mentoring.',
+      totalScore: 0,
+      remarks: '',
       recommendation: 'Recommend'
     }
   ]);
+
+  // Only first panel member expanded by default
+  const [expandedMembers, setExpandedMembers] = useState<Record<number, boolean>>({ 0: true });
+  const [overrideTotalScore, setOverrideTotalScore] = useState<number | null>(null);
 
   const [overallRecommendation, setOverallRecommendation] = useState<
     'Strongly Recommend' | 'Recommend' | 'Waitlist' | 'Not Recommended'
   >('Recommend');
   const [committeeRemarks, setCommitteeRemarks] = useState('');
+
+  const toggleMemberExpand = (idx: number) => {
+    setExpandedMembers((prev) => ({ ...prev, [idx]: !prev[idx] }));
+  };
 
   // Fetch requisition and candidate
   useEffect(() => {
@@ -108,6 +105,9 @@ function CandidateInterviewEvaluationContent({ params }: EvaluationPageProps) {
         // If candidate already has saved memberEvaluations, load them!
         if (cand.interviewDetails?.memberEvaluations && cand.interviewDetails.memberEvaluations.length > 0) {
           setMemberEvaluations(cand.interviewDetails.memberEvaluations);
+          if (typeof cand.interviewDetails.totalScore50 === 'number') {
+            setOverrideTotalScore(cand.interviewDetails.totalScore50);
+          }
           if (cand.interviewDetails.recommendation) {
             setOverallRecommendation(cand.interviewDetails.recommendation);
           }
@@ -115,21 +115,27 @@ function CandidateInterviewEvaluationContent({ params }: EvaluationPageProps) {
             setCommitteeRemarks(cand.interviewDetails.panelRemarks);
           }
         } else if (cand.interviewDetails?.panelMembers && cand.interviewDetails.panelMembers.length > 0) {
-          // Initialize from scheduled panel members
-          const initialized: MemberEvaluation[] = cand.interviewDetails.panelMembers.map((name, idx) => ({
-            memberId: `m-${idx + 1}`,
-            memberName: name,
-            memberRole: idx === 0 ? 'Expert Panelist' : 'Panel Member',
-            metrics: [
-              { id: `met-${idx}-1`, name: 'Technical & Domain Knowledge', maxMarks: 20, marksObtained: 0 },
-              { id: `met-${idx}-2`, name: 'Communication Skills', maxMarks: 15, marksObtained: 0 },
-              { id: `met-${idx}-3`, name: 'Teaching Aptitude & Pedagogy', maxMarks: 15, marksObtained: 0 }
-            ],
-            totalScore: 0,
-            remarks: '',
-            recommendation: 'Recommend'
-          }));
+          // Initialize from scheduled panel members with cleared marks (out of 50)
+          const initialized: MemberEvaluation[] = cand.interviewDetails.panelMembers.map((rawName, idx) => {
+            const match = rawName.match(/^(.+?)\s*\((.+)\)$/);
+            const parsedName = match ? match[1].trim() : rawName;
+            const parsedRole = match ? match[2].trim() : '';
+            return {
+              memberId: `m-${idx + 1}`,
+              memberName: parsedName,
+              memberRole: parsedRole,
+              metrics: [
+                { id: `met-${idx}-1`, name: 'Technical & Domain Knowledge', maxMarks: 20, marksObtained: 0 },
+                { id: `met-${idx}-2`, name: 'Communication Skills', maxMarks: 15, marksObtained: 0 },
+                { id: `met-${idx}-3`, name: 'Teaching Aptitude & Pedagogy', maxMarks: 15, marksObtained: 0 }
+              ],
+              totalScore: 0,
+              remarks: '',
+              recommendation: 'Recommend'
+            };
+          });
           setMemberEvaluations(initialized);
+          setExpandedMembers({ 0: true });
         }
       } catch (err: any) {
         setErrorMsg(err.message || 'Error fetching candidate data');
@@ -178,6 +184,21 @@ function CandidateInterviewEvaluationContent({ params }: EvaluationPageProps) {
       next[memberIndex] = member;
       return next;
     });
+    setOverrideTotalScore(null);
+  };
+
+  // Direct edit of member score (out of 50)
+  const handleMemberScoreChange = (memberIndex: number, value: string) => {
+    const parsed = value === '' ? 0 : Math.min(50, Math.max(0, Number(value) || 0));
+    setMemberEvaluations((prev) => {
+      const next = [...prev];
+      next[memberIndex] = {
+        ...next[memberIndex],
+        totalScore: parsed
+      };
+      return next;
+    });
+    setOverrideTotalScore(null);
   };
 
   // Add dynamic metric to member
@@ -187,7 +208,7 @@ function CandidateInterviewEvaluationContent({ params }: EvaluationPageProps) {
       const member = { ...next[memberIndex] };
       const newMet: EvaluationMetric = {
         id: `met-${Date.now()}-${Math.random().toString(36).substring(2, 5)}`,
-        name: 'Additional Evaluation Criterion',
+        name: '',
         maxMarks: 10,
         marksObtained: 0
       };
@@ -196,6 +217,7 @@ function CandidateInterviewEvaluationContent({ params }: EvaluationPageProps) {
       next[memberIndex] = member;
       return next;
     });
+    setOverrideTotalScore(null);
   };
 
   // Remove metric
@@ -208,6 +230,7 @@ function CandidateInterviewEvaluationContent({ params }: EvaluationPageProps) {
       next[memberIndex] = member;
       return next;
     });
+    setOverrideTotalScore(null);
   };
 
   // Member details change
@@ -222,21 +245,26 @@ function CandidateInterviewEvaluationContent({ params }: EvaluationPageProps) {
     });
   };
 
-  // Add another panel member
+  // Add another panel member (all fields clean/blank, metrics out of 50)
   const handleAddPanelMember = () => {
     const newMember: MemberEvaluation = {
       memberId: `m-${Date.now()}`,
-      memberName: 'New Committee Panelist',
-      memberRole: 'Subject Expert',
+      memberName: '',
+      memberRole: '',
       metrics: [
-        { id: `met-${Date.now()}-1`, name: 'Technical Competence', maxMarks: 25, marksObtained: 0 },
+        { id: `met-${Date.now()}-1`, name: 'Technical & Domain Knowledge', maxMarks: 25, marksObtained: 0 },
         { id: `met-${Date.now()}-2`, name: 'Communication & Aptitude', maxMarks: 25, marksObtained: 0 }
       ],
       totalScore: 0,
       remarks: '',
       recommendation: 'Recommend'
     };
-    setMemberEvaluations((prev) => [...prev, newMember]);
+    setMemberEvaluations((prev) => {
+      const next = [...prev, newMember];
+      setExpandedMembers((exp) => ({ ...exp, [next.length - 1]: true }));
+      return next;
+    });
+    setOverrideTotalScore(null);
   };
 
   // Remove panel member
@@ -246,10 +274,11 @@ function CandidateInterviewEvaluationContent({ params }: EvaluationPageProps) {
       return;
     }
     setMemberEvaluations((prev) => prev.filter((_, idx) => idx !== memberIndex));
+    setOverrideTotalScore(null);
   };
 
-  // Calculate aggregated average score out of 50
-  const averageScoreOutOf50 =
+  // Calculate aggregated average score out of 50 (auto-calculated, or user override)
+  const calculatedAverageScoreOutOf50 =
     memberEvaluations.length > 0
       ? Number(
         (
@@ -258,6 +287,9 @@ function CandidateInterviewEvaluationContent({ params }: EvaluationPageProps) {
         ).toFixed(1)
       )
       : 0;
+
+  const averageScoreOutOf50 =
+    overrideTotalScore !== null ? overrideTotalScore : calculatedAverageScoreOutOf50;
 
   // Submit interview evaluation to server
   const handleSubmitEvaluation = async (decision: 'shortlist' | 'reject' | 'interviewed') => {
@@ -276,6 +308,7 @@ function CandidateInterviewEvaluationContent({ params }: EvaluationPageProps) {
           requestId: request.requestId,
           candidateId: candidate.id,
           memberEvaluations,
+          totalScore50: averageScoreOutOf50,
           decision,
           recommendation: overallRecommendation,
           panelRemarks:
@@ -364,18 +397,30 @@ function CandidateInterviewEvaluationContent({ params }: EvaluationPageProps) {
           </div>
 
           <div className="flex items-center space-x-3">
-            {/* Quick aggregate badge */}
-            <div className="hidden sm:flex items-center space-x-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 text-xs">
-              <span className="text-slate-500 font-medium">Panel Average:</span>
-              <span className="text-base font-black text-blue-700">{averageScoreOutOf50}</span>
-              <span className="text-slate-400 font-medium">/ 50</span>
+            {/* Editable Total Score out of 50 (auto-calculated from all members) */}
+            <div className="flex items-center space-x-2 bg-blue-50/80 px-3 py-1.5 rounded-xl border border-blue-200 text-xs">
+              <span className="text-blue-900 font-bold">Total Score:</span>
+              <input
+                type="number"
+                min={0}
+                max={50}
+                step={0.5}
+                value={averageScoreOutOf50}
+                onChange={(e) => {
+                  const val = Math.min(50, Math.max(0, Number(e.target.value) || 0));
+                  setOverrideTotalScore(val);
+                }}
+                className="w-16 bg-white border border-blue-300 rounded-lg px-2 py-0.5 text-center text-sm font-black text-blue-800 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                title="Auto-calculated from all members (editable)"
+              />
+              <span className="text-slate-500 font-semibold">/ 50</span>
             </div>
 
             <Link
-              href="/hr"
+              href="/"
               className="text-xs font-semibold text-slate-600 hover:text-blue-700 px-3 py-1.5 rounded-xl hover:bg-slate-100 transition"
             >
-              HR Workspace
+              Portal
             </Link>
           </div>
         </div>
@@ -475,14 +520,25 @@ function CandidateInterviewEvaluationContent({ params }: EvaluationPageProps) {
             </button>
           </div>
 
-          {memberEvaluations.map((member, mIdx) => (
+          {memberEvaluations.map((member, mIdx) => {
+            const isExpanded = Boolean(expandedMembers[mIdx]);
+            return (
             <div
               key={member.memberId || mIdx}
               className="bg-white rounded-2xl border border-slate-200/90 shadow-xs overflow-hidden transition hover:border-slate-300"
             >
               {/* Panel Member Card Header */}
-              <div className="p-4 sm:p-5 bg-slate-50/70 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
+              <div className={`p-4 sm:p-5 bg-slate-50/70 ${isExpanded ? 'border-b border-slate-200' : ''} flex flex-wrap items-center justify-between gap-3`}>
                 <div className="flex flex-wrap items-center gap-3 flex-1 min-w-[260px]">
+                  <button
+                    type="button"
+                    onClick={() => toggleMemberExpand(mIdx)}
+                    className="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 hover:text-blue-700 hover:border-blue-300 transition cursor-pointer shrink-0"
+                    title={isExpanded ? 'Collapse evaluator section' : 'Expand evaluator section'}
+                  >
+                    {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                  </button>
+
                   <div className="w-8 h-8 rounded-full bg-blue-900 text-white font-bold flex items-center justify-center text-xs shrink-0">
                     {mIdx + 1}
                   </div>
@@ -495,32 +551,41 @@ function CandidateInterviewEvaluationContent({ params }: EvaluationPageProps) {
                       type="text"
                       value={member.memberName}
                       onChange={(e) => handleMemberChange(mIdx, 'memberName', e.target.value)}
-                      placeholder="e.g. Prof. (Dr.) Harpreet Singh (External Subject Expert)"
-                      className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-bold text-slate-900 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                      placeholder="Enter panel member name..."
+                      className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-bold text-slate-900 focus:ring-2 focus:ring-blue-500 focus:outline-none placeholder:text-slate-400 placeholder:font-normal"
                     />
                   </div>
 
-                  <div className="max-w-[180px]">
+                  <div className="max-w-[200px]">
                     <label className="text-[10px] font-bold text-slate-500 uppercase block mb-0.5">
                       Panelist Role:
                     </label>
                     <input
                       type="text"
-                      value={member.memberRole || 'Panel Member'}
+                      value={member.memberRole || ''}
                       onChange={(e) => handleMemberChange(mIdx, 'memberRole', e.target.value)}
-                      placeholder="e.g. External Subject Expert"
-                      className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-700 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                      placeholder="Enter role (e.g. Expert, Dean)..."
+                      className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-700 focus:ring-2 focus:ring-blue-500 focus:outline-none placeholder:text-slate-400"
                     />
                   </div>
                 </div>
 
                 <div className="flex items-center space-x-3 shrink-0">
-                  {/* Score Indicator out of 50 */}
+                  {/* Editable Member Score out of 50 */}
                   <div className="text-right">
-                    <div className="text-[10px] font-bold text-slate-500 uppercase">Member Score</div>
-                    <div className="text-xl font-black text-blue-950 flex items-center justify-end space-x-1">
-                      <span>{member.totalScore}</span>
-                      <span className="text-xs text-slate-400 font-normal">/ 50</span>
+                    <div className="text-[10px] font-bold text-slate-500 uppercase mb-0.5">Member Score</div>
+                    <div className="flex items-center justify-end space-x-1">
+                      <input
+                        type="number"
+                        min={0}
+                        max={50}
+                        step={0.5}
+                        value={member.totalScore}
+                        onChange={(e) => handleMemberScoreChange(mIdx, e.target.value)}
+                        className="w-16 bg-white border border-blue-300 rounded-lg px-2 py-1 text-center text-sm font-black text-blue-950 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        title="Edit member score directly (out of 50)"
+                      />
+                      <span className="text-xs text-slate-400 font-semibold">/ 50</span>
                     </div>
                   </div>
 
@@ -538,6 +603,7 @@ function CandidateInterviewEvaluationContent({ params }: EvaluationPageProps) {
               </div>
 
               {/* Dynamic Assessment Metrics List for this Member */}
+              {isExpanded && (
               <div className="p-4 sm:p-5 space-y-4">
                 <div className="flex items-center justify-between border-b border-slate-100 pb-2">
                   <span className="font-bold text-xs text-slate-800 uppercase tracking-wider">
@@ -657,8 +723,10 @@ function CandidateInterviewEvaluationContent({ params }: EvaluationPageProps) {
                   </div>
                 </div>
               </div>
+              )}
             </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Consolidated Committee Decision & Action Bar */}
@@ -674,11 +742,23 @@ function CandidateInterviewEvaluationContent({ params }: EvaluationPageProps) {
             </div>
 
             <div className="flex items-center space-x-3 bg-blue-50 border border-blue-200 px-4 py-2.5 rounded-xl">
-              <span className="text-xs font-bold text-blue-900">Average Panel Score:</span>
-              <div className="flex items-center space-x-1">
+              <span className="text-xs font-bold text-blue-900">Total Score:</span>
+              <div className="flex items-center space-x-1.5">
                 <Star className="w-5 h-5 fill-amber-500 text-amber-500" />
-                <span className="text-2xl font-black text-blue-950">{averageScoreOutOf50}</span>
-                <span className="text-xs text-slate-500">/ 50</span>
+                <input
+                  type="number"
+                  min={0}
+                  max={50}
+                  step={0.5}
+                  value={averageScoreOutOf50}
+                  onChange={(e) => {
+                    const val = Math.min(50, Math.max(0, Number(e.target.value) || 0));
+                    setOverrideTotalScore(val);
+                  }}
+                  className="w-20 bg-white border border-blue-300 rounded-lg px-2 py-1 text-center text-lg font-black text-blue-950 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  title="Auto-calculated from all members (editable)"
+                />
+                <span className="text-xs text-slate-500 font-semibold">/ 50</span>
               </div>
             </div>
           </div>
