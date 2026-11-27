@@ -32,6 +32,25 @@ interface SchedulePageProps {
   }>;
 }
 
+interface CommitteeProfile {
+  _id?: string;
+  name: string;
+  email: string;
+  designation: string;
+  department?: string;
+  status?: string;
+}
+
+const COMMITTEE_DESIGNATIONS = [
+  'Dean',
+  'Director',
+  'Vice Chancellor',
+  'Registrar',
+  'VC / Registrar',
+  'Dean Academic',
+  'Expert'
+];
+
 function ScheduleInterviewContent({ params }: SchedulePageProps) {
   const resolvedParams = use(params);
   const router = useRouter();
@@ -41,6 +60,8 @@ function ScheduleInterviewContent({ params }: SchedulePageProps) {
 
   const [request, setRequest] = useState<IHiringRequest | null>(null);
   const [candidate, setCandidate] = useState<Candidate | null>(null);
+  const [committeeProfiles, setCommitteeProfiles] = useState<CommitteeProfile[]>([]);
+  const [assignedExpertIds, setAssignedExpertIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
   const [statusMsg, setStatusMsg] = useState('');
@@ -49,10 +70,7 @@ function ScheduleInterviewContent({ params }: SchedulePageProps) {
   const [interviewTime, setInterviewTime] = useState('11:00 AM');
   const [interviewVenue, setInterviewVenue] = useState('Board Room 1, Guru Kashi University');
   const [memberInput, setMemberInput] = useState('');
-  const [panelMembers, setPanelMembers] = useState<string[]>([
-    'Prof. Balwant Singh (Dean Academic)',
-    'Prof. (Dr.) Harpreet Singh (Subject Expert Panelist)'
-  ]);
+  const [panelMembers, setPanelMembers] = useState<string[]>([]);
 
   const [confirmUnapprovedProceed, setConfirmUnapprovedProceed] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -82,6 +100,25 @@ function ScheduleInterviewContent({ params }: SchedulePageProps) {
           if (cand.interviewDetails.panelMembers && cand.interviewDetails.panelMembers.length > 0) {
             setPanelMembers(cand.interviewDetails.panelMembers);
           }
+          if (cand.interviewDetails.assignedExpertIds && cand.interviewDetails.assignedExpertIds.length > 0) {
+            setAssignedExpertIds(cand.interviewDetails.assignedExpertIds);
+          }
+        }
+
+        // Fetch real user profiles (Deans, VC, Registrar, Dean Academic, Expert)
+        try {
+          const usersRes = await fetch('/api/admin/users');
+          const usersData = await usersRes.json();
+          if (usersData.success && Array.isArray(usersData.data)) {
+            const filtered = (usersData.data as CommitteeProfile[]).filter(
+              (u) =>
+                u.status !== 'Inactive' &&
+                COMMITTEE_DESIGNATIONS.includes(u.designation)
+            );
+            setCommitteeProfiles(filtered);
+          }
+        } catch (userErr) {
+          console.error('Failed to load committee profiles:', userErr);
         }
       } catch (err: unknown) {
         setErrorMsg((err as Error).message);
@@ -92,6 +129,24 @@ function ScheduleInterviewContent({ params }: SchedulePageProps) {
 
     fetchData();
   }, [requestId, candidateId]);
+
+  const formatProfileLabel = (p: CommitteeProfile) => {
+    const deptSuffix =
+      (p.designation === 'Dean' || p.designation === 'Director') && p.department
+        ? ` • ${p.department}`
+        : '';
+    return `${p.name} (${p.designation}${deptSuffix})`;
+  };
+
+  const handleAddProfileMember = (p: CommitteeProfile) => {
+    const label = formatProfileLabel(p);
+    if (!panelMembers.includes(label)) {
+      setPanelMembers((prev) => [...prev, label]);
+    }
+    if (p.designation === 'Expert' && p.email && !assignedExpertIds.includes(p.email)) {
+      setAssignedExpertIds((prev) => [...prev, p.email]);
+    }
+  };
 
   const handleAddMember = (name?: string) => {
     const memberName = (name || memberInput).trim();
@@ -140,6 +195,7 @@ function ScheduleInterviewContent({ params }: SchedulePageProps) {
           requestId,
           candidateId,
           interviewerNames: panelMembers,
+          assignedExpertIds,
           date: interviewDate,
           time: interviewTime,
           venue: interviewVenue,
@@ -444,26 +500,37 @@ function ScheduleInterviewContent({ params }: SchedulePageProps) {
               </button>
             </div>
 
-            {/* Quick Suggestions */}
-            <div className="flex flex-wrap items-center gap-1.5 pt-1">
-              <span className="text-[10px] font-bold text-slate-500">Quick Suggestions:</span>
-              {[
-                'Prof. Balwant Singh (Dean Academic)',
-                'Prof. (Dr.) Gurinder Singh (VC Nominee)',
-                'Department Dean',
-                'Prof. (Dr.) Harpreet Singh (External Subject Expert)',
-                'External University Nominee',
-                'Industry Specialist'
-              ].map((sugg) => (
-                <button
-                  key={sugg}
-                  type="button"
-                  onClick={() => handleAddMember(sugg)}
-                  className="px-2.5 py-1 rounded-lg bg-white hover:bg-blue-100 text-blue-900 border border-blue-200 text-[10px] font-semibold transition cursor-pointer"
-                >
-                  + {sugg}
-                </button>
-              ))}
+            {/* University Profiles List (Deans, VC, Registrar, Dean Academic, Expert) */}
+            <div className="space-y-1.5 pt-1">
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
+                University Profiles (Deans, VC, Registrar, Dean Academic &amp; Experts):
+              </span>
+              {committeeProfiles.length === 0 ? (
+                <p className="text-[11px] text-slate-400">No committee profiles found.</p>
+              ) : (
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {committeeProfiles.map((profile) => {
+                    const label = formatProfileLabel(profile);
+                    const isAdded = panelMembers.includes(label);
+                    return (
+                      <button
+                        key={profile._id || profile.email}
+                        type="button"
+                        onClick={() => handleAddProfileMember(profile)}
+                        disabled={isAdded}
+                        className={`px-2.5 py-1 rounded-lg border text-[11px] font-semibold transition cursor-pointer ${
+                          isAdded
+                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200 cursor-default'
+                            : 'bg-white hover:bg-blue-100 text-blue-900 border-blue-200'
+                        }`}
+                      >
+                        {isAdded ? '✓ ' : '+ '}
+                        {label}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
             {/* Added Members List */}

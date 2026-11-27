@@ -252,11 +252,11 @@ function CandidateInterviewEvaluationContent({ params }: EvaluationPageProps) {
   const averageScoreOutOf50 =
     memberEvaluations.length > 0
       ? Number(
-          (
-            memberEvaluations.reduce((acc, m) => acc + (Number(m.totalScore) || 0), 0) /
-            memberEvaluations.length
-          ).toFixed(1)
-        )
+        (
+          memberEvaluations.reduce((acc, m) => acc + (Number(m.totalScore) || 0), 0) /
+          memberEvaluations.length
+        ).toFixed(1)
+      )
       : 0;
 
   // Submit interview evaluation to server
@@ -455,20 +455,7 @@ function CandidateInterviewEvaluationContent({ params }: EvaluationPageProps) {
           </div>
         </section>
 
-        {/* Evaluation Rubric Notice */}
-        <div className="p-4 bg-blue-50/50 border border-blue-200/80 rounded-2xl flex items-start space-x-3 text-xs">
-          <ShieldCheck className="w-5 h-5 text-blue-700 shrink-0 mt-0.5" />
-          <div className="space-y-1">
-            <h4 className="font-bold text-blue-900">
-              Statutory Evaluation Standard: 50 Marks Maximum per Panel Member
-            </h4>
-            <p className="text-blue-800 leading-relaxed font-normal">
-              Each selection committee member scores the candidate separately on their assigned card out of <strong>50 marks</strong>.
-              You can dynamically add custom metrics (e.g. Communication Skills, Domain Knowledge, Technical Prowess, Teaching Pedagogy)
-              inside each panelist&apos;s section. All member scores are averaged for the consolidated committee outcome.
-            </p>
-          </div>
-        </div>
+
 
         {/* Panel Members Evaluation Sections (Separate per member) */}
         <div className="space-y-5">
