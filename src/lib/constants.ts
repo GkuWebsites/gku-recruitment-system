@@ -94,15 +94,46 @@ export const RECRUITMENT_STAGES = [
 ];
 
 export const POST_LEVELS = [
+  // Teaching / Academic
   'Professor',
   'Associate Professor',
   'Assistant Professor',
-  'Senior Lecturer / Lecturer',
+  'Senior Lecturer',
+  'Lecturer',
+  'Visiting Professor',
+  'Adjunct Faculty',
+  'Research Professor',
   'Research Associate',
-  'Lab Superintendent / Technical Staff',
+  'Research Fellow',
+  // Administrative / Non-Teaching
+  'Registrar',
+  'Deputy Registrar',
+  'Assistant Registrar',
   'Administrative Officer',
+  'Section Officer',
+  'Office Superintendent',
+  // Finance & Accounts
+  'Finance Officer',
+  'Accounts Officer',
   'Accounts & Finance Executive',
-  'Librarian / Asst. Librarian'
+  'Audit Officer',
+  // Technical / Lab
+  'Lab Superintendent',
+  'Lab Technician / Technical Staff',
+  'Systems Analyst / IT Officer',
+  'Network & Infrastructure Engineer',
+  // Library
+  'Librarian',
+  'Deputy Librarian',
+  'Assistant Librarian',
+  'Library Assistant',
+  // Support
+  'Sports Officer',
+  'Medical Officer / Medical Superintendent',
+  'Student Counsellor / Welfare Officer',
+  'Public Relations Officer',
+  // Other
+  'Other'
 ];
 
 export const PROMOTION_CHANNELS_LIST = [
