@@ -55,6 +55,25 @@ const CandidateSchema = new Schema({
     }],
     scorecardFile: { type: String }
   },
+  cvApproval: {
+    sentTo: [{ type: String }],
+    sentAt: { type: String },
+    sentBy: { type: String },
+    status: {
+      type: String,
+      enum: ['Pending', 'Approved', 'Rejected'],
+      default: 'Pending'
+    },
+    reviews: [{
+      role: { type: String },
+      reviewerRole: { type: String },
+      reviewerName: { type: String },
+      status: { type: String },
+      decision: { type: String },
+      remarks: { type: String },
+      reviewedAt: { type: String }
+    }]
+  },
   joiningDetails: {
     offerLetterRef: { type: String },
     offerLetterDate: { type: String },

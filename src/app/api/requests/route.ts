@@ -58,10 +58,11 @@ export async function GET(req: NextRequest) {
         query._id = null;
       }
     } else if (role === 'VC / Registrar') {
-      // When role is 'VC / Registrar', only show requisitions that have passed Dean Academic review!
+      // Show requisitions that have passed Dean Academic review OR have candidates awaiting CV approval
       query.$or = [
         { currentStage: { $gte: 3 } },
         { 'deanAcademicApproval.decision': 'Approved' },
+        { 'candidates.cvApproval': { $exists: true } },
         {
           status: {
             $in: [

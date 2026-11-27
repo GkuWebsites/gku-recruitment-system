@@ -69,6 +69,15 @@ export function VCRegistrarModule({
     setIsSubmittingCv(true);
     setModalError('');
     try {
+      // Map designation to the exact role string stored in sentTo
+      const designation = currentUser?.designation || 'Vice Chancellor';
+      const reviewerRole =
+        designation === 'Vice Chancellor' || designation === 'Vice-Chancellor'
+          ? 'Vice-Chancellor (VC)'
+          : designation === 'Registrar'
+          ? 'Registrar'
+          : designation;
+
       const res = await fetch('/api/hr', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -78,7 +87,7 @@ export function VCRegistrarModule({
           candidateId: cand.id,
           decision,
           remarks: remarks || (decision === 'Approved' ? 'CV Approved for interview assessment' : 'CV Rejected by Executive Authority'),
-          reviewerRole: currentUser?.designation || 'Vice-Chancellor (VC)',
+          reviewerRole,
           reviewerName: currentUser?.name || 'Executive Authority'
         })
       });
@@ -154,14 +163,20 @@ export function VCRegistrarModule({
 
   // 4. CV Approvals Queue (Sent to VC / Registrar by HR)
   const cvApprovalCandidates: { request: IHiringRequest; candidate: Candidate }[] = [];
+  const isOnlyVC = currentUser?.designation === 'Vice Chancellor' || currentUser?.designation === 'Vice-Chancellor';
+  const isOnlyRegistrar = currentUser?.designation === 'Registrar';
   requests.forEach((req) => {
     if (req.candidates && req.candidates.length > 0) {
       req.candidates.forEach((cand) => {
-        if (
-          cand.cvApproval &&
-          cand.cvApproval.sentTo.some((t) => t.includes('VC') || t.includes('Registrar') || t === 'Vice-Chancellor (VC)')
-        ) {
-          cvApprovalCandidates.push({ request: req, candidate: cand });
+        if (cand.cvApproval && Array.isArray(cand.cvApproval.sentTo)) {
+          const matchesTarget = isOnlyVC
+            ? cand.cvApproval.sentTo.some((t) => t.includes('VC') || t.includes('Vice-Chancellor'))
+            : isOnlyRegistrar
+            ? cand.cvApproval.sentTo.some((t) => t.includes('Registrar'))
+            : cand.cvApproval.sentTo.some((t) => t.includes('VC') || t.includes('Registrar') || t.includes('Vice-Chancellor'));
+          if (matchesTarget) {
+            cvApprovalCandidates.push({ request: req, candidate: cand });
+          }
         }
       });
     }

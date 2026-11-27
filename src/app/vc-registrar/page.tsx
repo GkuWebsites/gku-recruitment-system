@@ -14,10 +14,10 @@ export default function VCRegistrarPage() {
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/vc-registrar/sanctions');
+      const res = await fetch('/api/requests?role=VC%20%2F%20Registrar');
       const data = await res.json();
       if (data.success) {
-        setRequests([...(data.pendingSanction || []), ...(data.sanctionedHistory || [])]);
+        setRequests(data.data || []);
       }
     } catch (err) {
       console.error('Failed to load VC sanction queue', err);
