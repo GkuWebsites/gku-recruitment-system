@@ -107,12 +107,16 @@ jobs:
 
       - name: Trigger Server Extraction & Phusion Passenger Restart
         run: |
-          echo "Triggering deployment webhook..."
-          RES1=$(curl -k -s "http://a7n.f1f.mytemp.website/deploy.php?token=gku_deploy_2026")
-          echo "Trigger Result: $RES1"
+          echo "Triggering deployment webhook on hrm.gku.ac.in..."
+          RES1=$(curl -k -s --max-time 60 "https://hrm.gku.ac.in/deploy.php?token=gku_deploy_2026")
+          echo "Primary Trigger Result: $RES1"
           
-          if [[ "$RES1" != *"success"* ]]; then
-            echo "Trying alternate trigger at hrm.gku.ac.in..."
-            RES2=$(curl -k -s "https://hrm.gku.ac.in/deploy.php?token=gku_deploy_2026")
-            echo "Alternate Result: $RES2"
+          if [[ "$RES1" != *"\"status\":\"success\""* ]]; then
+            echo "Trying fallback trigger at a7n.f1f.mytemp.website..."
+            RES2=$(curl -k -s --max-time 60 "http://a7n.f1f.mytemp.website/deploy.php?token=gku_deploy_2026")
+            echo "Fallback Result: $RES2"
+            if [[ "$RES2" != *"\"status\":\"success\""* ]]; then
+              echo "ERROR: Deployment extraction webhook failed on both endpoints."
+              exit 1
+            fi
           fi
