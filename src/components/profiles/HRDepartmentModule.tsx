@@ -814,6 +814,10 @@ export function HRDepartmentModule({
       setErrorMsg('Candidate Full Name and Email Address are required.');
       return;
     }
+    if (!resumeFileName.trim()) {
+      setErrorMsg('Candidate Resume / CV file upload is mandatory.');
+      return;
+    }
     setIsSubmitting(true);
     setErrorMsg('');
     setStatusMsg('');
@@ -836,7 +840,7 @@ export function HRDepartmentModule({
           qualification: candQual.trim() || 'Postgraduate / Ph.D.',
           experienceYears: Number(candExp) || 0,
           currentAffiliation: candAffiliation.trim(),
-          resumeFileName: resumeFileName.trim() || (candName.trim() ? `${candName.trim().replace(/\s+/g, '_')}_CV.pdf` : 'Candidate_CV.pdf'),
+          resumeFileName: resumeFileName.trim(),
           sendCvApprovalTo: targetApprovalList,
           actorName: 'HR Talent Acquisition Desk'
         })
@@ -3737,7 +3741,7 @@ export function HRDepartmentModule({
 
                 <div>
                   <label className="block font-semibold text-slate-700 mb-1">
-                    Upload Candidate Resume / Curriculum Vitae (.pdf, .doc, .docx):
+                    Upload Candidate Resume / Curriculum Vitae (.pdf, .doc, .docx) <span className="text-rose-500">*</span>:
                   </label>
                   <div className="border-2 border-dashed border-slate-300 hover:border-indigo-500 rounded-xl p-3 bg-slate-50 hover:bg-indigo-50/20 transition text-center cursor-pointer relative group">
                     <input

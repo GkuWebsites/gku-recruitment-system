@@ -166,6 +166,13 @@ export async function POST(req: NextRequest) {
         );
       }
 
+      if (!resumeFileName || !String(resumeFileName).trim()) {
+        return NextResponse.json(
+          { success: false, error: 'Candidate resume / CV file is mandatory.' },
+          { status: 400 }
+        );
+      }
+
       const candidateId = `cand-${Date.now()}`;
       const newCandidate: Candidate = {
         id: candidateId,
@@ -175,7 +182,7 @@ export async function POST(req: NextRequest) {
         qualification: qualification || 'Postgraduate / Ph.D.',
         experienceYears: Number(experienceYears) || 0,
         currentAffiliation: currentAffiliation || '',
-        resumeFileName: resumeFileName || `${fullName.replace(/\s+/g, '_')}_CV.pdf`,
+        resumeFileName: String(resumeFileName).trim(),
         status: 'Applied'
       };
 
